@@ -1,6 +1,14 @@
 # webOS-style E-ink Shell
 
-A minimal, plugin-based “webOS-style” environment for low-spec, Kindle-like e-ink devices. It provides a home screen, launcher, and a set of built-in apps that run inside a shared shell.
+A minimal, plugin-based “webOS-style” environment for low-spec e-ink devices. It provides a home screen, launcher, and a set of built-in apps that run inside a shared shell.
+
+### Light and dark mode
+
+| Light mode | Dark mode |
+|------------|-----------|
+| ![OpenInk home screen — light mode](docs/screenshots/light-mode.png) | ![OpenInk home screen — dark mode](docs/screenshots/dark-mode.png) |
+
+Toggle appearance from the status bar (light bulb icon). The same Apps and Games launcher is available in both themes.
 
 ## Tech stack
 
@@ -81,4 +89,3 @@ The site is tuned for **slow hardware, grayscale e-ink, and low refresh rates**:
 - `src/core/utils/` – Shared helpers (e.g. stripHtml).
 - `src/apps/` – App plugins (e.g. settings, finance, games, news, reddit, notes, dictionary).
 - `src/types/` – Shared types and plugin API.
-# OpenInk-WebOS
