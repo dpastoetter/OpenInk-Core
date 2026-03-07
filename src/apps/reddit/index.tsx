@@ -1,0 +1,248 @@
+import { h } from 'preact';
+import { useState, useEffect, useCallback, useMemo } from 'preact/hooks';
+import type { AppContext, AppInstance } from '../../types/plugin';
+import { PLUGIN_API_VERSION } from '../../types/plugin';
+import { PageNav } from '@core/ui/PageNav';
+import { stripHtml } from '@core/utils/html';
+
+const REDDIT_JSON = (path: string) => `https://www.reddit.com${path}.json?raw_json=1&limit=25`;
+const CORS_PROXY = 'https://corsproxy.io/?';
+
+interface RedditPost {
+  data: {
+    id: string;
+    title: string;
+    selftext: string;
+    selftext_html: string | null;
+    author: string;
+    score: number;
+    created_utc: number;
+    url: string;
+    permalink: string;
+    is_self: boolean;
+    num_comments: number;
+  };
+}
+
+interface RedditComment {
+  data: {
+    id: string;
+    body: string;
+    author: string;
+    score: number;
+    created_utc: number;
+    depth: number;
+    replies?: string | { data: { children: RedditComment[] } };
+  };
+}
+
+const DEFAULT_SUBS = ['books', 'cryptocurrencies', 'popular', 'technology', 'wallstreetbets', 'worldnews'];
+
+const POSTS_PER_PAGE = 10;
+
+/** Reddit API comment node (children may include "more" placeholders without body). */
+interface RedditCommentNode {
+  data?: {
+    id?: string;
+    body?: string;
+    author?: string;
+    score?: number;
+    created_utc?: number;
+    depth?: number;
+    replies?: string | { data: { children: RedditCommentNode[] } };
+  };
+}
+
+/** Reddit API: [0] = post listing, [1] = comments listing. */
+type RedditPostCommentsResponse = [
+  { data: { children: unknown[] } },
+  { data: { children: RedditCommentNode[] } }
+];
+
+function RedditApp(context: AppContext): AppInstance {
+  const { network, storage } = context.services;
+  const SUBS_KEY = 'reddit:subs';
+  const backRef: {
+    current: {
+      setSelectedPost: (p: RedditPost['data'] | null) => void;
+      selectedPost: RedditPost['data'] | null;
+      setCurrentSub: (s: string | null) => void;
+      currentSub: string | null;
+    } | null;
+  } = { current: null };
+  const titleRef: { current: string } = { current: 'Subreddits' };
+
+  function RedditUI() {
+    const [subs, setSubs] = useState<string[]>(DEFAULT_SUBS);
+    const [searchInput, setSearchInput] = useState('');
+    const [currentSub, setCurrentSub] = useState<string | null>(null);
+    const [posts, setPosts] = useState<RedditPost['data'][]>([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [selectedPost, setSelectedPost] = useState<RedditPost['data'] | null>(null);
+    backRef.current = { setSelectedPost, selectedPost, setCurrentSub, currentSub };
+    titleRef.current = selectedPost ? selectedPost.title : currentSub ? `r/${currentSub}` : 'Subreddits';
+    const [comments, setComments] = useState<RedditComment[]>([]);
+    const [listPage, setListPage] = useState(1);
+    const [commentPage, setCommentPage] = useState(1);
+
+    const loadSub = useCallback(async (sub: string) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const url = REDDIT_JSON(`/r/${sub}`);
+        const proxyUrl = CORS_PROXY + encodeURIComponent(url);
+        const data = await network.fetchJson<{ data: { children: RedditPost[] } }>(proxyUrl);
+        setPosts(data.data.children.map((c) => c.data));
+        setListPage(1);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'Failed to load');
+      } finally {
+        setLoading(false);
+      }
+    }, [network]);
+
+    useEffect(() => {
+      if (currentSub) loadSub(currentSub);
+    }, [currentSub, loadSub]);
+
+    const openPost = useCallback(async (post: RedditPost['data']) => {
+      setSelectedPost(post);
+      setComments([]);
+      try {
+        const commentsUrl = REDDIT_JSON(post.permalink);
+        const proxyCommentsUrl = CORS_PROXY + encodeURIComponent(commentsUrl);
+        const data = await network.fetchJson<RedditPostCommentsResponse>(proxyCommentsUrl);
+        const list = data[1]?.data?.children ?? [];
+        const flatten = (nodes: RedditCommentNode[], depth: number): RedditComment[] => {
+          const out: RedditComment[] = [];
+          for (const c of nodes) {
+            const d = c.data;
+            const body = d?.body;
+            if (body != null && body !== '' && body !== '[deleted]' && body !== '[removed]')
+              out.push({ data: { id: d?.id ?? '', body, author: d?.author ?? '[unknown]', score: d?.score ?? 0, created_utc: d?.created_utc ?? 0, depth } });
+            const replies = d?.replies;
+            if (replies && typeof replies === 'object' && replies.data?.children?.length)
+              out.push(...flatten(replies.data.children, depth + 1));
+          }
+          return out;
+        };
+        setComments(flatten(list, 0));
+      } catch {
+        setComments([]);
+      }
+    }, [network]);
+
+    const totalPages = useMemo(() => Math.max(1, Math.ceil(posts.length / POSTS_PER_PAGE)), [posts.length]);
+    const pagePosts = useMemo(
+      () => posts.slice((listPage - 1) * POSTS_PER_PAGE, listPage * POSTS_PER_PAGE),
+      [posts, listPage]
+    );
+
+    if (selectedPost) {
+      const commentPages = Math.max(1, Math.ceil(comments.length / 5));
+      const pageComments = comments.slice((commentPage - 1) * 5, commentPage * 5);
+      return (
+        <div class="reddit-post-view">
+          <p class="reddit-meta">u/{selectedPost.author} · {selectedPost.score} pts · {new Date(selectedPost.created_utc * 1000).toLocaleDateString()}</p>
+          <div class="reddit-selftext">
+            {stripHtml(selectedPost.selftext_html || selectedPost.selftext || '') || (selectedPost.is_self ? '' : `Link: ${selectedPost.url}`)}
+          </div>
+          <h2>Comments</h2>
+          {comments.length === 0 ? (
+            <p class="reddit-meta">No comments yet.</p>
+          ) : (
+            <>
+              <ul class="reddit-comments">
+                {pageComments.map((c) => (
+                  <li key={c.data.id} class="reddit-comment" style={{ marginLeft: `${c.data.depth * 12}px` }}>
+                    <strong>u/{c.data.author}</strong> · {c.data.score} pts
+                    <p>{stripHtml(c.data.body)}</p>
+                  </li>
+                ))}
+              </ul>
+                  {commentPages > 1 && (
+                <PageNav current={commentPage} total={commentPages} onPrev={() => setCommentPage((p) => Math.max(1, p - 1))} onNext={() => setCommentPage((p) => Math.min(commentPages, p + 1))} />
+              )}
+            </>
+          )}
+        </div>
+      );
+    }
+
+    const openSubreddit = (name: string) => {
+      const trimmed = name.trim().toLowerCase().replace(/^r\//, '');
+      if (trimmed) setCurrentSub(trimmed);
+    };
+
+    if (!currentSub) {
+      return (
+        <div class="reddit-app">
+          <div class="reddit-search">
+            <input
+              type="text"
+              class="input"
+              placeholder="Subreddit name (e.g. programming)"
+              value={searchInput}
+              onInput={(e) => setSearchInput((e.target as HTMLInputElement).value)}
+              onKeyDown={(e) => e.key === 'Enter' && openSubreddit(searchInput)}
+            />
+            <button type="button" class="btn" onClick={() => openSubreddit(searchInput)}>
+              Open
+            </button>
+          </div>
+          <p class="reddit-search-hint">Or pick one below:</p>
+          <ul class="list">
+            {subs.map((sub) => (
+              <li key={sub}>
+                <button type="button" onClick={() => setCurrentSub(sub)}>r/{sub}</button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      );
+    }
+
+    if (loading) return <p>Loading…</p>;
+    if (error) return <p class="browser-error">{error}</p>;
+
+    return (
+      <div class="reddit-app">
+        <ul class="list">
+          {pagePosts.map((p) => (
+            <li key={p.id}>
+              <button type="button" onClick={() => openPost(p)}>
+                <strong>{p.title}</strong>
+                <br />
+                <small>u/{p.author} · {p.score} pts · {p.num_comments} comments</small>
+              </button>
+            </li>
+          ))}
+        </ul>
+        <PageNav current={listPage} total={totalPages} onPrev={() => setListPage((p) => Math.max(1, p - 1))} onNext={() => setListPage((p) => Math.min(totalPages, p + 1))} />
+      </div>
+    );
+  }
+
+  return {
+    render: () => <RedditUI />,
+    getTitle: () => titleRef.current,
+    canGoBack: () => backRef.current != null && (backRef.current.selectedPost != null || backRef.current.currentSub != null),
+    goBack: () => {
+      const c = backRef.current;
+      if (!c) return;
+      if (c.selectedPost != null) c.setSelectedPost(null);
+      else if (c.currentSub != null) c.setCurrentSub(null);
+    },
+  };
+}
+
+export const redditApp = {
+  id: 'reddit',
+  name: 'Reddit',
+  icon: '🔶',
+  category: 'reader' as const,
+  apiVersion: PLUGIN_API_VERSION,
+  metadata: { requiresNetwork: true },
+  launch: RedditApp,
+};

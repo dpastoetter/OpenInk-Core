@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Open book left page -->
+  <path d="M24 40 L24 8 Q24 4 20 4 L8 4 Q4 4 4 8 L4 40 Q4 44 8 44 L20 44 Q24 44 24 40 Z" fill="none"/>
+  <!-- Open book right page -->
+  <path d="M96 40 L96 8 Q96 4 100 8 L100 40 Q100 44 96 44 L84 44 Q80 44 80 40 L80 8 Q80 4 84 4 L96 4 Q100 4 100 8 Z" fill="none"/>
+  <!-- Spine -->
+  <line x1="60" y1="4" x2="60" y2="44"/>
+  <!-- Ink drop -->
+  <path d="M60 2 Q56 10 56 18 Q56 24 60 28 Q64 24 64 18 Q64 10 60 2 Z" fill="currentColor"/>
+</svg>

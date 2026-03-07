@@ -1,0 +1,101 @@
+# Architecture
+
+This document describes the high-level architecture of the shell, plugin system, and app lifecycle.
+
+## Overview
+
+The app is a **single-page application (SPA)** built with Preact and Vite. It provides a webOS-style shell: a **home screen** that launches **apps** (plugins). Each app runs inside a shared **shell** that provides a global header (Home, Back, title), services (storage, network, theme, settings), and navigation.
+
+- **No router library**: Navigation is driven by the shell state and the History API (pushState / popstate) so that the browser Back button closes the app and returns to home.
+- **Plugin-based apps**: Apps are registered at startup and launched on demand; they receive a context and return an instance with a `render()` function.
+- **Shared services**: Storage, network, theme, and settings are created once in `main.tsx` and passed into the shell, which injects them into every app via `AppContext`.
+
+## Entry point and bootstrap
+
+**`src/main.tsx`**
+
+1. Creates the four services: storage, network, theme, settings.
+2. Theme is created with `DEFAULT_SETTINGS`; settings service loads persisted values from storage and applies them to the theme.
+3. Calls `registerAllApps()` so all built-in apps are registered in `AppRegistry`.
+4. Calls `settings.load()` to restore saved settings.
+5. Renders `<Shell services={...} />` into `#root`.
+
+No app is running at this point; the shell shows the home screen.
+
+## Shell
+
+**`src/core/kernel/shell.tsx`**
+
+The shell is the root UI when not on the home screen. It holds:
+
+- **State**: `currentAppId`, `instance` (the running `AppInstance`), and optionally `appStack` (for future multi-step navigation).
+- **Callbacks**: `launchApp`, `closeApp`, `goToHome`, `goHome` (History back vs direct home), and `navigate` (for path-based navigation, e.g. deep links).
+
+**Behavior:**
+
+- **Home**: When `currentAppId === null`, the shell renders `<HomeScreen />`, which shows the grid of registered apps.
+- **App open**: When the user taps an app, `launchApp(app)` is called. The shell builds an `AppContext` (navigate, closeApp, services), calls `app.launch(context)`, stores the returned `AppInstance`, and pushes a history state. The UI then shows:
+  - **App header**: Home button, Back button, and a title. The title comes from `instance.getTitle?.()` or the app name. The Back button calls `instance.goBack()` if `instance.canGoBack?.()` is true, otherwise `closeApp()`.
+  - **App content**: `instance.render()` is called each time the shell re-renders.
+
+**History:**
+
+- Opening an app does `history.pushState(...)` so the URL stays the same but the Back button has an entry.
+- A `popstate` listener calls `goToHome()`, which clears the instance and shows the home screen. So browser/mouse Back closes the app.
+
+## Plugin system
+
+**Types**: `src/types/plugin.ts`
+
+- **WebOSApp**: Descriptor for an app (`id`, `name`, `icon`, `category`, `apiVersion`, `metadata`, `launch`).
+- **AppContext**: Passed to `launch()`: `navigate`, `closeApp`, and `services` (storage, network, theme, settings).
+- **AppInstance**: Returned by `launch()`: required `render()`, and optional `onSuspend`, `onResume`, `onDestroy`, `canGoBack`, `goBack`, `getTitle`.
+
+**Registry**: `src/core/plugins/registry.ts`
+
+- In-memory `Map<string, WebOSApp>`.
+- `registerApp(app)` adds an app; `getApp(id)` / `getAllApps()` / `getAppsByCategory(category)` for the shell and home screen.
+
+**Registration**: `src/apps/registry.ts`
+
+- Defines the `APPS` array of all built-in apps and calls `AppRegistry.registerApp(app)` for each in `registerAllApps()`.
+
+Apps do not import each other; they are only coupled via the shared types and context.
+
+## Services
+
+**Storage** (`src/core/services/storage.ts`): Key/value persistence (async get/set/remove/keys) over localStorage with a prefix. Used by the settings service and by apps (e.g. news cache, reddit subs).
+
+**Network** (`src/core/services/network.ts`): Thin wrapper around `fetch` with CORS and credentials settings; exposes `fetch`, `fetchText`, `fetchJson`. Used by apps for Reddit, News, Finance, etc.
+
+**Theme** (`src/core/services/theme.ts`): Holds current global settings in memory and applies them to `document.documentElement.dataset` (pixelOptics, colorMode, fontSize, theme, appearance). Exposes `getSettings()` and `subscribe(listener)`. Updated only by the settings service when the user changes settings.
+
+**Settings** (`src/core/services/settings.ts`): Persisted global settings. `get()` returns current in-memory settings; `set(partial)` merges, persists via storage, and calls `theme.applySettings()`. `load()` reads from storage and applies to theme (used at startup).
+
+Settings and theme are separate so that theme is the single source of “what is applied to the DOM” and settings is the source of “what the user chose and what is saved.”
+
+## UI layers
+
+- **Status bar** (`src/core/ui/StatusBar.tsx`): Top bar with branding, clock, and Light/Dark toggle. Subscribes to theme for appearance.
+- **Home screen** (`src/core/kernel/HomeScreen.tsx`): Grid of app tiles; sorts by category and name; calls `onLaunch(app)` when a tile is tapped.
+- **App header**: Rendered by the shell (Home, Back, title). Title is dynamic via `getTitle()`.
+- **App content**: The result of `instance.render()`; each app owns its layout and uses shared CSS classes (e.g. `.list`, `.btn`, `.panel-title`) and optional core components like `PageNav`.
+
+Core UI components live in `src/core/ui/` (e.g. `PageNav`, `Button`, `List`). Apps may use them or use plain HTML with the same CSS classes.
+
+## Data flow
+
+- **Launch**: User taps app → Shell `launchApp` → `app.launch(context)` → instance stored → shell re-renders → header + `instance.render()`.
+- **Back (in-app)**: User taps Back and `canGoBack()` is true → Shell calls `instance.goBack()` → app updates its own state (e.g. close thread) → shell re-renders → `getTitle()` and `render()` reflect new state.
+- **Back (exit)**: User taps Back and `canGoBack()` is false, or user uses browser Back → `closeApp` / `goToHome` → instance cleared → home screen shown.
+- **Settings change**: User changes a setting in the Settings app → `settings.set(partial)` → storage updated, `theme.applySettings()` → DOM and theme subscribers (e.g. StatusBar) update.
+
+## Utilities and shared code
+
+- **`src/core/utils/html.ts`**: `stripHtml(html)` for safe plain-text extraction from HTML (used by Reddit and News).
+- **`src/types/`**: Shared TypeScript types (plugin, settings, services). Implementations live in `core/services` and are re-exported or used via interfaces.
+
+## Build and runtime
+
+- **Vite** bundles the app; aliases (`@core`, `@apps`, `@types`) point into `src/`. The result is static HTML/JS/CSS; no server-side rendering.
+- **Runtime**: One shell, one active app instance at a time. No lazy loading of app code in the current setup; all registered apps are in the bundle.
