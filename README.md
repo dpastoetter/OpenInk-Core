@@ -16,6 +16,10 @@ Toggle appearance from the status bar (light bulb icon). Use **+** / **−** in 
 
 ![OpenInk screencast](docs/demo-screencast.mp4)
 
+https://github.com/user-attachments/assets/1a1e025f-053a-4fa5-92ef-d9c765a25204
+
+
+
 ## Tech stack
 
 - **TypeScript** (strict, no implicit any)
