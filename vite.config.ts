@@ -1,6 +1,9 @@
-import path from 'path';
-import { defineConfig } from 'vite';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { defineConfig } from 'vitest/config';
 import preact from '@preact/preset-vite';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   plugins: [preact()],

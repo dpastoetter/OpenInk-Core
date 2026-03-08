@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>OpenInk — E-ink demo</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #1a1a1a;
+      font-family: system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      gap: 24px;
+    }
+    .eink-device {
+      background: #0d0d0d;
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5), inset 0 0 0 2px #333;
+      max-width: 100%;
+    }
+    .eink-screen-wrap {
+      position: relative;
+      display: inline-block;
+      margin: 0 auto;
+    }
+    .eink-screen {
+      position: relative;
+      background: #e8e6e3;
+      border-radius: 8px;
+      overflow: hidden;
+      min-width: 200px;
+      min-height: 266px;
+      max-width: calc(100vw - 80px);
+      max-height: 85vh;
+    }
+    .eink-screen iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      filter: grayscale(1) contrast(1.05);
+    }
+    .eink-refresh {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: #0a0a0a;
+      opacity: 0;
+      z-index: 2;
+    }
+    .eink-resize-handle {
+      position: absolute;
+      right: -4px;
+      bottom: -4px;
+      width: 20px;
+      height: 20px;
+      cursor: nwse-resize;
+      z-index: 3;
+      background: linear-gradient(135deg, transparent 50%, #555 50%, #555 55%, transparent 55%);
+      border-radius: 0 0 4px 0;
+    }
+    .eink-resize-handle:hover { opacity: 0.9; }
+    .eink-controls {
+      padding: 12px 16px;
+      background: #252525;
+      border-radius: 8px;
+      color: #999;
+      font-size: 13px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px;
+    }
+    .eink-controls label { display: flex; align-items: center; gap: 8px; }
+    .eink-controls input[type="range"] { width: 120px; }
+  </style>
+</head>
+<body>
+  <div class="eink-device">
+    <div class="eink-screen-wrap">
+      <div class="eink-screen" id="screen">
+        <iframe id="app" src="/" title="OpenInk"></iframe>
+        <div class="eink-refresh" id="refresh" aria-hidden="true"></div>
+      </div>
+      <div class="eink-resize-handle" id="resizeHandle" title="Drag to resize"></div>
+    </div>
+  </div>
+  <div class="eink-controls">
+    <label>
+      Refresh duration (ms):
+      <input type="range" id="duration" min="200" max="900" value="450" step="50" />
+      <span id="durationVal">450</span>
+    </label>
+    <label>
+      <input type="checkbox" id="autoRefresh" />
+      Auto-refresh every 3s
+    </label>
+  </div>
+
+  <script>
+    (function () {
+      // --- Constants ---
+      var DEFAULT_WIDTH = 380;
+      var DEFAULT_HEIGHT = 507;
+      var MIN_WIDTH = 200;
+      var MAX_WIDTH = 900;
+      var MIN_HEIGHT = 266;
+      var MAX_HEIGHT = 1200;
+      var REFRESH_CLICKS_MIN = 3;
+      var REFRESH_CLICKS_MAX = 4;
+      var AUTO_REFRESH_INTERVAL_MS = 3000;
+      var FADE_IN_MS = 150;
+      var FADE_OUT_MS = 400;
+
+      // --- DOM refs ---
+      var screenEl = document.getElementById('screen');
+      var iframe = document.getElementById('app');
+      var overlay = document.getElementById('refresh');
+      var resizeHandle = document.getElementById('resizeHandle');
+      var durationInput = document.getElementById('duration');
+      var durationVal = document.getElementById('durationVal');
+      var autoRefreshCheck = document.getElementById('autoRefresh');
+
+      // --- State ---
+      var screenW = DEFAULT_WIDTH;
+      var screenH = DEFAULT_HEIGHT;
+      var resizing = false;
+      var startX, startY, startW, startH;
+      var autoTimer = null;
+      var navClickCount = 0;
+      var refreshAfterClicks = REFRESH_CLICKS_MIN + Math.floor(Math.random() * (REFRESH_CLICKS_MAX - REFRESH_CLICKS_MIN + 1));
+
+      // --- Resize (drag corner) ---
+      screenEl.style.width = screenW + 'px';
+      screenEl.style.height = screenH + 'px';
+
+      function onResizeStart(e) {
+        e.preventDefault();
+        resizing = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        startW = screenW;
+        startH = screenH;
+        document.addEventListener('mousemove', onResizeMove);
+        document.addEventListener('mouseup', onResizeEnd);
+      }
+      function onResizeMove(e) {
+        if (!resizing) return;
+        var dx = e.clientX - startX;
+        var dy = e.clientY - startY;
+        screenW = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, startW + dx));
+        screenH = Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, startH + dy));
+        screenEl.style.width = screenW + 'px';
+        screenEl.style.height = screenH + 'px';
+      }
+      function onResizeEnd() {
+        resizing = false;
+        document.removeEventListener('mousemove', onResizeMove);
+        document.removeEventListener('mouseup', onResizeEnd);
+      }
+      resizeHandle.addEventListener('mousedown', onResizeStart);
+
+      // --- Refresh animation (black fade, e-ink style) ---
+      function getDuration() {
+        return Number(durationInput.value) || 450;
+      }
+
+      function runRefresh() {
+        var ms = getDuration();
+        overlay.style.transition = 'none';
+        overlay.style.opacity = '0';
+        overlay.offsetHeight;
+
+        overlay.style.transition = 'opacity ' + (FADE_IN_MS / 1000) + 's ease-out';
+        overlay.style.opacity = '1';
+        var holdBlack = Math.max(0, ms - FADE_IN_MS - FADE_OUT_MS);
+
+        setTimeout(function () {
+          overlay.style.transition = 'opacity ' + (FADE_OUT_MS / 1000) + 's ease-in';
+          overlay.style.opacity = '0';
+        }, FADE_IN_MS + holdBlack);
+      }
+
+      // --- Navigation: refresh every 3–4 clicks (not every click) ---
+      window.addEventListener('message', function (e) {
+        if (e.data && e.data.type === 'openink-refresh') {
+          navClickCount++;
+          if (navClickCount >= refreshAfterClicks) {
+            runRefresh();
+            navClickCount = 0;
+            refreshAfterClicks = REFRESH_CLICKS_MIN + Math.floor(Math.random() * (REFRESH_CLICKS_MAX - REFRESH_CLICKS_MIN + 1));
+          }
+        }
+      });
+
+      // --- Controls ---
+      durationInput.addEventListener('input', function () {
+        durationVal.textContent = durationInput.value;
+      });
+
+      autoRefreshCheck.addEventListener('change', function () {
+        clearInterval(autoTimer);
+        if (autoRefreshCheck.checked) {
+          autoTimer = setInterval(runRefresh, AUTO_REFRESH_INTERVAL_MS);
+        }
+      });
+
+      iframe.addEventListener('load', function () {
+        try {
+          iframe.contentWindow.postMessage({ type: 'openink-demo-ready' }, '*');
+        } catch (err) {}
+      });
+    })();
+  </script>
+</body>
+</html>

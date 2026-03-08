@@ -1,8 +1,4 @@
-import { h } from 'preact';
 import { useState, useCallback, useEffect } from 'preact/hooks';
-
-const RANKS = 8;
-const FILES = 8;
 
 type Piece = 'K' | 'Q' | 'R' | 'B' | 'N' | 'P' | 'k' | 'q' | 'r' | 'b' | 'n' | 'p' | null;
 type Board = (Piece)[][];
@@ -91,7 +87,6 @@ function getComputerMove(board: Board): { from: [number, number]; to: [number, n
 function initialBoard(): Board {
   const b: Board = Array(8).fill(null).map(() => Array(8).fill(null));
   const back = (row: number, color: 'w' | 'b') => {
-    const base = color === 'w' ? 1 : -1;
     b[row][0] = ((color === 'w' ? 'R' : 'r') as Piece);
     b[row][1] = ((color === 'w' ? 'N' : 'n') as Piece);
     b[row][2] = ((color === 'w' ? 'B' : 'b') as Piece);

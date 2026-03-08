@@ -1,4 +1,3 @@
-import { h } from 'preact';
 import { memo } from 'preact/compat';
 import { useMemo, useCallback } from 'preact/hooks';
 import type { AppDescriptor } from '../../types/plugin';

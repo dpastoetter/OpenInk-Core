@@ -1,4 +1,4 @@
-import type { GlobalSettings, PixelOpticsPreset, ColorMode, FontSize, ThemePreset } from '../../types/settings';
+import type { GlobalSettings } from '../../types/settings';
 import { DEFAULT_SETTINGS } from '../../types/settings';
 import type { StorageService } from './storage';
 import type { ThemeService } from './theme';

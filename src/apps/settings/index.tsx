@@ -1,4 +1,3 @@
-import { h } from 'preact';
 import { useState, useEffect } from 'preact/hooks';
 import type { AppContext, AppInstance } from '../../types/plugin';
 import type { GlobalSettings, PixelOpticsPreset, FontSize, ThemePreset, Appearance } from '../../types/settings';

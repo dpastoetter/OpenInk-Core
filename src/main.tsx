@@ -1,4 +1,4 @@
-import { h, render } from 'preact';
+import { render } from 'preact';
 import { createStorageService } from './core/services/storage';
 import { createNetworkService } from './core/services/network';
 import { createThemeService } from './core/services/theme';

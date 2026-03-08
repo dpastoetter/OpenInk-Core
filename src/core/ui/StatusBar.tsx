@@ -1,4 +1,3 @@
-import { h } from 'preact';
 import { useState, useEffect } from 'preact/hooks';
 import type { ThemeService } from '../services/theme';
 import type { SettingsService } from '../services/settings';

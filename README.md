@@ -1,4 +1,4 @@
-# webOS-style E-ink Shell
+# OpenInk
 
 A minimal, plugin-based “webOS-style” environment for low-spec e-ink devices. It provides a home screen, launcher, and a set of built-in apps that run inside a shared shell.
 
@@ -9,6 +9,10 @@ A minimal, plugin-based “webOS-style” environment for low-spec e-ink devices
 | ![OpenInk home screen — light mode](docs/screenshots/light-mode.png) | ![OpenInk home screen — dark mode](docs/screenshots/dark-mode.png) |
 
 Toggle appearance from the status bar (light bulb icon). Use **+** / **−** in the status bar to zoom for resolution fit. The same Apps and Games launcher is available in both themes.
+
+### Demo
+
+![OpenInk screencast](docs/demo-screencast.mp4)
 
 ## Tech stack
 
@@ -25,6 +29,8 @@ npm run dev
 ```
 
 Then open the URL shown (e.g. `http://localhost:5173`) in a browser.
+
+**E-ink demo (testing):** Open `/demo/eink-demo.html` (e.g. [http://localhost:5173/demo/eink-demo.html](http://localhost:5173/demo/eink-demo.html)) to run the app in a B&W mock reader: drag the corner to resize, simulated e-ink refresh every 3–4 navigations (or on a timer). See **[docs/DEMO.md](docs/DEMO.md)** for details.
 
 **Build for production:**
 
@@ -96,6 +102,7 @@ For a site that anyone can access, the app is built with security in mind: no se
 - **[docs/SECURITY.md](docs/SECURITY.md)** – Security measures and deployment checklist for public sites.
 - **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** – High-level design: shell, plugin system, services, and data flow.
 - **[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)** – Development workflow, project structure, adding services, testing, and deploy.
+- **[docs/DEMO.md](docs/DEMO.md)** – E-ink demo page: how to open it, controls, and how the simulated refresh works.
 - **[docs/plugins.md](docs/plugins.md)** – How to build and register app plugins, use context and services, and optional shell integration (getTitle, canGoBack, goBack).
 
 ## Project structure

@@ -7,3 +7,6 @@ dist/
 .cursor/
 *.log
 .DS_Store
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts

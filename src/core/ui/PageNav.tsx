@@ -1,4 +1,3 @@
-import { h } from 'preact';
 
 interface PageNavProps {
   current: number;

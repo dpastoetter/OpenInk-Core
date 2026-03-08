@@ -1,4 +1,3 @@
-import { h } from 'preact';
 import { useState, useCallback, useEffect, useRef } from 'preact/hooks';
 
 const LANES = 3;

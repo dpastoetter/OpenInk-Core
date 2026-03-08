@@ -1,4 +1,3 @@
-import { h } from 'preact';
 import { useState, useEffect, useCallback, useMemo } from 'preact/hooks';
 import type { WebOSApp, AppInstance, AppContext } from '../../types/plugin';
 import { AppRegistry } from '../plugins/registry';
@@ -25,7 +24,7 @@ const HISTORY_STATE_KEY = 'openInk';
 export function Shell({ services }: ShellProps) {
   const [currentAppId, setCurrentAppId] = useState<string | null>(null);
   const [instance, setInstance] = useState<AppInstance | null>(null);
-  const [appStack, setAppStack] = useState<string[]>([]);
+  const [_appStack, setAppStack] = useState<string[]>([]);
   const [loadingAppId, setLoadingAppId] = useState<string | null>(null);
 
   const closeApp = useCallback(() => {
@@ -115,6 +114,17 @@ export function Shell({ services }: ShellProps) {
   const currentApp = currentAppId ? AppRegistry.getApp(currentAppId) : null;
   const headerTitle = instance?.getTitle?.() ?? currentApp?.name ?? currentAppId ?? '';
   const appDescriptors = useMemo(() => AppRegistry.getAllAppDescriptors(), []);
+
+  // Notify parent frame (e.g. e-ink demo) when view changes so it can simulate refresh
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.self !== window.parent) {
+      try {
+        window.parent.postMessage({ type: 'openink-refresh' }, '*');
+      } catch {
+        /* ignore */
+      }
+    }
+  }, [currentAppId, showHome, loadingAppId]);
 
   return (
     <div class="shell">

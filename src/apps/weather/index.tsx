@@ -1,4 +1,3 @@
-import { h } from 'preact';
 import { useState, useEffect, useCallback } from 'preact/hooks';
 import type { AppContext, AppInstance } from '../../types/plugin';
 import { PLUGIN_API_VERSION } from '../../types/plugin';

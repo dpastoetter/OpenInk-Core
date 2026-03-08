@@ -1,4 +1,3 @@
-import { h } from 'preact';
 import { useState, useEffect, useCallback, useMemo } from 'preact/hooks';
 import type { AppContext, AppInstance } from '../../types/plugin';
 import { PLUGIN_API_VERSION } from '../../types/plugin';
@@ -60,8 +59,7 @@ type RedditPostCommentsResponse = [
 ];
 
 function RedditApp(context: AppContext): AppInstance {
-  const { network, storage } = context.services;
-  const SUBS_KEY = 'reddit:subs';
+  const { network } = context.services;
   const backRef: {
     current: {
       setSelectedPost: (p: RedditPost['data'] | null) => void;
@@ -73,7 +71,7 @@ function RedditApp(context: AppContext): AppInstance {
   const titleRef: { current: string } = { current: 'Subreddits' };
 
   function RedditUI() {
-    const [subs, setSubs] = useState<string[]>(DEFAULT_SUBS);
+    const [subs] = useState<string[]>(DEFAULT_SUBS);
     const [searchInput, setSearchInput] = useState('');
     const [currentSub, setCurrentSub] = useState<string | null>(null);
     const [posts, setPosts] = useState<RedditPost['data'][]>([]);

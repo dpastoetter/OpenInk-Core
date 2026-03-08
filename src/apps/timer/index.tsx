@@ -1,4 +1,3 @@
-import { h } from 'preact';
 import { useState, useEffect, useRef, useCallback } from 'preact/hooks';
 import type { AppContext, AppInstance } from '../../types/plugin';
 import { PLUGIN_API_VERSION } from '../../types/plugin';
@@ -11,7 +10,7 @@ function formatTime(seconds: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-function TimerApp(context: AppContext): AppInstance {
+function TimerApp(_context: AppContext): AppInstance {
   function TimerUI() {
     const [totalSeconds, setTotalSeconds] = useState(0);
     const [remaining, setRemaining] = useState(0);

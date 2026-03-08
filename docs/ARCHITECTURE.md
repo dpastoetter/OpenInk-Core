@@ -58,7 +58,7 @@ The shell is the root UI when not on the home screen. It holds:
 
 **Registration**: `src/apps/registry.ts`
 
-- Defines the `APPS` array of all built-in apps and calls `AppRegistry.registerApp(app)` for each in `registerAllApps()`.
+- Defines the `LAZY_APPS` array (descriptor + lazy loader per app) and calls `AppRegistry.registerLazy(descriptor, load)` for each in `registerAllApps()`. Apps are loaded on first launch to keep the initial bundle small.
 
 Apps do not import each other; they are only coupled via the shared types and context.
 

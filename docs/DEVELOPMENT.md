@@ -47,7 +47,7 @@ src/
 │   └── utils/
 │       └── html.ts           # stripHtml and other helpers
 └── apps/                     # App plugins
-    ├── registry.ts           # registerAllApps(), APPS list
+    ├── registry.ts           # registerAllApps(), LAZY_APPS
     ├── settings/
     ├── finance/
     ├── games/
@@ -57,8 +57,14 @@ src/
     ├── dictionary/
     └── …
 
+public/
+├── demo/
+│   └── eink-demo.html        # E-ink mock reader demo (B&W, resize, simulated refresh)
+└── …
+
 docs/                         # Documentation
 ├── ARCHITECTURE.md           # High-level design (this repo)
+├── DEMO.md                   # E-ink demo page (how to open, controls)
 ├── DEVELOPMENT.md            # This file
 └── plugins.md               # How to add and implement apps
 ```
@@ -66,7 +72,7 @@ docs/                         # Documentation
 ## Adding a new app
 
 1. Create `src/apps/<app-id>/index.tsx` and implement `WebOSApp` (see [docs/plugins.md](plugins.md)).
-2. In `src/apps/registry.ts`, import the app and add it to the `APPS` array.
+2. In `src/apps/registry.ts`, add a descriptor and lazy loader to the `LAZY_APPS` array (e.g. `load: () => import('./your-app').then(m => m.yourApp)`).
 3. The app will appear on the home screen; no further wiring is needed.
 
 ## Adding a new service
@@ -79,7 +85,7 @@ docs/                         # Documentation
 ## Code style and conventions
 
 - **TypeScript**: Strict mode; avoid `any`. Use types from `@types/plugin` and `@types/services` for app and service code.
-- **Preact**: Functional components and hooks. Use `h` from `preact` for JSX.
+- **Preact**: Functional components and hooks. JSX is transformed by the Preact preset; you don’t need to import `h`.
 - **Imports**: Prefer `@core/...` for core code (see `vite.config.ts` aliases). Apps use relative imports for types (`../../types/plugin`) and `@core` for UI/utils.
 - **CSS**: Global styles in `index.css`; use semantic class names (e.g. `.app-header`, `.list`, `.btn`) and CSS variables (e.g. `var(--space)`, `var(--fg)`). No CSS modules or Tailwind in this project.
 - **Naming**: `camelCase` for functions/variables; `PascalCase` for components and types. Files: `kebab-case` or component name (e.g. `HomeScreen.tsx`).
@@ -90,14 +96,23 @@ docs/                         # Documentation
 - Tests live next to source (e.g. `registry.test.ts` next to `registry.ts`) or in a `*.test.ts` / `*.test.tsx` file.
 - Run `npm test` before committing if you changed core or app logic.
 
+## E-ink demo
+
+- The demo page lives in `public/demo/eink-demo.html` and is served at `/demo/eink-demo.html` (dev and production).
+- It embeds the app in an iframe, applies grayscale, and simulates e-ink refresh (black flash every 3–4 navigations or on a timer). You can resize the “screen” by dragging the bottom-right corner.
+- See **[docs/DEMO.md](DEMO.md)** for full description and behaviour.
+
 ## Build and deploy
 
 - `npm run build` produces `dist/` (static assets). Deploy `dist/` to any static host (Netlify, Vercel, GitHub Pages, etc.).
 - If the app is served from a subpath (e.g. `/browserOS/`), set `base: '/browserOS/'` in `vite.config.ts` and rebuild.
 - The app uses the History API; the server must serve `index.html` for all routes (SPA fallback).
+- The e-ink demo is copied to `dist/demo/eink-demo.html`; open that URL on your deployed site to use it.
 
 ## Documentation
 
 - **ARCHITECTURE.md** – How the shell, plugins, and services fit together.
+- **DEMO.md** – E-ink demo page: URL, controls, and refresh behaviour.
 - **plugins.md** – Step-by-step app plugin implementation and use of context/services.
+- **SECURITY.md** – Security measures and deployment checklist for public sites.
 - **README.md** – Quick start, commands, and links to the docs above.

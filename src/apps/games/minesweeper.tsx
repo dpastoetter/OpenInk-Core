@@ -1,4 +1,3 @@
-import { h } from 'preact';
 import { useState, useCallback } from 'preact/hooks';
 
 const ROWS = 9;
