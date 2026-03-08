@@ -12,6 +12,8 @@ Toggle appearance from the status bar (light bulb icon). Use **+** / **−** in 
 
 ### Demo
 
+<!-- Inline playback: 1) On GitHub, open this README and click Edit. 2) Download docs/demo-screencast.mp4 from the repo (or use your local copy). 3) Drag-and-drop the MP4 file onto the line below. 4) Save. GitHub will replace it with a playable embed (max 10 MB). -->
+
 ![OpenInk screencast](docs/demo-screencast.mp4)
 
 ## Tech stack
