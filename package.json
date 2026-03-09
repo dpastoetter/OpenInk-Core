@@ -2,6 +2,8 @@
   "name": "browseros",
   "version": "1.0.0",
   "type": "module",
+  "repository": "https://github.com/dpastoetter/OpenInk-WebOS.git",
+  "homepage": "https://github.com/dpastoetter/OpenInk-WebOS#readme",
   "scripts": {
     "dev": "vite --host",
     "build": "tsc -b && vite build && node scripts/generate-legacy-html.mjs",

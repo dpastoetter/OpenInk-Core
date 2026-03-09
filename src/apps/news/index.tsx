@@ -100,7 +100,8 @@ function NewsApp(context: AppContext): AppInstance {
       for (const url of feeds) {
         const sourceName = sourceNameFromUrl(url);
         try {
-          const cached = await storage.get<CachedFeed>(CACHE_KEY + ':' + url);
+          const cacheKey = CACHE_KEY + ':' + encodeURIComponent(url).slice(0, 500);
+          const cached = await storage.get<CachedFeed>(cacheKey);
           if (cached && Date.now() - cached.fetchedAt < CACHE_TTL) {
             const withSource = cached.items.map((it) => ({ ...it, source: it.source ?? sourceName }));
             all.push(...withSource);
@@ -109,7 +110,7 @@ function NewsApp(context: AppContext): AppInstance {
           const proxyUrl = CORS_PROXY + encodeURIComponent(url);
           const xml = await network.fetchText(proxyUrl);
           const parsed = parseRss(xml, sourceName);
-          await storage.set(CACHE_KEY + ':' + url, { url, items: parsed, fetchedAt: Date.now() });
+          await storage.set(cacheKey, { url, items: parsed, fetchedAt: Date.now() });
           all.push(...parsed);
         } catch (e) {
           lastError = e instanceof Error ? e.message : 'Failed to load feed';

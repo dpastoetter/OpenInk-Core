@@ -3,6 +3,7 @@ import { createStorageService } from './core/services/storage';
 import { createNetworkService } from './core/services/network';
 import { createThemeService } from './core/services/theme';
 import { createSettingsService } from './core/services/settings';
+import { setRootFallback, LOAD_ERROR_MESSAGE } from './core/utils/fallback-ui';
 import { Shell } from './core/kernel/shell';
 import { registerAllApps } from './apps/registry';
 import { DEFAULT_SETTINGS } from './types/settings';
@@ -56,9 +57,8 @@ async function init() {
       new Promise<void>((resolve) => setTimeout(resolve, loadTimeout)),
     ]);
     renderShell(root);
-  } catch (e) {
-    root.innerHTML =
-      '<p style="padding:1rem;font-family:system-ui,sans-serif;font-size:1rem;">OpenInk could not load. Your browser may not be fully supported (e.g. Kindle). Try a different browser or device.</p>';
+  } catch {
+    setRootFallback(root, LOAD_ERROR_MESSAGE);
   }
 }
 

@@ -42,4 +42,13 @@ describe('StorageService', () => {
     expect(redKeys).toContain('red:1');
     expect(redKeys).toContain('red:2');
   });
+
+  it('rejects invalid keys (get returns null, set/remove no-op)', async () => {
+    await storage.set('valid', 1);
+    expect(await storage.get('invalid key!')).toBe(null);
+    expect(await storage.get('')).toBe(null);
+    await storage.set('bad key', 2); // no-op
+    await storage.remove('bad key'); // no-op
+    expect(await storage.get('valid')).toBe(1);
+  });
 });

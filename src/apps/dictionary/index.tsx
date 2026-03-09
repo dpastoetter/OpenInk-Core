@@ -33,7 +33,7 @@ function DictionaryApp(context: AppContext): AppInstance {
       setError(null);
       setResult(null);
       try {
-        const cacheKey = CACHE_PREFIX + w;
+        const cacheKey = CACHE_PREFIX + encodeURIComponent(w).slice(0, 200);
         const cached = await storage.get<DictEntry[]>(cacheKey);
         if (cached) {
           setResult(cached);
