@@ -41,6 +41,8 @@ function renderShell(root: HTMLElement) {
     />,
     root
   );
+  // Signal to legacy.html loader that the app mounted (so it doesn't show static fallback).
+  if (typeof window !== 'undefined') (window as unknown as { __openinkMounted?: boolean }).__openinkMounted = true;
 }
 
 async function init() {

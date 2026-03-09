@@ -27,6 +27,17 @@ const entrySrc = entryMatch[1];
 const cssMatch = html.match(/href="(\/assets\/index-[^"]+\.css)"/);
 const cssHref = cssMatch ? cssMatch[1] : '/assets/index.css';
 
+// Static fallback shown if the app never mounts (e.g. Kindle loading loop). No JS required.
+const staticFallback = `
+  <div style="padding:1.5rem;font-family:Arial,Verdana,sans-serif;max-width:28em;margin:0 auto;">
+    <h1 style="font-size:1.35rem;margin:0 0 1rem;">OpenInk</h1>
+    <p style="margin:0 0 1rem;color:#555;">The app could not start on this device. You can use these on a phone or computer:</p>
+    <ul style="margin:0 0 1rem;padding-left:1.25rem;">
+      <li>Calculator</li><li>Weather</li><li>News</li><li>Timer</li><li>Settings</li><li>Games (Chess, Sudoku, …)</li>
+    </ul>
+    <p style="margin:0;font-size:0.9rem;color:#666;">Open this page on a phone or computer for the full app.</p>
+  </div>`.replace(/\n\s+/g, ' ').trim();
+
 const legacyHtml = `<!DOCTYPE html>
 <html lang="en" class="legacy-browser">
 <head>
@@ -44,37 +55,33 @@ const legacyHtml = `<!DOCTYPE html>
 <body>
   <div id="root"><p style="padding:1.5rem;font-family:Arial,Verdana,sans-serif;">Loading OpenInk…</p></div>
   <noscript><p style="padding:1rem;font-family:Arial,Verdana,sans-serif;">OpenInk needs JavaScript.</p></noscript>
+  <script crossorigin="anonymous" src="${polyfillSrc}"><\/script>
   <script>
     (function() {
       var root = document.getElementById('root');
       var entrySrc = ${JSON.stringify(entrySrc)};
-      var polyfillSrc = ${JSON.stringify(polyfillSrc)};
       function showErr(msg) {
         if (root) root.innerHTML = '<p style="padding:1.5rem;font-family:Arial,Verdana,sans-serif;">' + msg + '</p>';
       }
+      function showStaticFallback() {
+        if (root) root.innerHTML = ${JSON.stringify(staticFallback)};
+      }
       window.onerror = function() {
-        showErr('OpenInk could not start. Try a different browser or device.');
+        showErr('OpenInk could not start. Try another browser or device.');
         return true;
       };
-      var s = document.createElement('script');
-      s.crossOrigin = 'anonymous';
-      s.src = polyfillSrc;
-      s.onload = function() {
-        if (typeof System === 'undefined') {
-          showErr('OpenInk could not load (missing polyfill).');
-          return;
-        }
-        System.import(entrySrc).catch(function() {
-          showErr('OpenInk could not load. Try another browser or device.');
-        });
-      };
-      s.onerror = function() {
-        showErr('OpenInk could not load scripts. Check your connection.');
-      };
-      document.body.appendChild(s);
+      if (typeof System === 'undefined') {
+        showErr('OpenInk could not load (missing polyfill).');
+        return;
+      }
+      System.import(entrySrc).then(function() {
+        // App may mount async; fallback timer will hide if __openinkMounted is set
+      }).catch(function() {
+        showErr('OpenInk could not load. Try another browser or device.');
+      });
       setTimeout(function() {
-        if (root && root.children.length === 1 && root.textContent.indexOf('Loading') !== -1) {
-          root.innerHTML = '<p style="padding:1.5rem;font-family:Arial,Verdana,sans-serif;">Still loading… If this persists, try another browser or device.</p>';
+        if (root && !window.__openinkMounted) {
+          showStaticFallback();
         }
       }, 12000);
     })();
