@@ -112,13 +112,13 @@ docs/                         # Documentation
 - If the app is served from a subpath (e.g. `/browserOS/`), set `base: '/browserOS/'` in `vite.config.ts` and rebuild.
 - The app uses the History API; the server must serve `index.html` for all routes (SPA fallback).
 - The e-ink demo is copied to `dist/demo/eink-demo.html`; open that URL on your deployed site to use it.
-- **Kindle / old browsers:** Kindle, Silk, and Experimental user agents are redirected to `legacy.html`. That page loads the same app via the legacy bundle (SystemJS + polyfills, no `type="module"`). The legacy build targets Chrome 75 (plugin-legacy with `targets: ['chrome 75', ...]`), so optional chaining and nullish coalescing are transpiled. CSS includes flexbox `gap` fallbacks (margins) for browsers that don’t support flex gap. The build generates `dist/legacy.html` via `scripts/generate-legacy-html.mjs` after Vite build. Deploy the full `dist/` including `legacy.html`. For more e-ink constraints, see [ReKindle COMPATIBILITY.md](https://github.com/ReKindleOS/ReKindle/blob/main/COMPATIBILITY.md).
+- **Kindle / old browsers:** Kindle, Silk, and Experimental user agents are redirected to `legacy.html`. That page loads the polyfill then the app entry with blocking script tags, and the legacy bundle uses SystemJS + polyfills (no `type="module"`). If the app does not mount within 12 seconds, a static fallback message is shown so the device is never stuck in a loading loop. The legacy build targets Chrome 75 (plugin-legacy with `targets: ['chrome 75', ...]`), so optional chaining and nullish coalescing are transpiled. CSS includes flexbox `gap` fallbacks (margins) for browsers that don’t support flex gap. The build generates `dist/legacy.html` via `scripts/generate-legacy-html.mjs` after Vite build. Deploy the full `dist/` including `legacy.html`. See [KINDLE-COMPATIBILITY.md](KINDLE-COMPATIBILITY.md) and [ReKindle COMPATIBILITY.md](https://github.com/ReKindleOS/ReKindle/blob/main/COMPATIBILITY.md).
 
 ## Documentation
 
 - **ARCHITECTURE.md** – How the shell, plugins, and services fit together.
 - **DEMO.md** – E-ink demo page: URL, controls, and refresh behaviour.
-- **KINDLE-COMPATIBILITY.md** – Kindle/e-ink constraints (ReKindle-style): no flex gap, no emoji, no animations on legacy, system fonts, etc.
+- **KINDLE-COMPATIBILITY.md** – Kindle/e-ink constraints (ReKindle-style): legacy loader, static fallback, no flex gap, no emoji, no animations on legacy, system fonts, etc.
 - **plugins.md** – Step-by-step app plugin implementation and use of context/services.
 - **SECURITY.md** – Security measures and deployment checklist for public sites.
 - **README.md** – Quick start, commands, and links to the docs above.

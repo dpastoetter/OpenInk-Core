@@ -36,7 +36,7 @@ npm run dev
 
 Then open the URL shown (e.g. `http://localhost:5173`) in a browser. The dev server listens on all interfaces, so you can also use your machine’s LAN address (e.g. `http://192.168.1.5:5173`) from another device on the same network.
 
-**Kindle / limited browsers:** Kindle, Silk, and the experimental browser are redirected to `legacy.html`, which loads the same app via a Chrome 75–compatible bundle (no ES modules; optional chaining and nullish coalescing are transpiled). Deploy the full `dist/` including `legacy.html`. Other old browsers can open `legacy.html` directly.
+**Kindle / limited browsers:** Kindle, Silk, and the experimental browser are redirected to `legacy.html`, which loads the same app via a Chrome 75–compatible bundle (no ES modules; optional chaining and nullish coalescing are transpiled). If the app does not start, a static message is shown after 12 seconds so the device is never stuck in a loading loop. Deploy the full `dist/` including `legacy.html`. See **[docs/KINDLE-COMPATIBILITY.md](docs/KINDLE-COMPATIBILITY.md)** for constraints. Other old browsers can open `legacy.html` directly.
 
 **E-ink demo (testing):** Open `/demo/eink-demo.html` (e.g. [http://localhost:5173/demo/eink-demo.html](http://localhost:5173/demo/eink-demo.html)) to run the app in a B&W mock reader: drag the corner to resize, simulated e-ink refresh every 3–4 navigations (or on a timer). See **[docs/DEMO.md](docs/DEMO.md)** for details.
 
@@ -111,6 +111,7 @@ For a site that anyone can access, the app is built with security in mind: no se
 - **[docs/SECURITY.md](docs/SECURITY.md)** – Security measures and deployment checklist for public sites.
 - **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** – High-level design: shell, plugin system, services, and data flow.
 - **[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)** – Development workflow, project structure, adding services, testing, and deploy.
+- **[docs/KINDLE-COMPATIBILITY.md](docs/KINDLE-COMPATIBILITY.md)** – Kindle/e-ink constraints (ReKindle-style) and legacy loader behaviour.
 - **[docs/DEMO.md](docs/DEMO.md)** – E-ink demo page: how to open it, controls, and how the simulated refresh works.
 - **[docs/plugins.md](docs/plugins.md)** – How to build and register app plugins, use context and services, and optional shell integration (getTitle, canGoBack, goBack).
 

@@ -98,4 +98,4 @@ Core UI components live in `src/core/ui/` (e.g. `PageNav`, `Button`, `List`). Ap
 ## Build and runtime
 
 - **Vite** bundles the app; aliases (`@core`, `@apps`, `@types`) point into `src/`. The result is static HTML/JS/CSS; no server-side rendering.
-- **Runtime**: One shell, one active app instance at a time. No lazy loading of app code in the current setup; all registered apps are in the bundle.
+- **Runtime**: One shell, one active app instance at a time. Apps are registered lazily (see `LAZY_APPS` in `src/apps/registry.ts`) and loaded on first launch via dynamic import.
