@@ -4,11 +4,17 @@ OpenInk follows [ReKindle COMPATIBILITY.md](https://github.com/ReKindleOS/ReKind
 
 ## Legacy loader (legacy.html)
 
-- **Blocking script tags (no dynamic injection):** The page uses a blocking `<script src="polyfill.js">` then an inline script that calls `System.import(entry)`. This avoids relying on `createElement('script')` + `onload`, which can be unreliable on Kindle. Scripts run in document order.
-- **CSP:** Legacy CSP uses `script-src 'self' 'unsafe-inline'` so the inline loader runs; without it the loader would be blocked and the page would stay on "Loading app…".
+- **Designed to never be blank:** Critical inline `<style>` in the head forces `body` and `#root` to be visible (no dependency on external CSS). The first element in the body is a canary line ("OpenInk") so something always shows. No CSP on legacy (old WebKit can mis-handle CSP and show a blank page). Main stylesheet is loaded at the end of the body so first paint does not wait for it.
+- **Blocking script tags:** A blocking `<script src="polyfill.js">` then an inline script runs `System.import(entry)`. Scripts are wrapped in try/catch so a single throw does not leave the page broken.
 - **Mounted flag:** After the app renders, it sets `window.__openinkMounted = true`. The 12s fallback timer is cleared when `System.import(entry)` resolves.
-- **12s timeout fallback:** If the app has not mounted within 12 seconds, the loader replaces the content with a static message ("OpenInk did not start on this device…") and a "Try again" link so the user is never stuck in a loading loop.
+- **12s timeout fallback:** If the app has not mounted within 12 seconds, the loader replaces the content with a static message and a "Try again" link.
 - **Startup timeout:** In the app, `settings.load()` is raced with a 5s timeout so slow or hanging localStorage (e.g. on Kindle) does not block the first render.
+
+## If the Kindle shows a blank screen
+
+1. **Confirm the right file is served:** Open `legacy-static.html` on the Kindle (same host, same path, e.g. `https://yoursite.com/legacy-static.html`). That page has no JavaScript. If you see "OpenInk" and "This page does not use JavaScript", the server is fine and the issue is with running the app scripts on legacy.html.
+2. **Deploy the full `dist/`:** Ensure `dist/legacy.html` and `dist/legacy-static.html` are deployed. If your host rewrites all routes to `index.html` (SPA mode), add an exception so `legacy.html` and `legacy-static.html` are served as static files.
+3. **Base path:** If you deploy under a subpath (e.g. `https://user.github.io/OpenInk-WebOS/`), set `base: '/OpenInk-WebOS/'` in `vite.config.ts` before building so script and style URLs in legacy.html resolve correctly.
 
 ## What we do
 
