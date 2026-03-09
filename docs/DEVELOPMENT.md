@@ -12,9 +12,10 @@ This document covers how to run, build, test, and work with the codebase day to 
 | Command | Description |
 |--------|--------------|
 | `npm install` | Install dependencies |
-| `npm run dev` | Start Vite dev server (e.g. http://localhost:5173) |
+| `npm run dev` | Start Vite dev server (e.g. http://localhost:5173). Listens on all interfaces so you can use your machine’s LAN IP (e.g. http://192.168.1.x:5173) from other devices. |
 | `npm run build` | TypeScript compile + Vite production build → `dist/` |
 | `npm run preview` | Serve the `dist/` build locally to test production |
+| `npm run lint` | Run ESLint on `src/` (TypeScript + jsx-a11y) |
 | `npm test` | Run Vitest once |
 | `npm run test:watch` | Run Vitest in watch mode |
 
@@ -104,7 +105,7 @@ docs/                         # Documentation
 
 ## Build and deploy
 
-- `npm run build` produces `dist/` (static assets). Deploy `dist/` to any static host (Netlify, Vercel, GitHub Pages, etc.).
+- `npm run build` produces `dist/` (static assets). Deploy `dist/` to any static host (Netlify, Vercel, GitHub Pages, etc.). To preview the build on your LAN, run `npm run preview -- --host`.
 - If the app is served from a subpath (e.g. `/browserOS/`), set `base: '/browserOS/'` in `vite.config.ts` and rebuild.
 - The app uses the History API; the server must serve `index.html` for all routes (SPA fallback).
 - The e-ink demo is copied to `dist/demo/eink-demo.html`; open that URL on your deployed site to use it.
@@ -116,3 +117,18 @@ docs/                         # Documentation
 - **plugins.md** – Step-by-step app plugin implementation and use of context/services.
 - **SECURITY.md** – Security measures and deployment checklist for public sites.
 - **README.md** – Quick start, commands, and links to the docs above.
+- **CONTRIBUTING.md** – How to run, test, and contribute.
+
+## Current tooling
+
+- **ESLint** – `eslint.config.js` with TypeScript and jsx-a11y; run with `npm run lint`.
+- **PWA** – [vite-plugin-pwa](https://vite-pwa-org.netlify.app/) generates a service worker (Workbox) for offline caching; registration in `main.tsx` (production only). Manifest: [public/manifest.json](public/manifest.json).
+
+## Possible improvements
+
+Ideas for future work (not required for current scope):
+
+- **Testing** – More unit tests for apps; consider a small E2E pass for the shell (e.g. Playwright) if the app grows.
+- **Accessibility** – jsx-a11y is enabled; a pass with axe or similar could catch gaps (focus order, landmarks, reduced-motion coverage).
+- **i18n** – All UI strings are currently English; if the project targets multiple locales, introduce a small i18n layer and extract strings.
+- **Dependency updates** – Run `npm audit` and upgrade dependencies (especially Vite and dev tools) periodically; see [docs/SECURITY.md](SECURITY.md).

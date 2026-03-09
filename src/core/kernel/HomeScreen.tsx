@@ -67,7 +67,7 @@ export function HomeScreen({ apps, onLaunch }: HomeScreenProps) {
     <div class="home-screen">
       <section class="home-category">
         <h2 class="home-category-title">Apps</h2>
-        <ul class="app-grid" role="list" onClick={handleGridClick}>
+        <ul class="app-grid" onClick={handleGridClick}>
           {appsOnly.map((app) => (
             <AppTile key={app.id} app={app} />
           ))}
@@ -75,7 +75,7 @@ export function HomeScreen({ apps, onLaunch }: HomeScreenProps) {
       </section>
       <section class="home-category">
         <h2 class="home-category-title">Games</h2>
-        <ul class="app-grid" role="list" onClick={handleGridClick}>
+        <ul class="app-grid" onClick={handleGridClick}>
           {games.map((app) => (
             <AppTile key={app.id} app={app} />
           ))}

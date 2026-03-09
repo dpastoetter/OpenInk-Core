@@ -34,7 +34,7 @@ npm install
 npm run dev
 ```
 
-Then open the URL shown (e.g. `http://localhost:5173`) in a browser.
+Then open the URL shown (e.g. `http://localhost:5173`) in a browser. The dev server listens on all interfaces, so you can also use your machine’s LAN address (e.g. `http://192.168.1.5:5173`) from another device on the same network.
 
 **E-ink demo (testing):** Open `/demo/eink-demo.html` (e.g. [http://localhost:5173/demo/eink-demo.html](http://localhost:5173/demo/eink-demo.html)) to run the app in a B&W mock reader: drag the corner to resize, simulated e-ink refresh every 3–4 navigations (or on a timer). See **[docs/DEMO.md](docs/DEMO.md)** for details.
 
@@ -45,9 +45,10 @@ npm run build
 npm run preview   # optional: preview the built app
 ```
 
-**Tests:**
+**Lint and tests:**
 
 ```bash
+npm run lint
 npm test
 ```
 
@@ -89,6 +90,7 @@ The site is tuned for **slow hardware, grayscale e-ink, and low refresh rates**:
 - **Containment** – Shell, app content, and home sections use `contain: layout style` to limit reflow/repaint scope.
 - **Light JS** – Memoized app lists and paginated slices; event delegation on the home grid; minimal work per render.
 - **Readability** – Large tap targets (`--tap-min`), high-contrast theme option, grayscale-first palette.
+- **Installable** – [Web app manifest](public/manifest.json) for “Add to Home Screen” on supported browsers and e-ink devices.
 
 ## Security (public deployment)
 
@@ -105,6 +107,7 @@ For a site that anyone can access, the app is built with security in mind: no se
 
 ## Documentation
 
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** – How to run, test, and contribute.
 - **[docs/SECURITY.md](docs/SECURITY.md)** – Security measures and deployment checklist for public sites.
 - **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** – High-level design: shell, plugin system, services, and data flow.
 - **[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)** – Development workflow, project structure, adding services, testing, and deploy.

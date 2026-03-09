@@ -8,10 +8,21 @@
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
     <link rel="icon" type="image/svg+xml" href="/openink-logo.svg" />
+    <link rel="manifest" href="/manifest.json" />
     <title>OpenInk</title>
   </head>
   <body>
     <div id="root"></div>
+    <noscript><p style="padding:1rem;font-family:system-ui,sans-serif;">OpenInk needs JavaScript. Please enable it or use a supported browser.</p></noscript>
+    <script>
+      // If the app does not render within 8s (e.g. Kindle or old browser), show a fallback.
+      setTimeout(function() {
+        var root = document.getElementById('root');
+        if (root && root.children.length === 0) {
+          root.innerHTML = '<p style="padding:1rem;font-family:system-ui,sans-serif;font-size:1rem;">OpenInk could not load on this browser (e.g. Kindle). Try a desktop or phone browser.</p>';
+        }
+      }, 8000);
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
