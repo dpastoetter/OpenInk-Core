@@ -27,9 +27,6 @@ const entrySrc = entryMatch[1];
 const cssMatch = html.match(/href="(\/assets\/index-[^"]+\.css)"/);
 const cssHref = cssMatch ? cssMatch[1] : '/assets/index.css';
 
-const unsupportedMsg =
-  '<div style="padding:1.5rem;font-family:system-ui,sans-serif;font-size:1rem;line-height:1.5;max-width:28em;margin:0 auto;"><h2 style="font-size:1.25rem;margin:0 0 0.75rem;">Unsupported browser</h2><p style="margin:0 0 0.5rem;">OpenInk does not run on this device or browser.</p><p style="margin:0;">Open this site on a phone or computer for the full app.</p></div>';
-
 const legacyHtml = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -45,29 +42,17 @@ const legacyHtml = `<!DOCTYPE html>
   <link rel="stylesheet" crossorigin href="${cssHref}">
 </head>
 <body>
-  <script>
-    (function() {
-      var ua = typeof navigator !== 'undefined' && navigator.userAgent || '';
-      if (/\\b(Kindle|Silk|Oasis)\\b/i.test(ua)) {
-        document.body.innerHTML = '${unsupportedMsg.replace(/'/g, "\\'")}';
-        document.title = 'OpenInk – Unsupported browser';
-        return;
-      }
-    })();
-  </script>
   <div id="root"></div>
   <noscript><p style="padding:1rem;font-family:system-ui,sans-serif;">OpenInk needs JavaScript.</p></noscript>
+  <script crossorigin src="${polyfillSrc}"></script>
+  <script>System.import("${entrySrc}");</script>
   <script>
     setTimeout(function() {
       var root = document.getElementById('root');
       if (root && root.children.length === 0) {
-        root.innerHTML = '${unsupportedMsg.replace(/'/g, "\\'")}';
+        root.innerHTML = '<p style="padding:1.5rem;font-family:system-ui,sans-serif;">Loading… If this persists, try another browser.</p>';
       }
-    }, 10000);
-  </script>
-  <script crossorigin src="${polyfillSrc}"></script>
-  <script>
-    System.import("${entrySrc}");
+    }, 15000);
   </script>
 </body>
 </html>

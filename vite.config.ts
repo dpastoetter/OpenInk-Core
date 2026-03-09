@@ -10,9 +10,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   plugins: [
     preact(),
-    // Legacy build (nomodule) for Kindle and other browsers that don't support ES modules or modern JS.
+    // Legacy build for Kindle (Chrome 75–level). Transpiles ?. and ?? and ES2020+ so e-ink browser can run the app.
     legacy({
-      targets: ['defaults', 'not supports es6-module'],
+      targets: ['chrome 75', 'not supports es6-module'],
       modernPolyfills: true,
     }),
     VitePWA({

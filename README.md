@@ -36,7 +36,7 @@ npm run dev
 
 Then open the URL shown (e.g. `http://localhost:5173`) in a browser. The dev server listens on all interfaces, so you can also use your machine’s LAN address (e.g. `http://192.168.1.5:5173`) from another device on the same network.
 
-**Kindle / limited browsers:** Kindle and Silk see an “Unsupported browser” message immediately (no white screen). Other old browsers can try `/legacy.html` (no ES modules).
+**Kindle / limited browsers:** Kindle, Silk, and the experimental browser are redirected to `legacy.html`, which loads the same app via a Chrome 75–compatible bundle (no ES modules; optional chaining and nullish coalescing are transpiled). Deploy the full `dist/` including `legacy.html`. Other old browsers can open `legacy.html` directly.
 
 **E-ink demo (testing):** Open `/demo/eink-demo.html` (e.g. [http://localhost:5173/demo/eink-demo.html](http://localhost:5173/demo/eink-demo.html)) to run the app in a B&W mock reader: drag the corner to resize, simulated e-ink refresh every 3–4 navigations (or on a timer). See **[docs/DEMO.md](docs/DEMO.md)** for details.
 

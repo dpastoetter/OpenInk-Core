@@ -12,26 +12,25 @@
     <title>OpenInk</title>
   </head>
   <body>
+    <div id="root"></div>
+    <noscript><p style="padding:1rem;font-family:system-ui,sans-serif;">OpenInk needs JavaScript.</p></noscript>
     <script>
       (function() {
-        var ua = typeof navigator !== 'undefined' && navigator.userAgent || '';
-        if (/\b(Kindle|Silk|Oasis)\b/i.test(ua)) {
-          document.body.innerHTML = '<div style="padding:1.5rem;font-family:system-ui,sans-serif;font-size:1rem;line-height:1.5;max-width:28em;margin:0 auto;"><h2 style="font-size:1.25rem;margin:0 0 0.75rem;">Unsupported browser</h2><p style="margin:0 0 0.5rem;">OpenInk does not run on this device or browser (e.g. Kindle).</p><p style="margin:0;">Open this site on a phone or computer for the full app.</p></div>';
-          document.title = 'OpenInk – Unsupported browser';
+        var ua = (typeof navigator !== 'undefined' && navigator.userAgent) ? navigator.userAgent : '';
+        if (/\b(Kindle|Silk|Oasis|Experimental)\b/i.test(ua)) {
+          window.location.replace('legacy.html');
           return;
         }
       })();
     </script>
-    <div id="root"></div>
-    <noscript><p style="padding:1rem;font-family:system-ui,sans-serif;">OpenInk needs JavaScript. Please enable it or use a supported browser.</p></noscript>
+    <script type="module" src="/src/main.tsx"></script>
     <script>
       setTimeout(function() {
         var root = document.getElementById('root');
-        if (root && root.children.length === 0) {
-          root.innerHTML = '<div style="padding:1.5rem;font-family:system-ui,sans-serif;font-size:1rem;line-height:1.5;max-width:28em;margin:0 auto;"><h2 style="font-size:1.25rem;margin:0 0 0.75rem;">Unsupported browser</h2><p style="margin:0 0 0.5rem;">OpenInk does not run on this device or browser.</p><p style="margin:0;">Open this site on a phone or computer for the full app.</p></div>';
+        if (root && root.children.length === 0 && !/legacy\.html/.test(window.location.pathname)) {
+          root.innerHTML = '<p style="padding:1.5rem;font-family:system-ui,sans-serif;">Loading… If this persists, try <a href="legacy.html">legacy</a> or another browser.</p>';
         }
-      }, 8000);
+      }, 10000);
     </script>
-    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

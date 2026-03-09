@@ -891,3 +891,53 @@ html, body {
   margin: 0 0 var(--space);
   font-size: 1.1rem;
 }
+
+/* Flex gap fallbacks for Kindle / Chrome 75 (no flexbox gap support). Use margin between siblings; modern browsers get gap via @supports below. */
+.status-bar-left > * + *,
+.status-bar-center > * + *,
+.status-bar-right > * + *,
+.browser-actions > * + *,
+.reddit-search > * + *,
+.finance-right > * + *,
+.finance-actions > * + *,
+.weather-search > * + *,
+.weather-current > * + *,
+.weather-forecast li > * + *,
+.timer-presets > * + *,
+.timer-actions > * + *,
+.widget-actions > * + *,
+.dictionary-search > * + *,
+.comics-source-tabs > * + *,
+.racing-controls > * + * {
+  margin-left: var(--space);
+}
+.chess-mode-select > * + * { margin-left: var(--space); }
+.chess-mode-buttons > * + * { margin-top: var(--space); }
+.sudoku-numpad > * + * { margin-left: 6px; margin-top: 6px; }
+.racing-track > * + * { margin-top: 2px; }
+.racing-row > * + * { margin-left: 2px; }
+.calculator-app > * + * { margin-top: var(--space); }
+@supports (gap: 1px) {
+  .status-bar-left > * + *,
+  .status-bar-center > * + *,
+  .status-bar-right > * + *,
+  .browser-actions > * + *,
+  .reddit-search > * + *,
+  .finance-right > * + *,
+  .finance-actions > * + *,
+  .weather-search > * + *,
+  .weather-current > * + *,
+  .weather-forecast li > * + *,
+  .timer-presets > * + *,
+  .timer-actions > * + *,
+  .widget-actions > * + *,
+  .dictionary-search > * + *,
+  .comics-source-tabs > * + *,
+  .racing-controls > * + * { margin-left: 0; }
+  .chess-mode-select > * + * { margin-left: 0; }
+  .chess-mode-buttons > * + * { margin-top: 0; }
+  .sudoku-numpad > * + * { margin-left: 0; margin-top: 0; }
+  .racing-track > * + * { margin-top: 0; }
+  .racing-row > * + * { margin-left: 0; }
+  .calculator-app > * + * { margin-top: 0; }
+}

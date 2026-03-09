@@ -112,7 +112,7 @@ docs/                         # Documentation
 - If the app is served from a subpath (e.g. `/browserOS/`), set `base: '/browserOS/'` in `vite.config.ts` and rebuild.
 - The app uses the History API; the server must serve `index.html` for all routes (SPA fallback).
 - The e-ink demo is copied to `dist/demo/eink-demo.html`; open that URL on your deployed site to use it.
-- **Kindle / old browsers:** Kindle/Silk user agents see an “Unsupported browser” message immediately (no app load). The build also generates `dist/legacy.html` via `scripts/generate-legacy-html.mjs` (no `type="module"` scripts—only classic scripts). Deploy the full `dist/` including `legacy.html` so other old browsers can try it; on legacy, the same unsupported message appears for Kindle, and a 10s fallback appears if the app never renders.
+- **Kindle / old browsers:** Kindle, Silk, and Experimental user agents are redirected to `legacy.html`. That page loads the same app via the legacy bundle (SystemJS + polyfills, no `type="module"`). The legacy build targets Chrome 75 (plugin-legacy with `targets: ['chrome 75', ...]`), so optional chaining and nullish coalescing are transpiled. CSS includes flexbox `gap` fallbacks (margins) for browsers that don’t support flex gap. The build generates `dist/legacy.html` via `scripts/generate-legacy-html.mjs` after Vite build. Deploy the full `dist/` including `legacy.html`. For more e-ink constraints, see [ReKindle COMPATIBILITY.md](https://github.com/ReKindleOS/ReKindle/blob/main/COMPATIBILITY.md).
 
 ## Documentation
 
@@ -127,7 +127,7 @@ docs/                         # Documentation
 
 - **ESLint** – `eslint.config.js` with TypeScript and jsx-a11y; run with `npm run lint`.
 - **PWA** – [vite-plugin-pwa](https://vite-pwa-org.netlify.app/) generates a service worker (Workbox) for offline caching; registration in `main.tsx` (production only). Manifest: [public/manifest.json](public/manifest.json).
-- **Legacy build** – [@vitejs/plugin-legacy](https://github.com/vitejs/vite/tree/main/packages/plugin-legacy) emits a second bundle for browsers that don’t support ES modules (e.g. Kindle). Modern browsers load `type="module"` scripts; others load `nomodule` scripts (SystemJS + polyfills). Use `npm run build`; both bundles are in `dist/`.
+- **Legacy build** – [@vitejs/plugin-legacy](https://github.com/vitejs/vite/tree/main/packages/plugin-legacy) emits a second bundle for Chrome 75–level browsers (e.g. Kindle experimental). Kindles are redirected to `legacy.html`, which loads only the legacy scripts (polyfills + SystemJS). Modern browsers load `index.html` with `type="module"`; legacy gets the same app via `legacy.html`. Use `npm run build`; both bundles and `legacy.html` are in `dist/`.
 
 ## Possible improvements
 
