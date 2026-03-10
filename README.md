@@ -27,7 +27,8 @@ To regenerate all screenshots: run `npm run build` then `npm run screenshot` (or
 https://github.com/user-attachments/assets/1a1e025f-053a-4fa5-92ef-d9c765a25204
 
 
-*The lengthy black flicker mocks the E-Ink refresh.
+*This is an old mocked screen-recording - Update follows shortly.
+**The lengthy black flicker mocks the E-Ink refresh.
 
 
 ## Tech stack
