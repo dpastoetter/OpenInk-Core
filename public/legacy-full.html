@@ -48,7 +48,7 @@
     var root = document.getElementById('root');
     var fallbackMsg = "OpenInk did not start. Use a phone or computer, or go back to legacy.html (simple version).";
     window.__openinkFallback = function(msg) { setFallback(root, msg || fallbackMsg); };
-    window.onerror = function() { try { setFallback(root, 'OpenInk could not start.'); } catch(x) {} return true; };
+    window.onerror = function() { try { setFallback(root, (window.__openinkError && String(window.__openinkError)) || 'OpenInk could not start.'); } catch(x) {} return true; };
     var t = setTimeout(function(){
       if (window.__openinkMounted) return;
       var r = document.getElementById('root');
