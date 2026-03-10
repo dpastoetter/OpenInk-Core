@@ -1,11 +1,12 @@
 /**
  * Builds a single IIFE bundle for Kindle/legacy (no SystemJS, no polyfill).
- * One script tag = one file; works on browsers that fail on System.import or ES modules.
+ * Transpiled to ES5 via Babel so old engines (e.g. Kindle Silk) can parse and run it.
  */
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 import preact from '@preact/preset-vite';
+import babel from '@rollup/plugin-babel';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -29,12 +30,28 @@ export default defineConfig({
     emptyOutDir: false,
     outDir: 'dist',
     lib: {
-      entry: path.resolve(__dirname, 'src/main.tsx'),
+      entry: path.resolve(__dirname, 'src/legacy-entry.ts'),
       name: 'OpenInk',
       formats: ['iife'],
       fileName: () => 'assets/openink-legacy-single.js',
     },
     rollupOptions: {
+      plugins: [
+        babel({
+          babelHelpers: 'bundled',
+          extensions: ['.js', '.jsx', '.ts', '.tsx'],
+          exclude: /node_modules/,
+          presets: [
+            [
+              '@babel/preset-env',
+              {
+                targets: { chrome: 44 },
+                modules: false,
+              },
+            ],
+          ],
+        }),
+      ],
       output: {
         inlineDynamicImports: true,
         assetFileNames: 'assets/openink-legacy-single.[ext]',
