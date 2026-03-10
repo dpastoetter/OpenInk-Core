@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" class="legacy-browser">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#ffffff">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<link rel="icon" type="image/svg+xml" href="/openink-logo.svg">
+<title>OpenInk (full app)</title>
+<style>body{margin:0;padding:0;height:100vh;width:100vw;overflow:hidden;background:#e5e5e5;color:#000;font-family:Geneva,Verdana,sans-serif;display:flex;align-items:center;justify-content:center;position:fixed;inset:0;box-sizing:border-box}#root{display:block !important;visibility:visible !important;opacity:1 !important;background:#fff;border:2px solid #000;box-shadow:4px 4px 0 #000;width:95%;max-width:600px;min-height:200px;flex-shrink:0}</style>
+</head>
+<body class="legacy-browser">
+<div id="root"><div style="padding:1.5rem;font-family:Arial,Verdana,sans-serif;max-width:28em;margin:0 auto;"><img src="/openink-logo.svg" alt="" width="40" height="40" style="display:block;margin:0 auto 0.5rem;vertical-align:middle"><h1 style="font-size:1.35rem;margin:0 0 0.5rem;">OpenInk</h1><p style="margin:0 0 0.75rem;font-size:0.9rem;color:#666;">Loading full app...</p><p style="margin:0 0 0.5rem;font-size:0.85rem;color:#555;">If you use <strong>npm run dev</strong>, the app script is not built; use <strong>npm run build</strong> then <strong>npm run preview</strong> to test the full app.</p><p style="margin:0 0 0.5rem;color:#555;">If nothing loads, go back to <a href="legacy.html" style="color:#333;text-decoration:underline;">legacy.html</a> (simple version).</p><p style="margin:0;"><a href="#" onclick="location.reload();return false;" style="color:#333;text-decoration:underline;">Try again</a></p></div></div>
+<noscript><p style="padding:1rem;font-family:Arial,Verdana,sans-serif;">OpenInk needs JavaScript. Use <a href="legacy.html">legacy.html</a> for the simple version.</p></noscript>
+<script>
+(function(){
+  function setFallback(root, msg) {
+    if (!root) return;
+    root.style.display = 'block';
+    root.style.visibility = 'visible';
+    root.style.opacity = '1';
+    try {
+      root.textContent = '';
+      var p = document.createElement('p');
+      p.style.cssText = 'padding:1.5rem;font-family:Arial,Verdana,sans-serif;margin:0;';
+      p.appendChild(document.createTextNode(msg));
+      p.appendChild(document.createTextNode(' '));
+      var back = document.createElement('a');
+      back.href = 'legacy.html';
+      back.textContent = 'Back to simple version';
+      back.style.color = '#333';
+      back.style.textDecoration = 'underline';
+      p.appendChild(back);
+      p.appendChild(document.createTextNode(' '));
+      var tryAgain = document.createElement('a');
+      tryAgain.href = '#';
+      tryAgain.textContent = 'Try again';
+      tryAgain.style.color = '#333';
+      tryAgain.style.textDecoration = 'underline';
+      tryAgain.onclick = function() { location.reload(); return false; };
+      p.appendChild(tryAgain);
+      root.appendChild(p);
+    } catch (e) {
+      root.innerHTML = '<p style="padding:1.5rem;font-family:Arial,Verdana,sans-serif;margin:0;">' + msg + ' <a href="legacy.html" style="color:#333;text-decoration:underline;">Back to simple</a> <a href="#" onclick="location.reload();return false;">Try again</a></p>';
+    }
+  }
+  try {
+    var root = document.getElementById('root');
+    var fallbackMsg = "OpenInk did not start. Use a phone or computer, or go back to legacy.html (simple version).";
+    window.__openinkFallback = function(msg) { setFallback(root, msg || fallbackMsg); };
+    window.onerror = function() { try { setFallback(root, 'OpenInk could not start.'); } catch(x) {} return true; };
+    var t = setTimeout(function(){
+      if (window.__openinkMounted) return;
+      var r = document.getElementById('root');
+      if (r) setFallback(r, fallbackMsg);
+    }, 8000);
+    window.__openinkFallbackTimer = t;
+  } catch(e) {}
+})();
+</script>
+<script>
+(function(){
+  var fallbackShown = false;
+  function showFallback(msg) {
+    if (fallbackShown) return;
+    fallbackShown = true;
+    if (window.__openinkFallback) window.__openinkFallback(msg);
+  }
+  try {
+    var s = document.createElement('script');
+    s.src = '/assets/openink-legacy-single.js';
+    s.async = false;
+    s.onerror = function() { showFallback('Could not load app. (Use npm run build then npm run preview to test the full app.)'); };
+    s.onload = function() { if (!window.__openinkMounted) setTimeout(function(){ if (!window.__openinkMounted) showFallback('App script loaded but did not start.'); }, 3000); };
+    document.body.appendChild(s);
+    setTimeout(function() {
+      if (!window.__openinkMounted) showFallback('App did not start. (Use npm run build then npm run preview to test the full app.)');
+    }, 4000);
+  } catch(e) { showFallback('Could not load app.'); }
+})();
+</script>
+<link rel="stylesheet" href="/assets/index-DLyQAD1A.css" crossorigin="anonymous">
+</body>
+</html>

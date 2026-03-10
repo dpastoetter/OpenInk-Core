@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" class="legacy-browser">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#ffffff">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<link rel="icon" type="image/svg+xml" href="/openink-logo.svg">
+<title>OpenInk</title>
+<style>body{margin:0;padding:0;height:100vh;width:100vw;overflow:hidden;background:#e5e5e5;color:#000;font-family:Geneva,Verdana,sans-serif;display:flex;align-items:center;justify-content:center;position:fixed;inset:0;box-sizing:border-box}#root{background:#fff;border:2px solid #000;box-shadow:4px 4px 0 #000;width:95%;max-width:600px;min-height:200px;padding:1.5rem;box-sizing:border-box;flex-shrink:0}.mcalc input,.mcalc button{font-size:1rem;padding:0.5rem;margin:0.25rem}</style>
+</head>
+<body class="legacy-browser">
+<div id="root">
+<h1 style="font-size:1.35rem;margin:0 0 0.5rem;">OpenInk</h1>
+<p style="margin:0 0 1rem;color:#666;">Simple version — no full app. Works on Kindle and old browsers.</p>
+<div class="mcalc">
+<input type="text" id="mcalc-a" value="0" size="6" aria-label="First number"> +
+<input type="text" id="mcalc-b" value="0" size="6" aria-label="Second number"> =
+<output id="mcalc-out" style="margin-left:0.25rem;">0</output>
+<button type="button" onclick="var a=document.getElementById('mcalc-a');var b=document.getElementById('mcalc-b');var o=document.getElementById('mcalc-out');var x=parseFloat(a.value)||0;var y=parseFloat(b.value)||0;o.textContent=x+y;">Add</button>
+</div>
+<p style="margin:1.5rem 0 0.5rem;"><a href="legacy-full.html" style="color:#333;text-decoration:underline;">Try full app (legacy-full.html)</a></p>
+<p style="margin:0;"><a href="legacy-static.html" style="color:#333;text-decoration:underline;">Static page (no JS)</a></p>
+</div>
+</body>
+</html>

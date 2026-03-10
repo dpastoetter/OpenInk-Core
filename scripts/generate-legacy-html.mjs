@@ -9,7 +9,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const distDir = path.join(__dirname, '..', 'dist');
+const rootDir = path.join(__dirname, '..');
+const distDir = path.join(rootDir, 'dist');
+const publicDir = path.join(rootDir, 'public');
 const indexPath = path.join(distDir, 'index.html');
 
 const singleLegacyPath = path.join(distDir, 'assets', 'openink-legacy-single.js');
@@ -43,10 +45,10 @@ const FALLBACK_MSG =
 const TRY_AGAIN =
   '<a href="#" onclick="location.reload();return false;" style="color:#333;text-decoration:underline;">Try again</a>';
 
-// ReKindle-aligned: gray body, white "window" (#root).
+// ReKindle-aligned: body = desktop (height 100vh, overflow hidden, flex center); #root = window (COMPATIBILITY.md).
 const criticalStyle = [
-  'body{margin:0;background:#e5e5e5;color:#000;min-height:100vh;font-family:Geneva,Verdana,sans-serif;display:flex;align-items:center;justify-content:center}',
-  '#root{background:#fff;border:2px solid #000;box-shadow:4px 4px 0 #000;width:95%;max-width:600px;min-height:200px;padding:1.5rem;box-sizing:border-box}',
+  'body{margin:0;padding:0;height:100vh;width:100vw;overflow:hidden;background:#e5e5e5;color:#000;font-family:Geneva,Verdana,sans-serif;display:flex;align-items:center;justify-content:center;position:fixed;inset:0;box-sizing:border-box}',
+  '#root{background:#fff;border:2px solid #000;box-shadow:4px 4px 0 #000;width:95%;max-width:600px;min-height:200px;padding:1.5rem;box-sizing:border-box;flex-shrink:0}',
   '.mcalc input,.mcalc button{font-size:1rem;padding:0.5rem;margin:0.25rem}',
 ].join('');
 
@@ -80,13 +82,16 @@ const legacyMinimalContent = `<!DOCTYPE html>
 `;
 
 fs.writeFileSync(path.join(distDir, 'legacy.html'), legacyMinimalContent);
+if (fs.existsSync(publicDir)) {
+  fs.writeFileSync(path.join(publicDir, 'legacy.html'), legacyMinimalContent);
+}
 
 // --- legacy-full.html: tries to load the full app (async). Fallback links back to legacy.html ---
 const fullCriticalStyle = [
-  'body{margin:0;background:#e5e5e5;color:#000;min-height:100vh;font-family:Geneva,Verdana,sans-serif;image-rendering:pixelated;overflow:hidden;display:flex;align-items:center;justify-content:center}',
-  '#root{display:block !important;visibility:visible !important;opacity:1 !important;background:#fff;border:2px solid #000;box-shadow:4px 4px 0 #000;width:95%;max-width:600px;min-height:200px}',
+  'body{margin:0;padding:0;height:100vh;width:100vw;overflow:hidden;background:#e5e5e5;color:#000;font-family:Geneva,Verdana,sans-serif;display:flex;align-items:center;justify-content:center;position:fixed;inset:0;box-sizing:border-box}',
+  '#root{display:block !important;visibility:visible !important;opacity:1 !important;background:#fff;border:2px solid #000;box-shadow:4px 4px 0 #000;width:95%;max-width:600px;min-height:200px;flex-shrink:0}',
 ].join('');
-const fullInitialContent = `<div style="padding:1.5rem;font-family:Arial,Verdana,sans-serif;max-width:28em;margin:0 auto;"><img src="/openink-logo.svg" alt="" width="40" height="40" style="display:block;margin:0 auto 0.5rem;vertical-align:middle"><h1 style="font-size:1.35rem;margin:0 0 0.5rem;">OpenInk</h1><p style="margin:0 0 0.75rem;font-size:0.9rem;color:#666;">Loading full app...</p><p style="margin:0 0 0.5rem;color:#555;">If nothing loads, go back to <a href="legacy.html" style="color:#333;text-decoration:underline;">legacy.html</a> (simple version).</p><p style="margin:0;">${TRY_AGAIN}</p></div>`;
+const fullInitialContent = `<div style="padding:1.5rem;font-family:Arial,Verdana,sans-serif;max-width:28em;margin:0 auto;"><img src="/openink-logo.svg" alt="" width="40" height="40" style="display:block;margin:0 auto 0.5rem;vertical-align:middle"><h1 style="font-size:1.35rem;margin:0 0 0.5rem;">OpenInk</h1><p style="margin:0 0 0.75rem;font-size:0.9rem;color:#666;">Loading full app...</p><p style="margin:0 0 0.5rem;font-size:0.85rem;color:#555;">If you use <strong>npm run dev</strong>, the app script is not built; use <strong>npm run build</strong> then <strong>npm run preview</strong> to test the full app.</p><p style="margin:0 0 0.5rem;color:#555;">If nothing loads, go back to <a href="legacy.html" style="color:#333;text-decoration:underline;">legacy.html</a> (simple version).</p><p style="margin:0;">${TRY_AGAIN}</p></div>`;
 
 const legacyFullHtml = `<!DOCTYPE html>
 <html lang="en" class="legacy-browser">
@@ -151,13 +156,23 @@ const legacyFullHtml = `<!DOCTYPE html>
 ${useSingleScript
   ? `<script>
 (function(){
+  var fallbackShown = false;
+  function showFallback(msg) {
+    if (fallbackShown) return;
+    fallbackShown = true;
+    if (window.__openinkFallback) window.__openinkFallback(msg);
+  }
   try {
     var s = document.createElement('script');
     s.src = '/assets/openink-legacy-single.js';
     s.async = false;
-    s.onerror = function() { if (window.__openinkFallback) window.__openinkFallback('Could not load app.'); };
+    s.onerror = function() { showFallback('Could not load app. (Use npm run build then npm run preview to test the full app.)'); };
+    s.onload = function() { if (!window.__openinkMounted) setTimeout(function(){ if (!window.__openinkMounted) showFallback('App script loaded but did not start.'); }, 3000); };
     document.body.appendChild(s);
-  } catch(e) { if (window.__openinkFallback) window.__openinkFallback('Could not load app.'); }
+    setTimeout(function() {
+      if (!window.__openinkMounted) showFallback('App did not start. (Use npm run build then npm run preview to test the full app.)');
+    }, 4000);
+  } catch(e) { showFallback('Could not load app.'); }
 })();
 </script>`
   : polyfillSrc && entrySrc ? `<script src="${polyfillSrc}" crossorigin="anonymous"></script>
@@ -197,6 +212,9 @@ ${useSingleScript
 `;
 
 fs.writeFileSync(path.join(distDir, 'legacy-full.html'), legacyFullHtml);
+if (fs.existsSync(publicDir)) {
+  fs.writeFileSync(path.join(publicDir, 'legacy-full.html'), legacyFullHtml);
+}
 
 // Static page: no JS at all.
 const staticHtml = `<!DOCTYPE html>
@@ -218,8 +236,15 @@ const staticHtml = `<!DOCTYPE html>
 `;
 
 fs.writeFileSync(path.join(distDir, 'legacy-static.html'), staticHtml);
+if (fs.existsSync(publicDir)) {
+  fs.writeFileSync(path.join(publicDir, 'legacy-static.html'), staticHtml);
+}
 
 // legacy-minimal.html = same as legacy.html (for bookmarks)
 fs.writeFileSync(path.join(distDir, 'legacy-minimal.html'), legacyMinimalContent);
+if (fs.existsSync(publicDir)) {
+  fs.writeFileSync(path.join(publicDir, 'legacy-minimal.html'), legacyMinimalContent);
+}
 
 console.log('Generated dist/legacy.html (simple, no bundle), dist/legacy-full.html (full app), dist/legacy-static.html, dist/legacy-minimal.html');
+if (fs.existsSync(publicDir)) console.log('Also written to public/ for dev server.');
