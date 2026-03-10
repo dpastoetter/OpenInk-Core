@@ -207,18 +207,23 @@ html, body {
 
 .status-bar .btn-status-zoom,
 .status-bar .btn-status-theme {
-  padding: 6px;
-  min-width: 34px;
-  min-height: 34px;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  font-size: 1.25rem;
+  line-height: 1;
+  box-sizing: border-box;
 }
 
 .status-bar-bulb {
   display: block;
-  width: 1em;
-  height: 1em;
+  width: 1.25rem;
+  height: 1.25rem;
   flex-shrink: 0;
 }
 
@@ -236,9 +241,12 @@ html, body {
   filter: brightness(1.15);
 }
 
-/* Home screen – touch-friendly grid for small Kindle */
+/* Home screen – touch-friendly grid for small Kindle; centered on all pages */
 .home-screen {
   padding: var(--space);
+  max-width: min(100%, 28rem);
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .home-title {
@@ -388,10 +396,17 @@ html, body {
   flex: 1;
   display: flex;
   flex-direction: column;
+  align-items: center;
   overflow: auto;
   padding: calc(var(--space) * 1.25);
   min-height: 0;
   contain: layout style;
+}
+
+.app-content > * {
+  max-width: min(100%, 28rem);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Buttons */
@@ -1075,23 +1090,40 @@ html.legacy-browser body {
   image-rendering: pixelated; /* ReKindle: crisp edges on e-ink */
 }
 
-/* Legacy (Kindle) normal theme: higher contrast for e-ink readability. Does not override highContrast theme. */
+/* Legacy (Kindle) normal theme: maximum contrast for e-ink. Does not override highContrast theme. */
 html.legacy-browser[data-appearance="light"]:not([data-theme="highContrast"]) {
-  --fg: #0a0a0a;
-  --muted: #333333;
-  --border: #1a1a1a;
-  --accent: #1a1a1a;
-  --header-fg: #0a0a0a;
-  --header-border: #1a1a1a;
+  --fg: #000000;
+  --muted: #1a1a1a;
+  --border: #000000;
+  --accent: #000000;
+  --surface: #ffffff;
+  --header-bg: #ffffff;
+  --header-fg: #000000;
+  --header-border: #000000;
 }
 html.legacy-browser[data-appearance="dark"]:not([data-theme="highContrast"]) {
-  --fg: #f5f5f5;
-  --muted: #b0b0b0;
-  --border: #555555;
-  --accent: #c0c0c0;
-  --surface: #252525;
-  --header-fg: #f5f5f5;
-  --header-border: #555555;
+  --fg: #ffffff;
+  --muted: #cccccc;
+  --border: #666666;
+  --accent: #e0e0e0;
+  --surface: #1a1a1a;
+  --header-bg: #1a1a1a;
+  --header-fg: #ffffff;
+  --header-border: #666666;
+}
+
+/* Legacy: thicker borders and lines for e-ink visibility */
+html.legacy-browser .btn,
+html.legacy-browser .app-tile,
+html.legacy-browser .panel,
+html.legacy-browser input,
+html.legacy-browser select,
+html.legacy-browser textarea {
+  border-width: 1.5px;
+}
+html.legacy-browser .status-bar,
+html.legacy-browser .app-header {
+  border-bottom-width: 1.5px;
 }
 
 /* Legacy: no CSS Grid (Chrome 44). Use flex so app tiles don’t span full width. */

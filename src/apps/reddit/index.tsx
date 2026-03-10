@@ -40,6 +40,13 @@ const DEFAULT_SUBS = ['books', 'cryptocurrencies', 'popular', 'technology', 'wal
 
 const POSTS_PER_PAGE = 10;
 
+function scrollAppContentToTop() {
+  try {
+    const el = document.querySelector('.app-content') as HTMLElement | null;
+    if (el) el.scrollTo(0, 0);
+  } catch (_) {}
+}
+
 /** Reddit API comment node (children may include "more" placeholders without body). */
 interface RedditCommentNode {
   data?: {
@@ -223,7 +230,7 @@ function RedditApp(context: AppContext): AppInstance {
             </li>
           ))}
         </ul>
-        <PageNav current={listPage} total={totalPages} onPrev={() => setListPage((p) => Math.max(1, p - 1))} onNext={() => setListPage((p) => Math.min(totalPages, p + 1))} />
+        <PageNav current={listPage} total={totalPages} onPrev={() => { setListPage((p) => Math.max(1, p - 1)); scrollAppContentToTop(); }} onNext={() => { setListPage((p) => Math.min(totalPages, p + 1)); scrollAppContentToTop(); }} />
       </div>
     );
   }
