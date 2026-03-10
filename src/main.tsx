@@ -58,7 +58,11 @@ async function init() {
     ]);
     renderShell(root);
   } catch {
-    setRootFallback(root, LOAD_ERROR_MESSAGE);
+    // Signal mounted so legacy-full.html doesn't overwrite with "OpenInk did not start" (e.g. Kindle).
+    if (typeof window !== 'undefined') (window as unknown as { __openinkMounted?: boolean }).__openinkMounted = true;
+    const win = typeof window !== 'undefined' ? (window as unknown as { __openinkFallback?: (msg: string) => void }) : null;
+    if (win?.__openinkFallback) win.__openinkFallback(LOAD_ERROR_MESSAGE);
+    else setRootFallback(root, LOAD_ERROR_MESSAGE);
   }
 }
 

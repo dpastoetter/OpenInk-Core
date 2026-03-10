@@ -53,7 +53,7 @@
       if (window.__openinkMounted) return;
       var r = document.getElementById('root');
       if (r) setFallback(r, fallbackMsg);
-    }, 8000);
+    }, 14000);
     window.__openinkFallbackTimer = t;
   } catch(e) {}
 })();
@@ -68,14 +68,14 @@
   }
   try {
     var s = document.createElement('script');
-    s.src = '/assets/openink-legacy-single.js';
+    s.src = 'assets/openink-legacy-single.js';
     s.async = false;
     s.onerror = function() { showFallback('Could not load app. (Use npm run build then npm run preview to test the full app.)'); };
-    s.onload = function() { if (!window.__openinkMounted) setTimeout(function(){ if (!window.__openinkMounted) showFallback('App script loaded but did not start.'); }, 3000); };
+    s.onload = function() { if (!window.__openinkMounted) setTimeout(function(){ if (!window.__openinkMounted) showFallback('App script loaded but did not start.'); }, 5000); };
     document.body.appendChild(s);
     setTimeout(function() {
       if (!window.__openinkMounted) showFallback('App did not start. (Use npm run build then npm run preview to test the full app.)');
-    }, 4000);
+    }, 12000);
   } catch(e) { showFallback('Could not load app.'); }
 })();
 </script>
