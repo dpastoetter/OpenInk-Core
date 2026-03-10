@@ -1,4 +1,5 @@
 # Serve legacy pages as files (must appear before any SPA catch-all like /* /index.html 200)
 /legacy.html          /legacy.html          200
+/legacy-full.html     /legacy-full.html     200
 /legacy-static.html   /legacy-static.html   200
 /legacy-minimal.html  /legacy-minimal.html  200

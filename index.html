@@ -5,7 +5,7 @@
     <script>
       (function() {
         var path = window.location.pathname || '';
-        if (/legacy(-static)?\.html$/i.test(path)) {
+        if (/legacy(-static|-full|-minimal)?\.html$/i.test(path)) {
           return;
         }
         var ua = (typeof navigator !== 'undefined' && navigator.userAgent) ? navigator.userAgent : '';
@@ -32,7 +32,7 @@
     <script>
       (function() {
         var path = (window.location.pathname || '');
-        if (/legacy(-static)?\.html$/i.test(path)) {
+        if (/legacy(-static|-full|-minimal)?\.html$/i.test(path)) {
           var root = document.getElementById('root');
           if (root) {
             root.innerHTML = '<p style="padding:1.5rem;font-family:Arial,Verdana,sans-serif;max-width:28em;">You opened a legacy URL but the server returned the main app instead of the legacy page. Deploy the full <code>dist/</code> folder and ensure your host serves <code>legacy.html</code> and <code>legacy-static.html</code> as static files (do not rewrite them to index.html). See docs/KINDLE-COMPATIBILITY.md.</p>';
@@ -45,7 +45,7 @@
     <script>
       setTimeout(function() {
         var root = document.getElementById('root');
-        if (root && root.children.length === 0 && !/legacy\.html/.test(window.location.pathname)) {
+        if (root && root.children.length === 0 && !/legacy(-static|-full|-minimal)?\.html/.test(window.location.pathname)) {
           root.innerHTML = '<p style="padding:1.5rem;font-family:system-ui,sans-serif;">Loading… If this persists, try <a href="legacy.html">legacy</a> or another browser.</p>';
         }
       }, 10000);

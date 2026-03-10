@@ -1,25 +1,23 @@
 # Kindle / E-ink browser compatibility
 
-OpenInk follows [ReKindle COMPATIBILITY.md](https://github.com/ReKindleOS/ReKindle/blob/main/COMPATIBILITY.md) for the legacy build (Kindle, Kobo, and other e-ink browsers). The legacy bundle is loaded when the user is redirected to `legacy.html` (see [DEVELOPMENT.md](DEVELOPMENT.md)).
+OpenInk follows [ReKindle COMPATIBILITY.md](https://github.com/ReKindleOS/ReKindle/blob/main/COMPATIBILITY.md) for the legacy build (Kindle, Kobo, and other e-ink browsers). The main site redirects Kindle/no-ESM to **legacy.html** (see [DEVELOPMENT.md](DEVELOPMENT.md)).
 
-## Legacy loader (legacy.html)
+## Radical split: legacy.html = simple only (no full app)
 
-- **ReKindle-aligned first paint:** Critical inline `<style>` makes the page match ReKindle from first paint: body is desktop gray (`#e5e5e5`), centered with flex, `image-rendering: pixelated`, `overflow: hidden`; `#root` is the "window" (white, 2px black border, 4px 4px 0 black shadow, max-width 600px). Fonts: Geneva, Verdana, sans-serif. No CSP on legacy (old WebKit can mis-handle it). Main stylesheet loads at the end of body so first paint does not depend on it.
-- **Fallback/error via DOM:** When the app does not load or a script throws, the loader shows a message using `createElement` and `createTextNode` (no `innerHTML` for the message text) so old WebKit that mishandles `innerHTML` still shows the "Try again" text. If `appendChild` fails, it falls back to one safe `innerHTML` string.
-- **Single-file legacy (preferred):** The build produces a single IIFE bundle (`openink-legacy-single.js`) with no SystemJS, transpiled to ES5 via Babel. `legacy.html` **loads this script asynchronously** (injected after the first paint) so the "Loading app..." content and 8s fallback timer always run even if the bundle fails to load or parse. If the app never mounts, the fallback shows a "Simple version" link to `legacy-minimal.html`.
-- **legacy-minimal.html:** No external scripts. Same ReKindle-style frame, a tiny inline calculator, and links to legacy.html and legacy-static.html. Use when the full app never loads on the device (e.g. Kindle); guaranteed to show content.
-- **Mounted flag:** After the app renders, it sets `window.__openinkMounted = true`. The fallback timer (8s) does not clear until the app mounts.
-- **8s timeout fallback:** If the app has not mounted within 8 seconds, the loader replaces the content with a message, "Try again", and "Simple version (no full app)" linking to `legacy-minimal.html`.
-- **Startup timeout:** In the app, `settings.load()` is raced with a 5s timeout so slow or hanging localStorage (e.g. on Kindle) does not block the first render.
+- **legacy.html** is the default legacy page. It **does not load the full app**. Zero external scripts: only inline HTML, inline CSS, and one inline `onclick` (calculator). **Guaranteed to render on Kindle.** Contains: ReKindle-style frame (gray body, white box), title "OpenInk", small calculator (Add), link to "Try full app (legacy-full.html)", link to "Static page (legacy-static.html)".
+- **legacy-full.html** is where the full app is attempted: async load of `openink-legacy-single.js`, 8s fallback, "Back to simple version" (legacy.html). Use this URL only if you want to try the full app on a device that might support it; if it fails, open legacy.html again.
+- **legacy-minimal.html** is identical to legacy.html (for existing bookmarks).
+- **legacy-static.html** has no JavaScript; use to confirm the server is serving files.
+- **Redirect:** The main index redirects to `legacy.html`, so Kindle users always land on the simple page that works. They can then tap "Try full app" to open legacy-full.html.
 
 ## If the Kindle shows a blank screen or legacy-static forwards to legacy
 
 1. **You opened legacy-static.html but were sent to legacy.html:** That means your host is serving `index.html` for every URL (SPA fallback). The app now skips redirecting when the URL is already `legacy.html` or `legacy-static.html`, so you should see a short message instead of being forwarded. To actually serve the legacy pages:
-   - **Deploy the full `dist/`** so `legacy.html`, `legacy-static.html`, and `legacy-minimal.html` exist.
-   - **Netlify:** The repo includes `public/_redirects` so `/legacy.html`, `/legacy-static.html`, and `/legacy-minimal.html` are served as files. If you add a catch-all (e.g. `/* /index.html 200`), put it *after* those two lines.
+   - **Deploy the full `dist/`** so `legacy.html`, `legacy-full.html`, `legacy-static.html`, and `legacy-minimal.html` exist.
+   - **Netlify:** The repo includes `public/_redirects` so all four legacy HTML files are served as files. If you add a catch-all (e.g. `/* /index.html 200`), put it *after* those two lines.
    - **Other hosts (Vercel, etc.):** Configure rewrites so `legacy.html` and `legacy-static.html` are not rewritten to `index.html`.
    - **GitHub Pages:** Deploy the whole `dist/` folder; by default each file is served, so no extra config unless you use a custom 404 that serves index.
-2. **Confirm the right file is served:** Open `legacy-static.html`; you should see "OpenInk" and "This page does not use JavaScript". Then try `legacy.html` for the full app. If the app never loads, open **legacy-minimal.html** for a simple page (no external scripts) that works on very old browsers.
+2. **Confirm the right file is served:** Open `legacy-static.html`; you should see "OpenInk" and "This page does not use JavaScript". Open **legacy.html** for the simple version (calculator; always works). To try the full app, open **legacy-full.html**.
 3. **Base path:** If you deploy under a subpath (e.g. `https://user.github.io/OpenInk-WebOS/`), set `base: '/OpenInk-WebOS/'` in `vite.config.ts` before building so script and style URLs in legacy.html resolve correctly.
 
 ## What we do
