@@ -38,8 +38,11 @@ const TRY_AGAIN =
 // All visible content uses inline styles so nothing depends on external CSS for first paint.
 const initialContent = `<div style="padding:1.5rem;font-family:Arial,Verdana,sans-serif;max-width:28em;margin:0 auto;"><h1 style="font-size:1.35rem;margin:0 0 0.5rem;">OpenInk</h1><p style="margin:0 0 0.75rem;font-size:0.9rem;color:#666;">Loading app...</p><p style="margin:0 0 0.5rem;font-size:0.85rem;color:#888;">Bookmark this page (legacy.html) on your Kindle for next time.</p><p style="margin:0 0 1rem;color:#555;">If nothing loads, use a phone or computer for the full app.</p><ul style="margin:0 0 1rem;padding-left:1.25rem;"><li>Calculator</li><li>Weather</li><li>News</li><li>Timer</li><li>Settings</li><li>Games</li></ul><p style="margin:0;">${TRY_AGAIN}</p></div>`;
 
-// Critical: ensure body and #root are visible even if external CSS never loads (Kindle/old WebKit).
-const criticalStyle = `body{margin:0;background:#fff;color:#000;min-height:100vh;font-family:Arial,Verdana,sans-serif}#root{display:block !important;visibility:visible !important;opacity:1 !important}#legacy-canary{margin:0;padding:0.5rem 1rem;font-size:14px;background:#fff;color:#000;border-bottom:1px solid #ccc}`;
+// ReKindle-aligned critical style: desktop gray body, centered "window" (#root), pixelated, no overflow scroll.
+const criticalStyle = [
+  'body{margin:0;background:#e5e5e5;color:#000;min-height:100vh;font-family:Geneva,Verdana,sans-serif;image-rendering:pixelated;overflow:hidden;display:flex;align-items:center;justify-content:center}',
+  '#root{display:block !important;visibility:visible !important;opacity:1 !important;background:#fff;border:2px solid #000;box-shadow:4px 4px 0 #000;width:95%;max-width:600px;min-height:200px}',
+].join('');
 
 const legacyHtml = `<!DOCTYPE html>
 <html lang="en" class="legacy-browser">
@@ -51,31 +54,43 @@ const legacyHtml = `<!DOCTYPE html>
 <title>OpenInk</title>
 <style>${criticalStyle}</style>
 </head>
-<body>
-<p id="legacy-canary">OpenInk</p>
+<body class="legacy-browser">
 <div id="root">${initialContent}</div>
 <noscript><p style="padding:1rem;font-family:Arial,Verdana,sans-serif;">OpenInk needs JavaScript.</p></noscript>
 <script>
 (function(){
+  function setFallback(root, msg) {
+    if (!root) return;
+    root.style.display = 'block';
+    root.style.visibility = 'visible';
+    root.style.opacity = '1';
+    try {
+      root.textContent = '';
+      var p = document.createElement('p');
+      p.style.cssText = 'padding:1.5rem;font-family:Arial,Verdana,sans-serif;margin:0;';
+      p.appendChild(document.createTextNode(msg));
+      p.appendChild(document.createTextNode(' '));
+      var a = document.createElement('a');
+      a.href = '#';
+      a.textContent = 'Try again';
+      a.style.color = '#333';
+      a.style.textDecoration = 'underline';
+      a.onclick = function() { location.reload(); return false; };
+      p.appendChild(a);
+      root.appendChild(p);
+    } catch (e) {
+      root.innerHTML = '<p style="padding:1.5rem;font-family:Arial,Verdana,sans-serif;margin:0;">' + msg + ' <a href="#" onclick="location.reload();return false;">Try again</a></p>';
+    }
+  }
   try {
     var root = document.getElementById('root');
     var fallbackMsg = ${JSON.stringify(FALLBACK_MSG)};
-    var tryAgain = ${JSON.stringify(TRY_AGAIN)};
-    function showFallback(msg){
-      if (!root) return;
-      root.style.display = 'block';
-      root.style.visibility = 'visible';
-      root.style.opacity = '1';
-      root.innerHTML = '<p style="padding:1.5rem;font-family:Arial,Verdana,sans-serif;margin:0;">' + msg + ' ' + tryAgain + '</p>';
-    }
-    window.__openinkFallback = showFallback;
-    window.onerror = function(){ try { showFallback('OpenInk could not start.'); } catch(e) {} return true; };
+    window.__openinkFallback = function(msg) { setFallback(root, msg || fallbackMsg); };
+    window.onerror = function() { try { setFallback(root, 'OpenInk could not start.'); } catch(x) {} return true; };
     var t = setTimeout(function(){
       if (window.__openinkMounted) return;
-      try {
-        var r = document.getElementById('root');
-        if (r) showFallback(fallbackMsg);
-      } catch(e) {}
+      var r = document.getElementById('root');
+      if (r) setFallback(r, fallbackMsg);
     }, 12000);
     window.__openinkFallbackTimer = t;
   } catch(e) {}
@@ -84,36 +99,44 @@ const legacyHtml = `<!DOCTYPE html>
 <script src="${polyfillSrc}" crossorigin="anonymous"></script>
 <script>
 (function(){
+  function setFallback(root, msg) {
+    if (!root) return;
+    root.style.display = 'block';
+    root.style.visibility = 'visible';
+    root.style.opacity = '1';
+    try {
+      root.textContent = '';
+      var p = document.createElement('p');
+      p.style.cssText = 'padding:1.5rem;font-family:Arial,Verdana,sans-serif;margin:0;';
+      p.appendChild(document.createTextNode(msg));
+      p.appendChild(document.createTextNode(' '));
+      var a = document.createElement('a');
+      a.href = '#';
+      a.textContent = 'Try again';
+      a.style.color = '#333';
+      a.style.textDecoration = 'underline';
+      a.onclick = function() { location.reload(); return false; };
+      p.appendChild(a);
+      root.appendChild(p);
+    } catch (e) {
+      root.innerHTML = '<p style="padding:1.5rem;font-family:Arial,Verdana,sans-serif;margin:0;">' + msg + ' <a href="#" onclick="location.reload();return false;">Try again</a></p>';
+    }
+  }
   try {
     var root = document.getElementById('root');
     var entrySrc = ${JSON.stringify(entrySrc)};
-    var tryAgain = ${JSON.stringify(TRY_AGAIN)};
-    function showErr(msg){
-      if (!root) return;
-      root.style.display = 'block';
-      root.style.visibility = 'visible';
-      root.style.opacity = '1';
-      root.innerHTML = '<p style="padding:1.5rem;font-family:Arial,Verdana,sans-serif;margin:0;">' + msg + ' ' + tryAgain + '</p>';
-    }
     if (typeof System === 'undefined') {
-      showErr('OpenInk could not load (missing polyfill).');
+      setFallback(root, 'OpenInk could not load (missing polyfill).');
       return;
     }
     System.import(entrySrc).then(function(){
       if (window.__openinkFallbackTimer) clearTimeout(window.__openinkFallbackTimer);
     }).catch(function(){
-      showErr('OpenInk could not load. Use a phone or computer.');
+      setFallback(root, 'OpenInk could not load. Use a phone or computer.');
     });
   } catch (e) {
-    try {
-      var r = document.getElementById('root');
-      if (r) {
-        r.style.display = 'block';
-        r.style.visibility = 'visible';
-        r.style.opacity = '1';
-        r.innerHTML = '<p style="padding:1.5rem;font-family:Arial,Verdana,sans-serif;margin:0;">OpenInk could not start. <a href="#" onclick="location.reload();return false;">Try again</a></p>';
-      }
-    } catch(x) {}
+    var r = document.getElementById('root');
+    if (r) setFallback(r, 'OpenInk could not start.');
   }
 })();
 </script>

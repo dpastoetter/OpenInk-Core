@@ -4,7 +4,8 @@ OpenInk follows [ReKindle COMPATIBILITY.md](https://github.com/ReKindleOS/ReKind
 
 ## Legacy loader (legacy.html)
 
-- **Designed to never be blank:** Critical inline `<style>` in the head forces `body` and `#root` to be visible (no dependency on external CSS). The first element in the body is a canary line ("OpenInk") so something always shows. No CSP on legacy (old WebKit can mis-handle CSP and show a blank page). Main stylesheet is loaded at the end of the body so first paint does not wait for it.
+- **ReKindle-aligned first paint:** Critical inline `<style>` makes the page match ReKindle from first paint: body is desktop gray (`#e5e5e5`), centered with flex, `image-rendering: pixelated`, `overflow: hidden`; `#root` is the "window" (white, 2px black border, 4px 4px 0 black shadow, max-width 600px). Fonts: Geneva, Verdana, sans-serif. No CSP on legacy (old WebKit can mis-handle it). Main stylesheet loads at the end of body so first paint does not depend on it.
+- **Fallback/error via DOM:** When the app does not load or a script throws, the loader shows a message using `createElement` and `createTextNode` (no `innerHTML` for the message text) so old WebKit that mishandles `innerHTML` still shows the "Try again" text. If `appendChild` fails, it falls back to one safe `innerHTML` string.
 - **Blocking script tags:** A blocking `<script src="polyfill.js">` then an inline script runs `System.import(entry)`. Scripts are wrapped in try/catch so a single throw does not leave the page broken.
 - **Mounted flag:** After the app renders, it sets `window.__openinkMounted = true`. The 12s fallback timer is cleared when `System.import(entry)` resolves.
 - **12s timeout fallback:** If the app has not mounted within 12 seconds, the loader replaces the content with a static message and a "Try again" link.
