@@ -1,8 +1,14 @@
-import { useState, useCallback, useEffect, useRef } from 'preact/hooks';
+import { useState, useCallback, useEffect, useRef, useContext, useMemo } from 'preact/hooks';
+import { AppHeaderActionsContext } from '@core/kernel/AppHeaderActionsContext';
 
 const COLS = 15;
 const ROWS = 15;
 const TICK_MS = 320;
+
+const SNAKE_BOARD_MIN = 200;
+const SNAKE_BOARD_MAX = 420;
+const SNAKE_BOARD_STEP = 40;
+const SNAKE_BOARD_DEFAULT = 300;
 
 type Dir = 'up' | 'down' | 'left' | 'right';
 
@@ -34,7 +40,22 @@ export function SnakeGame() {
   const [gameOver, setGameOver] = useState(false);
   const [score, setScore] = useState(0);
   const [paused, setPaused] = useState(false);
-  const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [boardSizePx, setBoardSizePx] = useState(SNAKE_BOARD_DEFAULT);
+  const tickCallbackRef = useRef<() => void>(() => {});
+  const setHeaderActions = useContext(AppHeaderActionsContext);
+
+  useEffect(() => {
+    if (!setHeaderActions) return;
+    const node = (
+      <div class="chess-board-zoom" role="group" aria-label="Board size">
+        <button type="button" class="btn btn-status btn-status-zoom" onClick={() => setBoardSizePx((s) => Math.max(SNAKE_BOARD_MIN, s - SNAKE_BOARD_STEP))} aria-label="Smaller board">−</button>
+        <span class="chess-board-zoom-label">{boardSizePx}px</span>
+        <button type="button" class="btn btn-status btn-status-zoom" onClick={() => setBoardSizePx((s) => Math.min(SNAKE_BOARD_MAX, s + SNAKE_BOARD_STEP))} aria-label="Larger board">+</button>
+      </div>
+    );
+    setHeaderActions(node);
+    return () => setHeaderActions(null);
+  }, [setHeaderActions, boardSizePx]);
 
   const reset = useCallback(() => {
     const start = INITIAL_SNAKE;
@@ -74,13 +95,14 @@ export function SnakeGame() {
   }, [gameOver, paused, nextDir, snake, food]);
 
   useEffect(() => {
+    tickCallbackRef.current = tick;
+  }, [tick]);
+
+  useEffect(() => {
     if (gameOver) return;
-    tickRef.current = setInterval(tick, TICK_MS);
-    return () => {
-      if (tickRef.current) clearInterval(tickRef.current);
-      tickRef.current = null;
-    };
-  }, [gameOver, tick]);
+    const id = setInterval(() => tickCallbackRef.current(), TICK_MS);
+    return () => clearInterval(id);
+  }, [gameOver]);
 
   const handleKey = useCallback(
     (e: KeyboardEvent) => {
@@ -107,8 +129,12 @@ export function SnakeGame() {
     return () => window.removeEventListener('keydown', handleKey);
   }, [handleKey]);
 
-  const snakeSet = new Set(snake.map((s) => pos(s.r, s.c)));
+  const snakeSet = useMemo(() => new Set(snake.map((s) => pos(s.r, s.c))), [snake]);
   const foodKey = pos(food.r, food.c);
+  const boardStyle = useMemo(
+    () => ({ width: boardSizePx + 'px', height: boardSizePx + 'px', maxHeight: boardSizePx + 'px' }),
+    [boardSizePx]
+  );
 
   const setDirSafe = useCallback(
     (d: Dir) => {
@@ -131,7 +157,7 @@ export function SnakeGame() {
         {paused && <span class="snake-paused">Paused</span>}
         {gameOver && <span class="snake-gameover">Game over</span>}
       </div>
-      <div class="snake-board">
+      <div class="snake-board" style={boardStyle}>
         {Array.from({ length: ROWS }, (_, r) =>
           Array.from({ length: COLS }, (_, c) => {
             const key = pos(r, c);

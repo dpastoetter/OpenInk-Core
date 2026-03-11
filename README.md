@@ -1,5 +1,7 @@
 # OpenInk
 
+**Current version: v0.1.1**
+
 A minimal, plugin-based “webOS-style” launcher for low-spec and e-ink devices. It provides a home screen, status bar, and a set of built-in apps that run inside a shared shell—tuned for Kindle, grayscale displays, and slow hardware.
 
 ## Features
@@ -71,6 +73,7 @@ Tuned for **slow hardware, grayscale e-ink, and low refresh rates**:
 - **Touch-first** – Large tap targets (`--tap-min`), direct handlers on app tiles and key buttons for reliable tap on Kindle.
 - **Readability** – High-contrast theme option, grayscale-first palette.
 - **Installable** – [Web app manifest](public/manifest.json) for “Add to Home Screen” where supported.
+- **Render efficiency** – Stable callbacks (e.g. shell Back button), memoized values (Snake board/set), and module-level icon components in the status bar to avoid unnecessary re-renders.
 
 ## Adding a new app
 
@@ -81,7 +84,7 @@ Details: **[docs/plugins.md](docs/plugins.md)**.
 
 ## Security (public deployment)
 
-No secrets in the bundle; sanitized API content (XSS prevention); Content-Security-Policy; safe storage. **Serve over HTTPS** and set security headers at your host. See **[docs/SECURITY.md](docs/SECURITY.md)**.
+No secrets in the bundle; sanitized API content (XSS prevention); Content-Security-Policy; safe storage. The legacy fallback path uses a fixed error message (no user/error text in DOM) to avoid XSS. **Serve over HTTPS** and set security headers at your host. See **[docs/SECURITY.md](docs/SECURITY.md)**.
 
 ## Limitations
 

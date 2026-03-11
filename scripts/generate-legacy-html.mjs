@@ -67,7 +67,7 @@ const legacyHtml = `<!DOCTYPE html>
       p.appendChild(tryAgain);
       root.appendChild(p);
     } catch (e) {
-      root.innerHTML = '<p style="padding:1.5rem;font-family:Arial,Verdana,sans-serif;margin:0;">' + msg + ' <a href="#" onclick="location.reload();return false;">Try again</a></p>';
+      root.innerHTML = '<p style="padding:1.5rem;font-family:Arial,Verdana,sans-serif;margin:0;">Something went wrong. <a href="#" onclick="location.reload();return false;">Try again</a></p>';
     }
   }
   try {

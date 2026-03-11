@@ -30,6 +30,38 @@ function useClock(timeFormat: '12h' | '24h') {
   return time;
 }
 
+const statusBarIconProps = { width: 20, height: 20, 'aria-hidden': true as const, fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
+
+function StatusBarZoomOut() {
+  return (
+    <svg class="status-bar-icon" viewBox="0 0 24 24" {...statusBarIconProps}>
+      <path d="M5 12h14" />
+    </svg>
+  );
+}
+function StatusBarZoomIn() {
+  return (
+    <svg class="status-bar-icon" viewBox="0 0 24 24" {...statusBarIconProps}>
+      <path d="M5 12h14M12 5v14" />
+    </svg>
+  );
+}
+function StatusBarSun() {
+  return (
+    <svg class="status-bar-icon" viewBox="0 0 24 24" {...statusBarIconProps}>
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+    </svg>
+  );
+}
+function StatusBarMoon() {
+  return (
+    <svg class="status-bar-icon" viewBox="0 0 24 24" {...statusBarIconProps}>
+      <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+    </svg>
+  );
+}
+
 function StatusBarInner({ theme, settings }: StatusBarProps) {
   const s = theme.getSettings();
   const [showClock, setShowClock] = useState(s.showClock);
@@ -61,17 +93,6 @@ function StatusBarInner({ theme, settings }: StatusBarProps) {
     settings.set({ zoom: next });
   };
 
-  const bulbOff = (
-    <svg class="status-bar-bulb status-bar-bulb-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M9 18h6M9 21h6M12 3a6 6 0 0 1 4.5 9.75A4 4 0 0 0 15 18H9a4 4 0 0 0-.5-5.25A6 6 0 0 1 12 3z" />
-    </svg>
-  );
-  const bulbOn = (
-    <svg class="status-bar-bulb status-bar-bulb-on" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M9 18h6M9 21h6M12 3a6 6 0 0 1 4.5 9.75A4 4 0 0 0 15 18H9a4 4 0 0 0-.5-5.25A6 6 0 0 1 12 3z" />
-    </svg>
-  );
-
   return (
     <header class="status-bar" role="banner">
       <span class="status-bar-left">OpenInk</span>
@@ -90,7 +111,7 @@ function StatusBarInner({ theme, settings }: StatusBarProps) {
           disabled={zoom <= ZOOM_MIN}
           aria-label="Zoom out"
         >
-          −
+          <StatusBarZoomOut />
         </button>
         <button
           type="button"
@@ -99,7 +120,7 @@ function StatusBarInner({ theme, settings }: StatusBarProps) {
           disabled={zoom >= ZOOM_MAX}
           aria-label="Zoom in"
         >
-          +
+          <StatusBarZoomIn />
         </button>
         <button
           type="button"
@@ -107,7 +128,7 @@ function StatusBarInner({ theme, settings }: StatusBarProps) {
           onClick={toggleAppearance}
           aria-label={`Switch to ${appearance === 'light' ? 'dark' : 'light'} mode`}
         >
-          {appearance === 'light' ? bulbOff : bulbOn}
+          {appearance === 'light' ? <StatusBarSun /> : <StatusBarMoon />}
         </button>
       </span>
     </header>

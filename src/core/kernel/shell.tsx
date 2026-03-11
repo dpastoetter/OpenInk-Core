@@ -130,6 +130,11 @@ export function Shell({ services }: ShellProps) {
   const appDescriptors = useMemo(() => AppRegistry.getAllAppDescriptors(), []);
   const handleLaunch = useCallback((d: AppDescriptor) => launchAppById(d.id), [launchAppById]);
 
+  const handleBack = useCallback(() => {
+    if (instance?.canGoBack?.() && instance?.goBack) instance.goBack();
+    else closeApp();
+  }, [instance, closeApp]);
+
   return (
     <div class="shell">
       <StatusBar theme={services.theme} settings={services.settings} />
@@ -146,12 +151,7 @@ export function Shell({ services }: ShellProps) {
               <button type="button" class="btn btn-nav" onClick={goHome} aria-label="Home">
                 Home
               </button>
-              <button
-                type="button"
-                class="btn btn-nav"
-                onClick={() => (instance?.canGoBack?.() && instance?.goBack ? instance.goBack() : closeApp())}
-                aria-label="Back"
-              >
+              <button type="button" class="btn btn-nav" onClick={handleBack} aria-label="Back">
                 Back
               </button>
               {headerTitle && <h1 class="app-header-title">{headerTitle}</h1>}
