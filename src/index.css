@@ -1039,6 +1039,8 @@ html, body {
 .comics-source-link { display: inline-block; margin-top: var(--space); color: var(--accent); }
 
 .settings-app .panel .btn { margin-right: var(--space); margin-bottom: var(--space); }
+.settings-app .panel-description { color: var(--muted); font-size: 0.9rem; margin: 0 0 var(--space); }
+.settings-app .settings-import-message { margin: 0.5rem 0 0; font-size: 0.9rem; color: var(--muted); }
 
 /* Panel / card */
 .panel {
