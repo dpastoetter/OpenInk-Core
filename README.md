@@ -24,12 +24,7 @@ To regenerate home screen screenshots: run `npm run build` then `npm run screens
 
 <!-- Inline playback: 1) On GitHub, open this README and click Edit. 2) Download docs/demo-screencast.mp4 from the repo (or use your local copy). 3) Drag-and-drop the MP4 file onto the line below. 4) Save. GitHub will replace it with a playable embed (max 10 MB). -->
 
-https://github.com/user-attachments/assets/1a1e025f-053a-4fa5-92ef-d9c765a25204
-
-
-*This is an old mocked screen-recording - Update follows shortly.
-**The lengthy black flicker mocks the E-Ink refresh.
-
+https://github.com/user-attachments/assets/78065765-93b0-42f6-a8c1-b9a5a60156c6
 
 ## Tech stack
 
