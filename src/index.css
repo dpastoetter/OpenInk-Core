@@ -278,23 +278,23 @@ html, body {
 
 .status-bar .btn-status-zoom,
 .status-bar .btn-status-theme {
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
-  min-height: 36px;
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  min-height: 30px;
   padding: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   line-height: 1;
   box-sizing: border-box;
 }
 
 .status-bar-bulb {
   display: block;
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 1.1rem;
+  height: 1.1rem;
   flex-shrink: 0;
   color: var(--header-fg);
 }
@@ -878,6 +878,103 @@ textarea {
   font-size: 0.9rem;
 }
 
+/* Snake */
+.snake-game {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-height: 0;
+}
+
+.snake-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space);
+  flex-shrink: 0;
+  margin-bottom: var(--space);
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.snake-score { color: var(--fg); }
+.snake-paused { color: var(--muted); }
+.snake-gameover { color: var(--accent); font-weight: 600; }
+
+.snake-board {
+  display: grid;
+  grid-template-columns: repeat(15, 1fr);
+  grid-template-rows: repeat(15, 1fr);
+  aspect-ratio: 1;
+  width: min(90vmin, 360px);
+  max-height: min(90vmin, 360px);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface);
+  flex-shrink: 0;
+}
+
+.snake-cell {
+  border: 1px solid var(--border);
+  min-width: 0;
+  min-height: 0;
+}
+
+.snake-cell.snake-body {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.snake-cell.snake-head {
+  background: var(--fg);
+  border-color: var(--fg);
+}
+
+[data-appearance="dark"] .snake-cell.snake-body { background: var(--accent); }
+[data-appearance="dark"] .snake-cell.snake-head { background: var(--header-fg); border-color: var(--header-fg); }
+
+.snake-cell.snake-food {
+  background: var(--muted);
+  border-color: var(--muted);
+}
+
+.snake-actions {
+  margin-top: var(--space);
+  flex-shrink: 0;
+}
+
+.snake-dpad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: var(--space);
+  flex-shrink: 0;
+}
+
+.snake-dpad-mid {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.snake-dpad-btn {
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  padding: 0.25rem;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.snake-dpad-center { font-size: 1rem; }
+
+.snake-hint {
+  margin: var(--space) 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
 /* Reddit */
 .reddit-search { display: flex; gap: var(--space); align-items: center; margin-bottom: var(--space); }
 .reddit-search .input { flex: 1; min-width: 0; }
@@ -1021,27 +1118,6 @@ textarea {
 .dictionary-defs { margin: 0.25em 0 0 1em; padding: 0; list-style: disc; }
 .dictionary-example { color: var(--muted); font-style: italic; }
 
-/* Wikipedia */
-.wikipedia-app { }
-.wikipedia-search { display: flex; gap: var(--space); align-items: center; margin-bottom: var(--space); }
-.wikipedia-results { list-style: none; margin: 0; padding: 0; }
-.wikipedia-result-item { display: block; width: 100%; text-align: left; padding: var(--space); margin-bottom: 0.5em; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); cursor: pointer; min-height: var(--tap-min); }
-.wikipedia-result-item:hover { border-color: var(--accent); }
-.wikipedia-result-title { font-weight: 600; display: block; margin-bottom: 0.25em; }
-.wikipedia-result-desc { font-size: 0.9rem; color: var(--muted); display: block; margin-bottom: 0.25em; }
-.wikipedia-result-excerpt { font-size: 0.9rem; color: var(--muted); display: block; }
-.wikipedia-article-header { margin-bottom: var(--space); }
-.wikipedia-article-title { font-size: 1.25rem; margin: 0 0 var(--space); }
-.wikipedia-extract { margin-top: var(--space); }
-.wikipedia-extract p { margin: 0 0 0.75em; }
-
-/* FrogFind */
-.frogfind-app { }
-.frogfind-search { display: flex; gap: var(--space); align-items: center; margin-bottom: var(--space); }
-.frogfind-frame-wrap { margin-top: var(--space); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; min-height: 24rem; }
-.frogfind-iframe { width: 100%; height: 28rem; border: 0; display: block; }
-.frogfind-placeholder { color: var(--muted); margin: var(--space) 0; }
-
 /* Stopwatch */
 .stopwatch-app { }
 .stopwatch-app .timer-display { font-size: 3rem; font-weight: 600; font-variant-numeric: tabular-nums; margin: var(--space) 0; text-align: center; }
@@ -1114,8 +1190,6 @@ textarea {
 .timer-actions > * + *,
 .widget-actions > * + *,
 .dictionary-search > * + *,
-.wikipedia-search > * + *,
-.frogfind-search > * + *,
 .comics-source-tabs > * + * {
   margin-left: var(--space);
 }
@@ -1141,8 +1215,6 @@ textarea {
   .timer-actions > * + *,
   .widget-actions > * + *,
   .dictionary-search > * + *,
-  .wikipedia-search > * + *,
-  .frogfind-search > * + *,
   .comics-source-tabs > * + * { margin-left: 0; }
   .chess-mode-select > * + * { margin-left: 0; }
   .chess-mode-buttons > * + * { margin-top: 0; }

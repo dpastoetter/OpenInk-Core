@@ -6,8 +6,13 @@
 type Piece = 'K' | 'Q' | 'R' | 'B' | 'N' | 'P' | 'k' | 'q' | 'r' | 'b' | 'n' | 'p' | null;
 type Board = (Piece)[][];
 
-/** Convert internal board + turn to FEN (piece placement + active color; minimal castling). */
-export function boardToFen(board: Board, turn: 'w' | 'b'): string {
+export interface FenState {
+  castlingRights: { K: boolean; Q: boolean; k: boolean; q: boolean };
+  enPassantTarget: [number, number] | null;
+}
+
+/** Convert internal board + turn (+ optional castling/en passant) to FEN. */
+export function boardToFen(board: Board, turn: 'w' | 'b', state?: FenState): string {
   const rows: string[] = [];
   for (let r = 0; r < 8; r++) {
     let s = '';
@@ -19,7 +24,7 @@ export function boardToFen(board: Board, turn: 'w' | 'b'): string {
           s += empty;
           empty = 0;
         }
-        s += p; // already K/k etc.
+        s += p;
       } else {
         empty++;
       }
@@ -27,7 +32,17 @@ export function boardToFen(board: Board, turn: 'w' | 'b'): string {
     if (empty > 0) s += empty;
     rows.push(s);
   }
-  return `${rows.join('/')} ${turn} KQkq - 0 1`;
+  let castling = 'KQkq';
+  if (state?.castlingRights) {
+    const { K, Q, k, q } = state.castlingRights;
+    castling = [K && 'K', Q && 'Q', k && 'k', q && 'q'].filter(Boolean).join('') || '-';
+  }
+  let ep = '-';
+  if (state?.enPassantTarget) {
+    const [r, c] = state.enPassantTarget;
+    ep = String.fromCharCode(97 + c) + (8 - r);
+  }
+  return `${rows.join('/')} ${turn} ${castling} ${ep} 0 1`;
 }
 
 /** Parse UCI bestmove line to board coordinates. e.g. "bestmove e7e5" -> { from: [1,4], to: [3,4] }. */

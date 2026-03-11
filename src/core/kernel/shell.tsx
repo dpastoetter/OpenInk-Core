@@ -100,6 +100,8 @@ export function Shell({ services }: ShellProps) {
         const app = await AppRegistry.loadApp(appId);
         if (app) launchApp(app);
       } catch {
+        // load failed
+      } finally {
         setLoadingAppId(null);
       }
     },

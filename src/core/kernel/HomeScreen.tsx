@@ -23,8 +23,21 @@ function sortAppsWithSettingsLast(apps: AppDescriptor[], order: 'a-z' | 'z-a'): 
   return [...rest, ...settings];
 }
 
-const AppTile = memo(function AppTile({ app }: { app: AppDescriptor }) {
+const AppTile = memo(function AppTile({
+  app,
+  onLaunch,
+}: {
+  app: AppDescriptor;
+  onLaunch: (app: AppDescriptor) => void;
+}) {
   const IconComponent = getAppIcon(app.id);
+  const handleActivate = useCallback(
+    (e: Event) => {
+      if (e.type === 'touchend') (e as TouchEvent).preventDefault();
+      onLaunch(app);
+    },
+    [app, onLaunch]
+  );
   return (
     <li>
       <button
@@ -32,6 +45,8 @@ const AppTile = memo(function AppTile({ app }: { app: AppDescriptor }) {
         class="app-tile"
         data-app-id={app.id}
         aria-label={`Open ${app.name}`}
+        onClick={handleActivate}
+        onTouchEnd={handleActivate}
       >
         <span class="app-tile-icon" aria-hidden="true">
           {IconComponent
@@ -68,40 +83,22 @@ const HomeScreenInner = function HomeScreen({ apps, onLaunch, theme }: HomeScree
     [apps, sortOrder]
   );
 
-  const appById = useMemo(() => {
-    const m = new Map<string, AppDescriptor>();
-    apps.forEach((a) => m.set(a.id, a));
-    return m;
-  }, [apps]);
-
-  const handleGridClick = useCallback(
-    (e: Event) => {
-      const el = (e.target as HTMLElement).closest?.('[data-app-id]');
-      const id = el?.getAttribute?.('data-app-id');
-      if (id) {
-        const app = appById.get(id);
-        if (app) onLaunch(app);
-      }
-    },
-    [appById, onLaunch]
-  );
-
   return (
     <div class="home-screen">
       <section class="home-category">
         <h2 class="home-category-title">Apps</h2>
-        <ul class="app-grid" onClick={handleGridClick}>
+        <ul class="app-grid">
           {appsOnly.map((app) => (
-            <AppTile key={app.id} app={app} />
+            <AppTile key={app.id} app={app} onLaunch={onLaunch} />
           ))}
         </ul>
       </section>
       {showGamesSection && (
         <section class="home-category">
           <h2 class="home-category-title">Games</h2>
-          <ul class="app-grid" onClick={handleGridClick}>
+          <ul class="app-grid">
             {games.map((app) => (
-              <AppTile key={app.id} app={app} />
+              <AppTile key={app.id} app={app} onLaunch={onLaunch} />
             ))}
           </ul>
         </section>

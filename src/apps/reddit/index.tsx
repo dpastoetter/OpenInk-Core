@@ -9,6 +9,9 @@ import { AppHeaderActionsContext } from '@core/kernel/AppHeaderActionsContext';
 
 const REDDIT_JSON = (path: string) => `https://www.reddit.com${path}.json?raw_json=1&limit=25`;
 
+type ListSort = 'hot' | 'new' | 'best';
+const LIST_SORTS: ListSort[] = ['hot', 'new', 'best'];
+
 interface RedditPost {
   data: {
     id: string;
@@ -132,17 +135,18 @@ function RedditApp(context: AppContext): AppInstance {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [selectedPost, setSelectedPost] = useState<RedditPost['data'] | null>(null);
+    const [listSort, setListSort] = useState<ListSort>('hot');
     backRef.current = { setSelectedPost, selectedPost, setCurrentSub, currentSub };
     titleRef.current = selectedPost ? selectedPost.title : currentSub ? `r/${currentSub}` : 'Subreddits';
     const [comments, setComments] = useState<RedditComment[]>([]);
     const [listPage, setListPage] = useState(1);
     const [commentPage, setCommentPage] = useState(1);
 
-    const loadSub = useCallback(async (sub: string) => {
+    const loadSub = useCallback(async (sub: string, sort: ListSort) => {
       setLoading(true);
       setError(null);
       try {
-        const url = REDDIT_JSON(`/r/${sub}`);
+        const url = REDDIT_JSON(`/r/${sub}/${sort}`);
         const proxy = getCorsProxyUrl(settings.get().corsProxyUrl);
         const proxyUrl = proxy + encodeURIComponent(url);
         const data = await network.fetchJson<{ data: { children: RedditPost[] } }>(proxyUrl);
@@ -161,8 +165,8 @@ function RedditApp(context: AppContext): AppInstance {
     }, [network]);
 
     useEffect(() => {
-      if (currentSub) loadSub(currentSub);
-    }, [currentSub, loadSub]);
+      if (currentSub) loadSub(currentSub, listSort);
+    }, [currentSub, listSort, loadSub]);
 
     useEffect(() => {
       if (!selectedPost) return;
@@ -172,8 +176,28 @@ function RedditApp(context: AppContext): AppInstance {
 
     useEffect(() => {
       if (!setHeaderActions) return;
-      if (currentSub != null) {
+      if (selectedPost != null) {
         setHeaderActions(null);
+        return () => setHeaderActions(null);
+      }
+      if (currentSub != null) {
+        const cycleSort = () => {
+          const i = LIST_SORTS.indexOf(listSort);
+          setListSort(LIST_SORTS[(i + 1) % LIST_SORTS.length]);
+        };
+        const label = listSort.charAt(0).toUpperCase() + listSort.slice(1);
+        const node = (
+          <button
+            type="button"
+            class="btn btn-active"
+            onClick={cycleSort}
+            aria-label={`Sort: ${label}. Click to cycle.`}
+            title={`Sort: ${label} (tap to cycle)`}
+          >
+            {label}
+          </button>
+        );
+        setHeaderActions(node);
         return () => setHeaderActions(null);
       }
       const node = (
@@ -189,7 +213,7 @@ function RedditApp(context: AppContext): AppInstance {
       );
       setHeaderActions(node);
       return () => setHeaderActions(null);
-    }, [setHeaderActions, currentSub, editMode]);
+    }, [setHeaderActions, currentSub, selectedPost, listSort, editMode]);
 
     const openPost = useCallback(async (post: RedditPost['data']) => {
       setSelectedPost(post);

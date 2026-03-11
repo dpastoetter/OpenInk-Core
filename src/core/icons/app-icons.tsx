@@ -19,8 +19,6 @@ import {
   CloudSun,
   Globe,
   Settings,
-  Library,
-  Search,
 } from 'lucide-react';
 
 type IconComponent = ComponentType<{ className?: string; 'aria-hidden'?: boolean; size?: number }>;
@@ -40,8 +38,6 @@ const APP_ICONS: Partial<Record<string, IconComponent>> = {
   timer: Clock as IconComponent,
   weather: CloudSun as IconComponent,
   worldclock: Globe as IconComponent,
-  wikipedia: Library as IconComponent,
-  frogfind: Search as IconComponent,
   settings: Settings as IconComponent,
 };
 
