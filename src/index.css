@@ -474,11 +474,11 @@ html, body {
 }
 
 .app-header-actions .btn,
-.app-header-actions .chess-board-zoom .btn {
+.app-header-actions .game-board-zoom .btn {
   min-height: 28px;
 }
 
-.app-header .chess-board-zoom {
+.app-header .game-board-zoom {
   margin: 0;
   flex-shrink: 0;
 }
@@ -659,14 +659,14 @@ textarea {
   font-weight: 500;
 }
 
-.chess-board-zoom {
+.game-board-zoom {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   margin-bottom: var(--space);
   flex-shrink: 0;
 }
-.chess-board-zoom-label {
+.game-board-zoom-label {
   font-size: 0.9rem;
   color: var(--muted);
   min-width: 3rem;
@@ -1316,7 +1316,7 @@ textarea {
 .chess-mode-buttons > * + * { margin-top: var(--space); }
 .chess-footer > * + * { margin-left: var(--space); }
 .app-header-actions > * + * { margin-left: var(--space); }
-.chess-board-zoom > * + * { margin-left: 0.5rem; }
+.game-board-zoom > * + * { margin-left: 0.5rem; }
 .sudoku-numpad > * + * { margin-left: 6px; margin-top: 6px; }
 .calculator-app > * + * { margin-top: var(--space); }
 @supports (gap: 1px) {
@@ -1343,7 +1343,7 @@ textarea {
   .chess-mode-buttons > * + * { margin-top: 0; }
   .chess-footer > * + * { margin-left: 0; }
   .app-header-actions > * + * { margin-left: 0; }
-  .chess-board-zoom > * + * { margin-left: 0; }
+  .game-board-zoom > * + * { margin-left: 0; }
   .sudoku-numpad > * + * { margin-left: 0; margin-top: 0; }
   .calculator-app > * + * { margin-top: 0; }
 }
@@ -1403,8 +1403,8 @@ html.legacy-browser .app-header .btn-nav + .btn-nav {
   margin-left: 0.5rem;
 }
 
-/* Legacy: chess widget – same settings layout as modern (header zoom, turn beside New game, mode/engine) */
-html.legacy-browser .app-header-actions .chess-board-zoom {
+/* Legacy (Kindle): board zoom in header for every game */
+html.legacy-browser .app-header-actions .game-board-zoom {
   display: flex;
   align-items: center;
 }

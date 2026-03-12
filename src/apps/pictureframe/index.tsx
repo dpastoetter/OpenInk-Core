@@ -2,9 +2,9 @@ import { useState, useCallback, useEffect, useRef } from 'preact/hooks';
 import { createPortal } from 'preact/compat';
 import type { AppContext, AppInstance } from '../../types/plugin';
 import { PLUGIN_API_VERSION } from '../../types/plugin';
-import { isSafeUrl, sanitizeUrl } from '@core/utils/url';
+import { sanitizeUrl } from '@core/utils/url';
 
-const STORAGE_KEY = 'pictureframe:custom';
+const isLegacy = typeof import.meta.env.LEGACY !== 'undefined' && import.meta.env.LEGACY;
 
 interface PictureItem {
   id: string;
@@ -12,17 +12,17 @@ interface PictureItem {
   name: string;
 }
 
-interface CustomPicture {
-  id: string;
-  url: string;
-  name: string;
-}
-
-const PREINSTALLED_GRAPHICS: PictureItem[] = [
+/** Legacy/Kindle: only local SVGs, no network, no heavy decode. Prevents crashes on e-ink. */
+const LEGACY_GRAPHICS: PictureItem[] = [
   { id: 'pf-1', name: 'Sun', src: '/pictureframe/1-sun.svg' },
   { id: 'pf-2', name: 'Mountain', src: '/pictureframe/2-mountain.svg' },
   { id: 'pf-3', name: 'Tree', src: '/pictureframe/3-tree.svg' },
   { id: 'pf-4', name: 'Moon', src: '/pictureframe/4-moon.svg' },
+];
+
+/** Full list: local SVGs + external (modern only). */
+const PREINSTALLED_GRAPHICS: PictureItem[] = [
+  ...LEGACY_GRAPHICS,
   { id: 'pf-5', name: 'Ocean', src: 'https://picsum.photos/seed/ocean2/1200/800' },
   { id: 'pf-6', name: 'Forest', src: 'https://picsum.photos/seed/forest2/1200/800' },
   { id: 'pf-7', name: 'Sunset', src: 'https://picsum.photos/seed/sunset2/1200/800' },
@@ -43,16 +43,19 @@ const PREINSTALLED_GRAPHICS: PictureItem[] = [
   { id: 'pf-22', name: 'Mountain peak', src: 'https://picsum.photos/seed/peak1/1200/800' },
   { id: 'pf-23', name: 'Aurora', src: 'https://picsum.photos/seed/aurora2/1200/800' },
   { id: 'pf-24', name: 'Tropical', src: 'https://picsum.photos/seed/tropical2/1200/800' },
+  { id: 'pf-25', name: 'Cathedral', src: 'https://picsum.photos/seed/cathedral1/1200/800' },
+  { id: 'pf-26', name: 'Tower', src: 'https://picsum.photos/seed/tower1/1200/800' },
+  { id: 'pf-27', name: 'Monument', src: 'https://picsum.photos/seed/monument1/1200/800' },
+  { id: 'pf-28', name: 'Palace', src: 'https://picsum.photos/seed/palace1/1200/800' },
+  { id: 'pf-29', name: 'City square', src: 'https://picsum.photos/seed/square1/1200/800' },
+  { id: 'pf-30', name: 'Park', src: 'https://picsum.photos/seed/park1/1200/800' },
+  { id: 'pf-31', name: 'Lighthouse', src: 'https://picsum.photos/seed/lighthouse1/1200/800' },
+  { id: 'pf-32', name: 'Castle', src: 'https://picsum.photos/seed/castle1/1200/800' },
+  { id: 'pf-33', name: 'Downtown', src: 'https://picsum.photos/seed/downtown1/1200/800' },
+  { id: 'pf-34', name: 'Seaside', src: 'https://picsum.photos/seed/seaside1/1200/800' },
+  { id: 'pf-35', name: 'Vineyard', src: 'https://picsum.photos/seed/vineyard1/1200/800' },
+  { id: 'pf-36', name: 'Alps', src: 'https://picsum.photos/seed/alps1/1200/800' },
 ];
-
-const PICSUM_LIST_URL = 'https://picsum.photos/v2/list?page=1&limit=20';
-
-function buildAllPictures(custom: CustomPicture[]): PictureItem[] {
-  const customItems: PictureItem[] = custom
-    .map((c) => ({ id: c.id, src: sanitizeUrl(c.url), name: c.name }))
-    .filter((x) => x.src.length > 0);
-  return [...PREINSTALLED_GRAPHICS, ...customItems];
-}
 
 const WAKE_DURATIONS = [
   { value: 0, label: '1 hour', ms: 60 * 60 * 1000 },
@@ -63,41 +66,24 @@ const WAKE_DURATIONS = [
   { value: 5, label: 'Forever', ms: 0 },
 ] as const;
 
-function PictureFrameApp(context: AppContext): AppInstance {
-  const { storage, network } = context.services;
+function PictureFrameApp(_context: AppContext): AppInstance {
+  const allPictures = isLegacy
+    ? LEGACY_GRAPHICS
+    : PREINSTALLED_GRAPHICS.map((p) => ({
+        ...p,
+        src: p.src.startsWith('http') ? sanitizeUrl(p.src) || p.src : p.src,
+      })).filter((p) => p.src.length > 0);
 
   function PictureFrameUI() {
-    const [custom, setCustom] = useState<CustomPicture[]>([]);
-    const [loaded, setLoaded] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [wakeDurationIndex, setWakeDurationIndex] = useState(0);
     const [wakeActive, setWakeActive] = useState(false);
     const [fullscreen, setFullscreen] = useState(false);
     const [wakeUnsupported, setWakeUnsupported] = useState(false);
-    const [addUrl, setAddUrl] = useState('');
-    const [browseResults, setBrowseResults] = useState<Array<{ id: string; download_url: string; author: string }>>([]);
-    const [browseLoading, setBrowseLoading] = useState(false);
     const wakeLockRef = useRef<WakeLockSentinel | null>(null);
     const releaseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const hasWakeLock = typeof navigator !== 'undefined' && 'wakeLock' in navigator;
-
-    useEffect(() => {
-      storage.get<CustomPicture[]>(STORAGE_KEY).then((data) => {
-        if (Array.isArray(data) && data.length > 0) setCustom(data);
-        setLoaded(true);
-      });
-    }, [storage]);
-
-    const persistCustom = useCallback(
-      (next: CustomPicture[]) => {
-        setCustom(next);
-        storage.set(STORAGE_KEY, next);
-      },
-      [storage]
-    );
-
-    const allPictures = buildAllPictures(custom);
+    const hasWakeLock = !isLegacy && typeof navigator !== 'undefined' && 'wakeLock' in navigator;
     const current = allPictures[Math.min(currentIndex, allPictures.length - 1)] ?? allPictures[0];
 
     useEffect(() => {
@@ -176,64 +162,7 @@ function PictureFrameApp(context: AppContext): AppInstance {
     const prev = () => setCurrentIndex((i) => (i === 0 ? allPictures.length - 1 : i - 1));
     const next = () => setCurrentIndex((i) => (i === allPictures.length - 1 ? 0 : i + 1));
 
-    const addByUrl = useCallback(() => {
-      const url = addUrl.trim();
-      if (!url || !isSafeUrl(url)) return;
-      const newItem: CustomPicture = {
-        id: `pf-custom-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-        url,
-        name: `Custom ${custom.length + 1}`,
-      };
-      persistCustom([...custom, newItem]);
-      setAddUrl('');
-    }, [addUrl, custom, persistCustom]);
-
-    const addFromBrowse = useCallback(
-      (url: string, name: string) => {
-        const safe = sanitizeUrl(url);
-        if (!safe) return;
-        const newItem: CustomPicture = {
-          id: `pf-custom-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-          url: safe,
-          name: name || 'Photo',
-        };
-        persistCustom([...custom, newItem]);
-      },
-      [custom, persistCustom]
-    );
-
-    const removeCustom = useCallback(
-      (id: string) => {
-        const nextList = custom.filter((c) => c.id !== id);
-        persistCustom(nextList);
-        const newLen = PREINSTALLED_GRAPHICS.length + nextList.length;
-        setCurrentIndex((i) => Math.min(i, Math.max(0, newLen - 1)));
-      },
-      [custom, persistCustom]
-    );
-
-    const searchBrowse = useCallback(async () => {
-      setBrowseLoading(true);
-      setBrowseResults([]);
-      try {
-        const list = await network.fetchJson<Array<{ id: string; download_url: string; author: string }>>(PICSUM_LIST_URL);
-        setBrowseResults(Array.isArray(list) ? list : []);
-      } catch {
-        setBrowseResults([]);
-      } finally {
-        setBrowseLoading(false);
-      }
-    }, [network]);
-
-    if (!loaded) {
-      return (
-        <div class="pictureframe-app">
-          <p class="pictureframe-loading">Loading…</p>
-        </div>
-      );
-    }
-
-    if (fullscreen && typeof document !== 'undefined' && current) {
+    if (!isLegacy && fullscreen && typeof document !== 'undefined' && document.body && current) {
       const fullscreenEl = (
         <div class="pictureframe-fullscreen" role="dialog" aria-label="Picture frame full screen">
           <button
@@ -262,6 +191,8 @@ function PictureFrameApp(context: AppContext): AppInstance {
               src={current.src}
               alt={current.name}
               class="pictureframe-img"
+              loading="lazy"
+              decoding="async"
             />
           )}
         </div>
@@ -274,97 +205,39 @@ function PictureFrameApp(context: AppContext): AppInstance {
             ›
           </button>
         </div>
-        <div class="pictureframe-add">
-          <label class="pictureframe-add-label" htmlFor="pictureframe-url">Add picture</label>
-          <div class="pictureframe-add-url">
-            <input
-              id="pictureframe-url"
-              type="url"
-              class="input pictureframe-input"
-              placeholder="Paste image URL"
-              value={addUrl}
-              onInput={(e) => setAddUrl((e.target as HTMLInputElement).value)}
-              onKeyDown={(e) => e.key === 'Enter' && addByUrl()}
-              aria-label="Image URL"
-            />
-            <button type="button" class="btn" onClick={addByUrl}>
-              Add
-            </button>
-          </div>
-          <div class="pictureframe-browse">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              onClick={searchBrowse}
-              disabled={browseLoading}
+        {!isLegacy && (
+          <div class="pictureframe-wake">
+            <label class="pictureframe-wake-label" htmlFor="pictureframe-wake-duration">Keep screen on</label>
+            <select
+              id="pictureframe-wake-duration"
+              class="input pictureframe-select"
+              value={wakeDurationIndex}
+              onChange={(e) => setWakeDurationIndex(Number((e.target as HTMLSelectElement).value))}
+              aria-label="Duration"
             >
-              {browseLoading ? 'Loading…' : 'Browse sample photos'}
-            </button>
-            {browseResults.length > 0 && (
-              <div class="pictureframe-browse-grid">
-                {browseResults.map((p) => {
-                  const safeSrc = sanitizeUrl(p.download_url);
-                  return (
-                    <div key={p.id} class="pictureframe-browse-item">
-                      {safeSrc ? <img src={safeSrc} alt={p.author} class="pictureframe-browse-thumb" /> : null}
-                      <button
-                        type="button"
-                        class="btn btn-small"
-                        onClick={() => addFromBrowse(p.download_url, p.author)}
-                      >
-                        Add
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
+              {WAKE_DURATIONS.map((d, i) => (
+                <option key={d.value} value={i}>
+                  {d.label}
+                </option>
+              ))}
+            </select>
+            {wakeActive && !fullscreen ? (
+              <button type="button" class="btn btn-secondary" onClick={releaseWakeLock}>
+                Cancel
+              </button>
+            ) : (
+              <button
+                type="button"
+                class="btn"
+                onClick={startFullscreen}
+                disabled={!hasWakeLock}
+              >
+                Start
+              </button>
             )}
           </div>
-          {custom.length > 0 && (
-            <div class="pictureframe-custom-list">
-              <span class="pictureframe-custom-label">Your pictures:</span>
-              {custom.map((c) => (
-                <span key={c.id} class="pictureframe-custom-item">
-                  {c.name}
-                  <button type="button" class="btn btn-small btn-ghost" onClick={() => removeCustom(c.id)} aria-label="Remove">
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-        <div class="pictureframe-wake">
-          <label class="pictureframe-wake-label" htmlFor="pictureframe-wake-duration">Keep screen on</label>
-          <select
-            id="pictureframe-wake-duration"
-            class="input pictureframe-select"
-            value={wakeDurationIndex}
-            onChange={(e) => setWakeDurationIndex(Number((e.target as HTMLSelectElement).value))}
-            aria-label="Duration"
-          >
-            {WAKE_DURATIONS.map((d, i) => (
-              <option key={d.value} value={i}>
-                {d.label}
-              </option>
-            ))}
-          </select>
-          {wakeActive && !fullscreen ? (
-            <button type="button" class="btn btn-secondary" onClick={releaseWakeLock}>
-              Cancel
-            </button>
-          ) : (
-            <button
-              type="button"
-              class="btn"
-              onClick={startFullscreen}
-              disabled={!hasWakeLock}
-            >
-              Start
-            </button>
-          )}
-        </div>
-        {wakeUnsupported && (
+        )}
+        {!isLegacy && wakeUnsupported && (
           <p class="pictureframe-unsupported">Keep-awake not supported in this browser.</p>
         )}
       </div>
