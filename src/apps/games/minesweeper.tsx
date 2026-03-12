@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useContext } from 'preact/hooks';
 import { AppHeaderActionsContext } from '@core/kernel/AppHeaderActionsContext';
+import { GameBoardResize } from './GameBoardResize';
 
 const ROWS = 9;
 const COLS = 9;
@@ -46,14 +47,16 @@ export function MinesweeperGame() {
 
   useEffect(() => {
     if (!setHeaderActions) return;
-    const node = (
-      <div class="chess-board-zoom" role="group" aria-label="Board size">
-        <button type="button" class="btn btn-status btn-status-zoom" onClick={() => setBoardSizePx((s) => Math.max(BOARD_SIZE_MIN, s - BOARD_SIZE_STEP))} aria-label="Smaller board">−</button>
-        <span class="chess-board-zoom-label">{boardSizePx}px</span>
-        <button type="button" class="btn btn-status btn-status-zoom" onClick={() => setBoardSizePx((s) => Math.min(BOARD_SIZE_MAX, s + BOARD_SIZE_STEP))} aria-label="Larger board">+</button>
-      </div>
+    setHeaderActions(
+      <GameBoardResize
+        min={BOARD_SIZE_MIN}
+        max={BOARD_SIZE_MAX}
+        step={BOARD_SIZE_STEP}
+        valuePx={boardSizePx}
+        onDecrease={() => setBoardSizePx((s) => Math.max(BOARD_SIZE_MIN, s - BOARD_SIZE_STEP))}
+        onIncrease={() => setBoardSizePx((s) => Math.min(BOARD_SIZE_MAX, s + BOARD_SIZE_STEP))}
+      />
     );
-    setHeaderActions(node);
     return () => setHeaderActions(null);
   }, [setHeaderActions, boardSizePx]);
 

@@ -5,6 +5,7 @@ dist/
 .env.*
 !.env.example
 .cursor/
+.vscode/
 *.log
 .DS_Store
 *.tsbuildinfo

@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useContext } from 'preact/hooks';
 import { boardToFen, getStockfishMove, isStockfishAvailable } from './stockfish-worker';
 import { AppHeaderActionsContext } from '@core/kernel/AppHeaderActionsContext';
+import { GameBoardResize } from './GameBoardResize';
 
 type Piece = 'K' | 'Q' | 'R' | 'B' | 'N' | 'P' | 'k' | 'q' | 'r' | 'b' | 'n' | 'p' | null;
 type Board = (Piece)[][];
@@ -56,7 +57,7 @@ function applyMoveInternal(
   const next = copyBoard(board);
   const white = isWhite(piece!);
   const p = piece!.toLowerCase();
-  let nextState: ChessState = { ...state, enPassantTarget: null };
+  const nextState: ChessState = { ...state, enPassantTarget: null };
 
   if (p === 'k' && Math.abs(toC - fromC) === 2) {
     next[fromR][fromC] = null;
@@ -231,20 +232,20 @@ function getMoves(board: Board, row: number, col: number, state: ChessState = IN
       if (col + 1 === state.enPassantTarget[1]) add(row + dir, col + 1);
     }
   } else if (p === 'r') {
-    for (let r = row - 1; r >= 0 && !board[r][col]; r--) add(r, col);
-    for (let r = row + 1; r < 8 && !board[r][col]; r++) add(r, col);
-    for (let c = col - 1; c >= 0 && !board[row][c]; c--) add(row, c);
-    for (let c = col + 1; c < 8 && !board[row][c]; c++) add(row, c);
+    for (let r = row - 1; r >= 0; r--) { add(r, col); if (board[r][col]) break; }
+    for (let r = row + 1; r < 8; r++) { add(r, col); if (board[r][col]) break; }
+    for (let c = col - 1; c >= 0; c--) { add(row, c); if (board[row][c]) break; }
+    for (let c = col + 1; c < 8; c++) { add(row, c); if (board[row][c]) break; }
   } else if (p === 'b') {
     for (let d = 1; row - d >= 0 && col - d >= 0; d++) { add(row - d, col - d); if (board[row - d][col - d]) break; }
     for (let d = 1; row + d < 8 && col + d < 8; d++) { add(row + d, col + d); if (board[row + d][col + d]) break; }
     for (let d = 1; row - d >= 0 && col + d < 8; d++) { add(row - d, col + d); if (board[row - d][col + d]) break; }
     for (let d = 1; row + d < 8 && col - d >= 0; d++) { add(row + d, col - d); if (board[row + d][col - d]) break; }
   } else if (p === 'q') {
-    for (let r = row - 1; r >= 0 && !board[r][col]; r--) add(r, col);
-    for (let r = row + 1; r < 8 && !board[r][col]; r++) add(r, col);
-    for (let c = col - 1; c >= 0 && !board[row][c]; c--) add(row, c);
-    for (let c = col + 1; c < 8 && !board[row][c]; c++) add(row, c);
+    for (let r = row - 1; r >= 0; r--) { add(r, col); if (board[r][col]) break; }
+    for (let r = row + 1; r < 8; r++) { add(r, col); if (board[r][col]) break; }
+    for (let c = col - 1; c >= 0; c--) { add(row, c); if (board[row][c]) break; }
+    for (let c = col + 1; c < 8; c++) { add(row, c); if (board[row][c]) break; }
     for (let d = 1; row - d >= 0 && col - d >= 0; d++) { add(row - d, col - d); if (board[row - d][col - d]) break; }
     for (let d = 1; row + d < 8 && col + d < 8; d++) { add(row + d, col + d); if (board[row + d][col + d]) break; }
     for (let d = 1; row - d >= 0 && col + d < 8; d++) { add(row - d, col + d); if (board[row - d][col + d]) break; }
@@ -317,7 +318,7 @@ export function ChessGame() {
   useEffect(() => {
     if (mode !== 'vsComputer' || turn !== 'b' || computerThinking || gameOver) return;
     setComputerThinking(true);
-    const useStockfish = !isLegacy && isStockfishAvailable();
+    const useStockfish = isStockfishAvailable();
     if (useStockfish) {
       getStockfishMove(
         boardToFen(board, 'b', chessState),
@@ -334,8 +335,17 @@ export function ChessGame() {
           setComputerThinking(false);
         },
         () => {
+          const comp = getComputerMove(board, chessState);
+          if (comp) {
+            const piece = board[comp.from[0]][comp.from[1]];
+            if (piece) {
+              const { board: next, nextState } = applyMoveInternal(board, chessState, comp.from[0], comp.from[1], comp.to[0], comp.to[1], piece);
+              setBoard(next);
+              setChessState(nextState);
+            }
+            setTurn('w');
+          }
           setComputerThinking(false);
-          setTurn('w');
         }
       );
       return;
@@ -405,7 +415,7 @@ export function ChessGame() {
           <button type="button" class="btn" onClick={() => startGame('vsComputer')}>vs Computer</button>
         </div>
         <div class="chess-engine-level" role="group" aria-label="Engine level">
-          <label for="chess-level">Engine level</label>
+          <label htmlFor="chess-level">Engine level</label>
           <select
             id="chess-level"
             class="chess-level-select"
@@ -432,14 +442,16 @@ export function ChessGame() {
       setHeaderActions(null);
       return () => setHeaderActions(null);
     }
-    const node = (
-      <div class="chess-board-zoom" role="group" aria-label="Board size">
-        <button type="button" class="btn btn-status btn-status-zoom" onClick={() => setBoardSizePx((s) => Math.max(CHESS_BOARD_MIN, s - CHESS_BOARD_STEP))} aria-label="Smaller board">−</button>
-        <span class="chess-board-zoom-label">{boardSizePx}px</span>
-        <button type="button" class="btn btn-status btn-status-zoom" onClick={() => setBoardSizePx((s) => Math.min(CHESS_BOARD_MAX, s + CHESS_BOARD_STEP))} aria-label="Larger board">+</button>
-      </div>
+    setHeaderActions(
+      <GameBoardResize
+        min={CHESS_BOARD_MIN}
+        max={CHESS_BOARD_MAX}
+        step={CHESS_BOARD_STEP}
+        valuePx={boardSizePx}
+        onDecrease={() => setBoardSizePx((s) => Math.max(CHESS_BOARD_MIN, s - CHESS_BOARD_STEP))}
+        onIncrease={() => setBoardSizePx((s) => Math.min(CHESS_BOARD_MAX, s + CHESS_BOARD_STEP))}
+      />
     );
-    setHeaderActions(node);
     return () => setHeaderActions(null);
   }, [setHeaderActions, mode, boardSizePx]);
 

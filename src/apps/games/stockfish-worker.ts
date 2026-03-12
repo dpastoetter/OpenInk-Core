@@ -122,12 +122,10 @@ export function getStockfishMove(
   }).catch(onError);
 }
 
-/** Reset engine state (e.g. new game). Keeps worker; next ensureReady will send ucinewgame. */
+/** Reset engine state (e.g. new game). Keeps worker alive for speed; only sends ucinewgame. */
 export function resetStockfish(): void {
-  initPromise = null;
   if (worker) {
-    worker.terminate();
-    worker = null;
+    worker.postMessage('ucinewgame');
   }
 }
 

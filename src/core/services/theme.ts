@@ -57,7 +57,7 @@ export function createThemeService(initial: GlobalSettings): ThemeService {
         } else {
           setTimeout(() => { list.forEach((l) => l(snapshot)); }, 0);
         }
-      } catch (_) {
+      } catch {
         // Old browsers (e.g. Kindle) may not support setAttribute or setProperty
       }
     },

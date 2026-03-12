@@ -23,6 +23,7 @@ OpenInk follows [ReKindle COMPATIBILITY.md](https://github.com/ReKindleOS/ReKind
 - **No `alert` / `confirm` / `prompt`** – We do not use them; use custom modals if needed.
 - **No `position: sticky` / `fixed`** – We avoid them to prevent checkerboarding on e-ink.
 - **Touch targets** – Minimum `--tap-min: 52px` for tap areas.
+- **Chess vs computer** – Stockfish (WASM) is attempted when Workers and WebAssembly are available; the worker is kept alive across games (no re-init). On Kindle/legacy the built-in fallback engine is used so vs computer still works.
 
 ## Quick tips for Kindle users
 

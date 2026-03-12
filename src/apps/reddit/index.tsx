@@ -72,7 +72,7 @@ function scrollAppContentToTop() {
     if (appContent) appContent.scrollTo(0, 0);
     const root = document.getElementById('root');
     if (root) root.scrollTo(0, 0);
-  } catch (_) {}
+  } catch { /* scroll not available */ }
 }
 
 /** Reddit API comment node (children may include "more" placeholders without body). */

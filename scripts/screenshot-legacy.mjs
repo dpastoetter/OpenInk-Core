@@ -1,5 +1,5 @@
 /**
- * Takes screenshots of the app home screen (light and dark) and saves to docs/screenshots/.
+ * Takes screenshots of the app home screen (light/dark), Reddit widget, and Chess in-game; saves to docs/screenshots/.
  * Requires: npm run build, then npm run screenshot (starts preview, captures, exits).
  */
 import { spawn } from 'node:child_process';
@@ -17,7 +17,7 @@ async function waitForServer(timeoutMs = 15000) {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
     try {
-      await fetch(`${baseUrl}/legacy.html`, { method: 'HEAD' });
+      await fetch(`${baseUrl}/`, { method: 'HEAD' });
       return true;
     } catch {
       await new Promise((r) => setTimeout(r, 300));
@@ -93,6 +93,44 @@ async function main() {
         type: 'png',
       });
       console.log('Saved docs/screenshots/legacy-home-dark.png');
+    }
+
+    // Reddit widget
+    const redditTile = await page.$('button[data-app-id="reddit"]');
+    if (redditTile) {
+      await redditTile.click();
+      await page.waitForSelector('.reddit-app', { timeout: 15000 }).catch(() => null);
+      await page.waitForTimeout(2000);
+      await page.screenshot({
+        path: path.join(screenshotsDir, 'reddit-widget.png'),
+        type: 'png',
+      });
+      console.log('Saved docs/screenshots/reddit-widget.png');
+      const homeBtn = await page.$('button[aria-label="Home"]');
+      if (homeBtn) {
+        await homeBtn.click();
+        await page.waitForSelector('.home-screen', { timeout: 5000 });
+        await page.waitForTimeout(500);
+      }
+    }
+
+    // Chess widget (inside a game: open Chess, start vs Computer, wait for board)
+    const chessTile = await page.$('button[data-app-id="chess"]');
+    if (chessTile) {
+      await chessTile.click();
+      await page.waitForSelector('.chess-game', { timeout: 15000 }).catch(() => null);
+      await page.waitForTimeout(600);
+      const vsComputerBtn = page.locator('button').filter({ hasText: /vs Computer/i }).first();
+      if (await vsComputerBtn.count() > 0) {
+        await vsComputerBtn.click();
+        await page.waitForSelector('.chess-board', { timeout: 10000 }).catch(() => null);
+        await page.waitForTimeout(800);
+      }
+      await page.screenshot({
+        path: path.join(screenshotsDir, 'chess-widget.png'),
+        type: 'png',
+      });
+      console.log('Saved docs/screenshots/chess-widget.png');
     }
   } finally {
     await browser.close();

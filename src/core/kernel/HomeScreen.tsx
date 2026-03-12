@@ -2,6 +2,7 @@ import { memo } from 'preact/compat';
 import { useMemo, useCallback, useState, useEffect } from 'preact/hooks';
 import type { AppDescriptor } from '../../types/plugin';
 import { getAppIcon } from '@core/icons/app-icons';
+import { isSafeLegacySvg } from '../utils/safe-svg';
 import type { ThemeService } from '../services/theme';
 
 interface HomeScreenProps {
@@ -51,8 +52,8 @@ const AppTile = memo(function AppTile({
         <span class="app-tile-icon" aria-hidden="true">
           {IconComponent
             ? <IconComponent className="app-tile-icon-svg" aria-hidden={true} />
-            : typeof import.meta.env.LEGACY !== 'undefined' && import.meta.env.LEGACY && app.iconLegacySvg
-              ? <span class="app-tile-icon-svg" dangerouslySetInnerHTML={{ __html: app.iconLegacySvg }} />
+            : typeof import.meta.env.LEGACY !== 'undefined' && import.meta.env.LEGACY && isSafeLegacySvg(app.iconLegacySvg)
+              ? <span class="app-tile-icon-svg" dangerouslySetInnerHTML={{ __html: app.iconLegacySvg! }} />
               : typeof import.meta.env.LEGACY !== 'undefined' && import.meta.env.LEGACY && app.iconFallback
                 ? app.iconFallback
                 : (app.icon ?? '◻')}

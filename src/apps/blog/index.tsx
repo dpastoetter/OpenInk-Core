@@ -3,6 +3,7 @@ import type { AppContext, AppInstance } from '../../types/plugin';
 import { PLUGIN_API_VERSION } from '../../types/plugin';
 import { PageNav } from '@core/ui/PageNav';
 import { stripHtml } from '@core/utils/html';
+import { sanitizeUrl } from '@core/utils/url';
 import { getCorsProxyUrl, getDefaultCacheTtlMs } from '@core/constants';
 import { AppHeaderActionsContext } from '@core/kernel/AppHeaderActionsContext';
 
@@ -294,11 +295,14 @@ function BlogApp(context: AppContext): AppInstance {
           <div class="blog-article-body">
             {pageParas.length > 0 ? pageParas.map((p, i) => <p key={i}>{p}</p>) : <p class="blog-meta">No content.</p>}
           </div>
-          {selectedItem.link && (
-            <p class="blog-link">
-              <a href={selectedItem.link} target="_blank" rel="noopener noreferrer">Open article</a>
-            </p>
-          )}
+          {(() => {
+            const safeLink = typeof selectedItem.link === 'string' ? sanitizeUrl(selectedItem.link) : '';
+            return safeLink ? (
+              <p class="blog-link">
+                <a href={safeLink} target="_blank" rel="noopener noreferrer">Open article</a>
+              </p>
+            ) : null;
+          })()}
           {totalPages > 1 && (
             <PageNav current={page} total={totalPages} onPrev={() => setArticlePage((p) => Math.max(1, p - 1))} onNext={() => setArticlePage((p) => Math.min(totalPages, p + 1))} />
           )}

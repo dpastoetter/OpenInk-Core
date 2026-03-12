@@ -31,11 +31,11 @@ export function createSettingsService(
         const stored = await storage.get<GlobalSettings>(SETTINGS_KEY);
         if (stored) current = { ...DEFAULT_SETTINGS, ...stored };
         theme.applySettings(current);
-      } catch (_) {
+      } catch {
         current = { ...DEFAULT_SETTINGS };
         try {
           theme.applySettings(current);
-        } catch (_) {}
+        } catch { /* ignore */ }
       }
       return current;
     },

@@ -78,7 +78,7 @@ Settings and theme are separate so that theme is the single source of “what is
 
 - **Status bar** (`src/core/ui/StatusBar.tsx`): Top bar with branding, clock, and Light/Dark toggle. Subscribes to theme for appearance.
 - **Home screen** (`src/core/kernel/HomeScreen.tsx`): Grid of app tiles; sorts by category and name; calls `onLaunch(app)` when a tile is tapped.
-- **App header**: Rendered by the shell (Home, Back, title). Title is dynamic via `getTitle()`.
+- **App header**: Rendered by the shell (Home, Back, title, optional header actions). Title is dynamic via `getTitle()`. Apps can inject custom header controls (e.g. board zoom for games) via **AppHeaderActionsContext** (`setHeaderActions`).
 - **App content**: The result of `instance.render()`; each app owns its layout and uses shared CSS classes (e.g. `.list`, `.btn`, `.panel-title`) and optional core components like `PageNav`.
 
 Core UI components live in `src/core/ui/` (e.g. `PageNav`, `Button`, `List`). Apps may use them or use plain HTML with the same CSS classes.
@@ -93,6 +93,10 @@ Core UI components live in `src/core/ui/` (e.g. `PageNav`, `Button`, `List`). Ap
 ## Utilities and shared code
 
 - **`src/core/utils/html.ts`**: `stripHtml(html)` for safe plain-text extraction from HTML (used by Reddit and News).
+- **`src/core/utils/url.ts`**: `isSafeUrl(url)` and `sanitizeUrl(url)` for safe links and image URLs (https/http only).
+- **`src/core/utils/safe-svg.ts`**: `isSafeLegacySvg(html)` to allow only SVG markup without script or event handlers; used for app tile icons in the shell.
+- **`src/core/utils/fallback-ui.ts`**: `setRootFallback(root, message)` for init/load errors (DOM only, no innerHTML from variables).
+- **`src/apps/games/`**: Chess (move generation, Stockfish worker + fallback engine), Snake, Sudoku, Minesweeper. Shared **GameBoardResize** component provides − / size / + controls in the app header for all four games. Chess uses `stockfish-worker.ts` for UCI/FEN; the Stockfish worker is kept alive across games (reset sends `ucinewgame` only). A simple fallback engine is used when Stockfish is unavailable (e.g. legacy/Kindle).
 - **`src/types/`**: Shared TypeScript types (plugin, settings, services). Implementations live in `core/services` and are re-exported or used via interfaces.
 
 ## Build and runtime

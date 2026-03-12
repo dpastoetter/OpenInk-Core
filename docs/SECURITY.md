@@ -5,7 +5,7 @@ This document describes security measures for running OpenInk as a public websit
 ## Client-side (application)
 
 - **No secrets in the bundle** – The app uses only public APIs and a CORS proxy. No API keys or tokens are embedded; do not add any.
-- **Untrusted content** – Data from Reddit, News, and other APIs is sanitized with `stripHtml()` (DOMParser-based, no `innerHTML` with untrusted input). Rendered content is plain text or Preact-escaped. Init/load error messages use `setRootFallback()` (DOM APIs only, no `innerHTML` from variables).
+- **Untrusted content** – Data from Reddit, News, and other APIs is sanitized with `stripHtml()` (DOMParser-based, no `innerHTML` with untrusted input). Rendered content is plain text or Preact-escaped. Init/load error messages use `setRootFallback()` (DOM APIs only, no `innerHTML` from variables). App tile icons (legacy SVG) are only injected when `isSafeLegacySvg()` passes (no `<script>`, no event handlers).
 - **URL safety** – Links and image URLs from APIs (e.g. RSS, Comics) are validated with `isSafeUrl()` / `sanitizeUrl()`; only `https:` and `http:` are allowed. This prevents `javascript:` or `data:` from being used in `href` or `img src`.
 - **Storage** – `localStorage` is used only for user preferences and cache (theme, weather, dictionary, news cache). No credentials or sensitive data are stored. Storage keys are validated (safe charset, max length); use `encodeURIComponent()` for URL- or user-derived key segments.
 - **CSP** – `index.html` sets a Content-Security-Policy to restrict script/style sources and limit `connect-src` to the app origin and the APIs the app calls. Adjust `connect-src` if you add new backend or proxy domains.

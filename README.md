@@ -1,20 +1,24 @@
 # OpenInk
 
-**Current version: v0.1.1**
+**Current version: 1.0.0**
 
 A minimal, plugin-based “webOS-style” launcher for low-spec and e-ink devices. It provides a home screen, status bar, and a set of built-in apps that run inside a shared shell—tuned for Kindle, grayscale displays, and slow hardware.
 
 ## Features
 
 - **Home screen** – Apps and Games sections; tap any tile to open an app. Touch and click both supported for reliable launch on Kindle.
-- **Status bar** – Zoom (+ / −), theme toggle (light/dark), compact controls.
+- **Status bar** – Zoom (+ / −), theme toggle (light/dark), clock (optional), compact controls.
 - **Single-page legacy build** – One HTML file and one JS bundle (no ES modules), so it runs on Kindle, Silk, and other no-ESM browsers. Black-and-white SVG icons where needed.
 
-| Light | Dark |
-|-------|------|
-| ![Home — light](docs/screenshots/legacy-home-light.png) | ![Home — dark](docs/screenshots/legacy-home-dark.png) |
+| Light mode | Dark mode |
+|------------|-----------|
+| ![Home — light mode](docs/screenshots/legacy-home-light.png) | ![Home — dark mode](docs/screenshots/legacy-home-dark.png) |
 
-To regenerate screenshots: `npm run build` then `npm run screenshot`. Requires [Playwright](https://playwright.dev/) (`npx playwright install chromium` once).
+| Reddit widget | Chess (in-game) |
+|---------------|-----------------|
+| ![Reddit app](docs/screenshots/reddit-widget.png) | ![Chess game](docs/screenshots/chess-widget.png) |
+
+Screenshots show the home screen and sample apps (Reddit, Chess) from the built app. To regenerate: `npm run build` then `npm run screenshot`. Requires [Playwright](https://playwright.dev/) — run `npx playwright install chromium` once if needed (use `PLAYWRIGHT_BROWSERS_PATH=$HOME/.cache/ms-playwright` if browsers are installed in user cache).
 
 ## Tech stack
 
@@ -50,7 +54,7 @@ npm test
 
 - **Settings** – Pixel optics, font size, theme, appearance, subreddit list, CORS proxy, and more.
 - **Calculator** – Basic arithmetic; offline.
-- **Chess** – Two players or vs computer. Full rules: castling, en passant, pawn promotion to queen, checkmate and stalemate. Stockfish used when available (WASM); fallback engine on legacy/Kindle.
+- **Chess** – Two players or vs computer. Full rules: castling, en passant, pawn promotion to queen, queen and rook captures along ranks and files, checkmate and stalemate. Stockfish (WASM) is used when the browser supports Web Workers and WebAssembly; if Stockfish fails to load or respond, the built-in fallback engine is used so vs computer still works (e.g. on legacy/Kindle).
 - **Snake** – Classic snake: arrow keys or on-screen D-pad, pause, score. Touch-friendly for e-ink.
 - **Sudoku** – Puzzle game.
 - **Minesweeper** – Classic minesweeper.
@@ -62,6 +66,9 @@ npm test
 - **Dictionary** – Offline/cached lookups.
 - **Weather** – Current and forecast (network).
 - **Timer**, **Stopwatch**, **World clock** – Time utilities.
+- **To-do** – Tasks with add/toggle/remove; stored locally.
+- **Recipes** – Search TheMealDB; list and detail view; cached.
+- **Picture Frame** – Slideshow of built-in and custom images; optional wake lock; add by URL or browse sample photos.
 
 ## Performance & e-ink
 
@@ -104,12 +111,14 @@ No secrets in the bundle; sanitized API content (XSS prevention); Content-Securi
 
 ## Project structure
 
-- `src/core/kernel/` – Shell, home screen, app lifecycle.
-- `src/core/plugins/` – Plugin registry.
+- `src/core/kernel/` – Shell, home screen, app lifecycle, AppHeaderActionsContext.
+- `src/core/plugins/` – Plugin registry (lazy load on first launch).
 - `src/core/icons/` – App launcher icons: Lucide in `app-icons.tsx`; legacy build uses `app-icons-legacy.ts` and `legacy-svg.ts`.
 - `src/core/services/` – Storage, network, theme, settings.
-- `src/core/ui/` – StatusBar, PageNav, shared UI.
-- `src/apps/` – App plugins (settings, games, news, reddit, comics, timer, stopwatch, worldclock, dictionary, finance, weather, blog, etc.).
+- `src/core/ui/` – StatusBar, PageNav, Button, List, shared UI.
+- `src/core/utils/` – html (stripHtml), url (isSafeUrl, sanitizeUrl), safe-svg (isSafeLegacySvg), date, fallback-ui.
+- `src/apps/` – App plugins: settings, games (chess, snake, sudoku, minesweeper), news, reddit, comics, blog, dictionary, finance, weather, timer, stopwatch, worldclock, todo, recipes, pictureframe.
+- `src/apps/games/` – GameBoardResize (shared − / size / + header controls for all game boards).
 - `src/types/` – Shared types and plugin API.
 
 ## License

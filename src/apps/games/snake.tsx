@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef, useContext, useMemo } from 'preact/hooks';
 import { AppHeaderActionsContext } from '@core/kernel/AppHeaderActionsContext';
+import { GameBoardResize } from './GameBoardResize';
 
 const COLS = 15;
 const ROWS = 15;
@@ -46,14 +47,16 @@ export function SnakeGame() {
 
   useEffect(() => {
     if (!setHeaderActions) return;
-    const node = (
-      <div class="chess-board-zoom" role="group" aria-label="Board size">
-        <button type="button" class="btn btn-status btn-status-zoom" onClick={() => setBoardSizePx((s) => Math.max(SNAKE_BOARD_MIN, s - SNAKE_BOARD_STEP))} aria-label="Smaller board">−</button>
-        <span class="chess-board-zoom-label">{boardSizePx}px</span>
-        <button type="button" class="btn btn-status btn-status-zoom" onClick={() => setBoardSizePx((s) => Math.min(SNAKE_BOARD_MAX, s + SNAKE_BOARD_STEP))} aria-label="Larger board">+</button>
-      </div>
+    setHeaderActions(
+      <GameBoardResize
+        min={SNAKE_BOARD_MIN}
+        max={SNAKE_BOARD_MAX}
+        step={SNAKE_BOARD_STEP}
+        valuePx={boardSizePx}
+        onDecrease={() => setBoardSizePx((s) => Math.max(SNAKE_BOARD_MIN, s - SNAKE_BOARD_STEP))}
+        onIncrease={() => setBoardSizePx((s) => Math.min(SNAKE_BOARD_MAX, s + SNAKE_BOARD_STEP))}
+      />
     );
-    setHeaderActions(node);
     return () => setHeaderActions(null);
   }, [setHeaderActions, boardSizePx]);
 
@@ -157,50 +160,42 @@ export function SnakeGame() {
         {paused && <span class="snake-paused">Paused</span>}
         {gameOver && <span class="snake-gameover">Game over</span>}
       </div>
-      <div class="snake-board" style={boardStyle}>
-        {Array.from({ length: ROWS }, (_, r) =>
-          Array.from({ length: COLS }, (_, c) => {
-            const key = pos(r, c);
-            const isSnake = snakeSet.has(key);
-            const isHead = snake.length > 0 && snake[0].r === r && snake[0].c === c;
-            const isFood = key === foodKey;
-            let cellClass = 'snake-cell';
-            if (isHead) cellClass += ' snake-head';
-            else if (isSnake) cellClass += ' snake-body';
-            else if (isFood) cellClass += ' snake-food';
-            return <div key={key} class={cellClass} aria-hidden="true" />;
-          })
+      <div class="snake-main">
+        <div class="snake-board" style={boardStyle}>
+          {Array.from({ length: ROWS }, (_, r) =>
+            Array.from({ length: COLS }, (_, c) => {
+              const key = pos(r, c);
+              const isSnake = snakeSet.has(key);
+              const isHead = snake.length > 0 && snake[0].r === r && snake[0].c === c;
+              const isFood = key === foodKey;
+              let cellClass = 'snake-cell';
+              if (isHead) cellClass += ' snake-head';
+              else if (isSnake) cellClass += ' snake-body';
+              else if (isFood) cellClass += ' snake-food';
+              return <div key={key} class={cellClass} aria-hidden="true" />;
+            })
+          )}
+        </div>
+        {!gameOver && (
+          <div class="snake-dpad" role="group" aria-label="Direction">
+            <button type="button" class="btn snake-dpad-btn" onClick={(e) => onDirTap(e, 'up')} onTouchEnd={(e) => onDirTap(e, 'up')} aria-label="Up">↑</button>
+            <div class="snake-dpad-mid">
+              <button type="button" class="btn snake-dpad-btn" onClick={(e) => onDirTap(e, 'left')} onTouchEnd={(e) => onDirTap(e, 'left')} aria-label="Left">←</button>
+              <button type="button" class="btn snake-dpad-btn snake-dpad-center" onClick={() => setPaused((p) => !p)} onTouchEnd={(e) => { (e as TouchEvent).preventDefault(); setPaused((p) => !p); }} aria-label={paused ? 'Resume' : 'Pause'}>{paused ? '▶' : '‖'}</button>
+              <button type="button" class="btn snake-dpad-btn" onClick={(e) => onDirTap(e, 'right')} onTouchEnd={(e) => onDirTap(e, 'right')} aria-label="Right">→</button>
+            </div>
+            <button type="button" class="btn snake-dpad-btn" onClick={(e) => onDirTap(e, 'down')} onTouchEnd={(e) => onDirTap(e, 'down')} aria-label="Down">↓</button>
+          </div>
         )}
       </div>
       {gameOver ? (
         <div class="snake-actions">
-          <button type="button" class="btn" onClick={reset}>
-            Play again
+          <button type="button" class="btn snake-play-again" onClick={reset} aria-label="Play again" title="Play again">
+            ↻
           </button>
         </div>
       ) : (
-        <>
-          <div class="snake-dpad" role="group" aria-label="Direction">
-            <button type="button" class="btn snake-dpad-btn" onClick={(e) => onDirTap(e, 'up')} onTouchEnd={(e) => onDirTap(e, 'up')} aria-label="Up">
-              ↑
-            </button>
-            <div class="snake-dpad-mid">
-              <button type="button" class="btn snake-dpad-btn" onClick={(e) => onDirTap(e, 'left')} onTouchEnd={(e) => onDirTap(e, 'left')} aria-label="Left">
-                ←
-              </button>
-              <button type="button" class="btn snake-dpad-btn snake-dpad-center" onClick={() => setPaused((p) => !p)} onTouchEnd={(e) => { (e as TouchEvent).preventDefault(); setPaused((p) => !p); }} aria-label={paused ? 'Resume' : 'Pause'}>
-                {paused ? '▶' : '‖'}
-              </button>
-              <button type="button" class="btn snake-dpad-btn" onClick={(e) => onDirTap(e, 'right')} onTouchEnd={(e) => onDirTap(e, 'right')} aria-label="Right">
-                →
-              </button>
-            </div>
-            <button type="button" class="btn snake-dpad-btn" onClick={(e) => onDirTap(e, 'down')} onTouchEnd={(e) => onDirTap(e, 'down')} aria-label="Down">
-              ↓
-            </button>
-          </div>
-          <p class="snake-hint">Arrow keys or tap buttons. Space to pause.</p>
-        </>
+        <p class="snake-hint">Arrow keys or tap buttons. Space to pause.</p>
       )}
     </div>
   );

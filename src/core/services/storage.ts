@@ -33,7 +33,7 @@ function createMemoryStorage(): StorageService {
       if (!validateKey(key)) return;
       try {
         map.set(PREFIX + key, JSON.stringify(value));
-      } catch (_) {}
+      } catch { /* ignore */ }
     },
     async remove(key: string): Promise<void> {
       if (!validateKey(key)) return;
@@ -41,12 +41,12 @@ function createMemoryStorage(): StorageService {
     },
     async keys(prefixFilter?: string): Promise<string[]> {
       const out: string[] = [];
-      map.forEach((_, k) => {
-        if (!k.startsWith(PREFIX)) return;
+      for (const k of map.keys()) {
+        if (!k.startsWith(PREFIX)) continue;
         const bare = k.slice(PREFIX.length);
-        if (!validateKey(bare)) return;
+        if (!validateKey(bare)) continue;
         if (!prefixFilter || bare.startsWith(prefixFilter)) out.push(bare);
-      });
+      }
       return out;
     },
   };
@@ -60,7 +60,7 @@ export function createStorageService(): StorageService {
       localStorage.getItem('_');
       storage = localStorage;
     }
-  } catch (_) {
+  } catch {
     storage = null;
   }
   if (!storage) return createMemoryStorage();
@@ -83,14 +83,14 @@ export function createStorageService(): StorageService {
       if (!validateKey(key)) return;
       try {
         storage!.setItem(prefixed(key), JSON.stringify(value));
-      } catch (_) {}
+      } catch { /* ignore */ }
     },
 
     async remove(key: string): Promise<void> {
       if (!validateKey(key)) return;
       try {
         storage!.removeItem(prefixed(key));
-      } catch (_) {}
+      } catch { /* ignore */ }
     },
 
     async keys(prefixFilter?: string): Promise<string[]> {
@@ -104,7 +104,7 @@ export function createStorageService(): StorageService {
             if (!prefixFilter || bare.startsWith(prefixFilter)) out.push(bare);
           }
         }
-      } catch (_) {}
+      } catch { /* ignore */ }
       return out;
     },
   };

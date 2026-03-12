@@ -66,11 +66,18 @@ Read current values from `context.services.settings.get()` or `context.services.
 - **`@core/ui/Button`**, **`@core/ui/List`** – Optional; you can also use plain `<button class="btn">` and `<ul class="list">` with the global CSS in `index.css`.
 - **`@core/utils/html`** – `stripHtml(html)` returns plain text from HTML (safe for user content). Useful for RSS descriptions or Reddit/API HTML bodies.
 
-Global classes like `.panel-title`, `.list`, `.btn`, `.btn-nav` are defined in `src/index.css` and keep the look consistent across apps.
+Global classes like `.panel-title`, `.list`, `.btn`, `.btn-nav` are defined in `src/index.css` and keep the look consistent across apps. Use `.widget-hint` for short in-app help text (e.g. "Search recipes by name. Results from TheMealDB, cached offline."); style is muted and compact.
+
+## Header actions (e.g. board zoom)
+
+Games that need resizable boards (Chess, Snake, Sudoku, Minesweeper) use the shared **GameBoardResize** component and inject it into the shell header via **AppHeaderActionsContext**. In your app, call `useContext(AppHeaderActionsContext)` to get `setHeaderActions`; pass a VNode (e.g. `<GameBoardResize min={…} max={…} valuePx={…} onDecrease={…} onIncrease={…} />`) and clear it on unmount with `setHeaderActions(null)`. See `src/apps/games/snake.tsx` or `chess.tsx` for the pattern.
 
 ## Example plugins
 
-See **Dictionary** (`src/apps/dictionary/index.tsx`) for a simple search-and-fetch app. For dynamic title and back stack (getTitle, canGoBack, goBack), see **Reddit** (`src/apps/reddit/index.tsx`) or **News** (`src/apps/news/index.tsx`).
+- **Dictionary** (`src/apps/dictionary/index.tsx`) – Simple search-and-fetch app.
+- **Reddit** / **News** (`src/apps/reddit/index.tsx`, `news/index.tsx`) – Dynamic title and back stack (getTitle, canGoBack, goBack).
+- **Recipes** (`src/apps/recipes/index.tsx`) – Search, list, detail view with back navigation and cached results.
+- **Picture Frame** (`src/apps/pictureframe/index.tsx`) – Fullscreen overlay via `createPortal(..., document.body)`, wake lock, custom images from URL or browse.
 
 ## Type safety
 

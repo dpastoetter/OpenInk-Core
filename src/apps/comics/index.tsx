@@ -275,7 +275,10 @@ function ComicsApp(context: AppContext): AppInstance {
                 #{comic.num} · {comic.year}-{comic.month}-{comic.day}
               </p>
               <div class="comics-image-wrap">
-                <img src={comic.img} alt={comic.title} title={comic.alt} class="comics-image" loading="lazy" decoding="async" />
+                {(() => {
+                  const src = sanitizeUrl(comic.img);
+                  return src ? <img src={src} alt={comic.title} title={comic.alt} class="comics-image" loading="lazy" decoding="async" /> : null;
+                })()}
               </div>
               {showAlt && comic.alt && <p class="comics-alt">{comic.alt}</p>}
               <button type="button" class="btn comics-alt-btn" onClick={() => setShowAlt((s) => !s)}>

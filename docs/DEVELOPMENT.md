@@ -18,7 +18,7 @@ This document covers how to run, build, test, and work with the codebase day to 
 | `npm run lint` | Run ESLint on `src/` (TypeScript + jsx-a11y) |
 | `npm test` | Run Vitest once |
 | `npm run test:watch` | Run Vitest in watch mode |
-| `npm run screenshot` | After `npm run build`, starts preview and captures home screen (light and dark) to `docs/screenshots/legacy-home-*.png`. Requires Playwright. |
+| `npm run screenshot` | After `npm run build`, starts preview and captures home screen (light/dark), Reddit widget, and Chess in-game to `docs/screenshots/`. Requires Playwright (`npx playwright install chromium`; use `PLAYWRIGHT_BROWSERS_PATH=$HOME/.cache/ms-playwright` if needed). |
 
 ## Project structure
 
@@ -51,15 +51,22 @@ src/
 │   │   ├── Button.tsx
 │   │   └── List.tsx
 │   └── utils/
-│       └── html.ts           # stripHtml and other helpers
+│       ├── html.ts           # stripHtml
+│       ├── url.ts            # isSafeUrl, sanitizeUrl
+│       ├── safe-svg.ts       # isSafeLegacySvg (app tile icons)
+│       ├── date.ts           # formatTimeLegacy, etc.
+│       └── fallback-ui.ts    # setRootFallback (no innerHTML)
 └── apps/                     # App plugins
     ├── registry.ts           # registerAllApps(), LAZY_APPS
     ├── settings/
     ├── finance/
-    ├── games/
+    ├── games/                # Chess (Stockfish + fallback), Snake, Sudoku, Minesweeper; GameBoardResize for board zoom
     ├── news/
     ├── reddit/
     ├── dictionary/
+    ├── todo/
+    ├── recipes/
+    ├── pictureframe/
     └── …
 
 public/
@@ -74,7 +81,7 @@ docs/                         # Documentation
 ├── KINDLE-COMPATIBILITY.md   # Kindle/e-ink constraints and legacy behaviour
 ├── plugins.md                # How to add and implement apps
 ├── SECURITY.md               # Security and deployment checklist
-└── screenshots/              # Captured home screens (light-mode, dark-mode, legacy-home-*)
+└── screenshots/              # legacy-home-light.png, legacy-home-dark.png, reddit-widget.png, chess-widget.png
 ```
 
 ## Adding a new app
@@ -124,14 +131,14 @@ docs/                         # Documentation
 
 - **ESLint** – `eslint.config.js` with TypeScript and jsx-a11y; run with `npm run lint`.
 - **PWA** – [vite-plugin-pwa](https://vite-pwa-org.netlify.app/) generates a service worker (Workbox) for offline caching; registration in `main.tsx` (production only). Manifest: [public/manifest.json](public/manifest.json).
-- **Build** – `vite.legacy-single.config.ts` produces `openink-legacy-single.js` (IIFE, Babel Chrome 44). `scripts/generate-legacy-html.mjs` then writes `dist/index.html`, which loads that bundle. There is only one app page; dev and production both use the same legacy-style bundle.
+- **Build** – The only production build is the legacy bundle: `npm run build` runs `vite build --config vite.legacy-single.config.ts`, producing `dist/assets/openink-legacy-single.js` (and CSS). Then `scripts/generate-legacy-html.mjs` writes `dist/index.html`, which loads that bundle. Target is Chrome 44 (Babel). Dev server (`npm run dev`) uses the default Vite config; production deploy uses the legacy single bundle only.
 
 ## Performance (legacy / Kindle)
 
 The legacy bundle and runtime are tuned for low-spec e-ink devices:
 
 - **Fast first paint** – The app renders immediately with default theme/settings; stored settings are loaded in the background and applied when ready (no blocking on `localStorage` before first frame).
-- **Smaller legacy bundle** – Heroicons are not included in the legacy build. The legacy launcher uses `app-icons-legacy.ts` (aliased in `vite.legacy-single.config.ts`), so tiles use inline SVG or fallback text only; this keeps the IIFE bundle smaller and parse/execution faster.
+- **Smaller legacy bundle** – Lucide is not included in the legacy build. The legacy launcher uses `app-icons-legacy.ts` (aliased in `vite.legacy-single.config.ts`), so tiles use inline SVG from `legacy-svg.ts` or fallback text only; this keeps the IIFE bundle smaller and parse/execution faster.
 - **Stable Shell callbacks** – `launchApp`, `closeApp`, and `goToHome` are stabilized with a ref to the current app instance, so child components (e.g. HomeScreen) receive stable props and avoid unnecessary re-renders when switching apps.
 - **Clock and theme** – On legacy, the status bar clock uses a simple formatter and updates every 60 seconds to limit reflows; theme is applied via `setAttribute` on the document so high-contrast works without extra layout.
 - **CSS** – Legacy uses `html.legacy-browser` scoping: no transitions/animations, system fonts, grayscale, and flex-based app grid (no CSS Grid). See `index.css` and [KINDLE-COMPATIBILITY.md](KINDLE-COMPATIBILITY.md).
