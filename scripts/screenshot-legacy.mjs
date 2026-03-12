@@ -68,7 +68,7 @@ async function main() {
 
   const browser = await playwright.chromium.launch({ headless: true });
   const context = await browser.newContext({
-    viewport: { width: 420, height: 720 },
+    viewport: { width: 600, height: 900 },
     deviceScaleFactor: 2,
   });
 
