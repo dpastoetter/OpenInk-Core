@@ -18,7 +18,7 @@ This document covers how to run, build, test, and work with the codebase day to 
 | `npm run lint` | Run ESLint on `src/` (TypeScript + jsx-a11y) |
 | `npm test` | Run Vitest once |
 | `npm run test:watch` | Run Vitest in watch mode |
-| `npm run screenshot` | After `npm run build`, starts preview and captures home screen (light/dark), Reddit widget, and Chess in-game to `docs/screenshots/`. Requires Playwright (`npx playwright install chromium`; use `PLAYWRIGHT_BROWSERS_PATH=$HOME/.cache/ms-playwright` if needed). |
+| `npm run screenshot` | After `npm run build`, runs `scripts/screenshot-legacy.mjs`: starts preview and captures home screen (light/dark), Reddit widget, and Chess in-game to `docs/screenshots/`. Use for the legacy single-page build. Requires Playwright (`npx playwright install chromium`; use `PLAYWRIGHT_BROWSERS_PATH=$HOME/.cache/ms-playwright` if needed). |
 
 ## Project structure
 
@@ -29,11 +29,14 @@ src/
 ├── types/                    # Shared TypeScript types
 │   ├── plugin.ts             # WebOSApp, AppContext, AppInstance
 │   ├── settings.ts           # GlobalSettings, defaults
-│   └── services.ts           # Service interfaces (storage, network, theme, settings)
+│   ├── services.ts           # Service interfaces (storage, network, theme, settings)
+│   └── feed.ts                # RssItem (shared by Blog, News, Comics)
 ├── core/
 │   ├── kernel/               # Shell and home screen
 │   │   ├── shell.tsx         # App container, header, history
 │   │   └── HomeScreen.tsx    # App grid and launch
+│   ├── hooks/
+│   │   └── useTapVsScrollThreshold.ts  # Suppress click when pointer moved (Kindle scroll vs tap)
 │   ├── plugins/
 │   │   └── registry.ts       # App registry (register / getApp / getAllApps)
 │   ├── icons/
@@ -55,7 +58,9 @@ src/
 │       ├── url.ts            # isSafeUrl, sanitizeUrl
 │       ├── safe-svg.ts       # isSafeLegacySvg (app tile icons)
 │       ├── date.ts           # formatTimeLegacy, etc.
-│       └── fallback-ui.ts    # setRootFallback (no innerHTML)
+│       ├── fallback-ui.ts    # setRootFallback (no innerHTML)
+│       ├── rss.ts            # parseRssItems, getFeedTitleFromXml (Blog, News, Comics)
+│       └── settings-parsers.ts  # parseJsonArray, guards for settings JSON (blog feeds, etc.)
 └── apps/                     # App plugins
     ├── registry.ts           # registerAllApps(), LAZY_APPS
     ├── settings/
@@ -73,7 +78,10 @@ public/
 └── …
 
 scripts/
-└── generate-legacy-html.mjs   # Post-build: generates dist/index.html (single-page app)
+├── copy-stockfish.mjs         # Pre-build: copy Stockfish worker to public/
+├── generate-legacy-html.mjs   # Post-build: generates dist/index.html (single-page app)
+├── screenshot-legacy.mjs      # Captures screenshots from legacy build (npm run screenshot)
+└── screenshot-modern.mjs       # Optional: captures from dev/modern build
 
 docs/                         # Documentation
 ├── ARCHITECTURE.md           # High-level design (this repo)

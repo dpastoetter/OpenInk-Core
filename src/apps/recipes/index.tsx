@@ -58,17 +58,8 @@ interface MealDetail extends MealSummary {
 }
 
 function RecipeApp(context: AppContext): AppInstance {
-  // #region agent log
-  fetch('http://127.0.0.1:7647/ingest/0cc433dc-bc56-4722-8dcd-55136a56519b', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'fbf877' }, body: JSON.stringify({ sessionId: 'fbf877', location: 'recipes/index.tsx', message: 'RecipeApp entered', data: {}, hypothesisId: 'LAUNCH', timestamp: Date.now() }) }).catch(() => {});
-  // #endregion
   const { network, storage } = context.services;
   const backRef: { current: { view: 'search' | 'detail'; setView: (v: 'search' | 'detail') => void; setDetailId: (id: string | null) => void } | null } = { current: null };
-
-  // #region agent log
-  const log = (message: string, data: Record<string, unknown>, hypothesisId: string) => {
-    fetch('http://127.0.0.1:7647/ingest/0cc433dc-bc56-4722-8dcd-55136a56519b', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'fbf877' }, body: JSON.stringify({ sessionId: 'fbf877', location: 'recipes/index.tsx', message, data, hypothesisId, timestamp: Date.now() }) }).catch(() => {});
-  };
-  // #endregion
 
   function RecipeUI() {
     const [view, setView] = useState<'search' | 'detail'>('search');
@@ -98,20 +89,11 @@ function RecipeApp(context: AppContext): AppInstance {
         const base = `https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(q)}`;
         const proxy = getCorsProxyUrl(context.services.settings.get().corsProxyUrl);
         const url = proxy + encodeURIComponent(base);
-        // #region agent log
-        log('search request', { proxy: proxy.slice(0, 40), urlLen: url.length, query: q }, 'B');
-        // #endregion
         const data = await network.fetchJson<{ meals: MealSummary[] | null }>(url);
         const list = data?.meals && Array.isArray(data.meals) ? data.meals : [];
-        // #region agent log
-        log('search response', { mealsCount: data?.meals?.length ?? null, listLength: list.length }, 'C');
-        // #endregion
         setMeals(list);
         if (list.length > 0) await storage.set(cacheKey, list);
       } catch (e) {
-        // #region agent log
-        log('search error', { err: e instanceof Error ? e.message : String(e) }, 'B');
-        // #endregion
         setError(e instanceof Error ? e.message : 'Search failed');
       } finally {
         setLoading(false);
@@ -135,20 +117,11 @@ function RecipeApp(context: AppContext): AppInstance {
           const base = `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${encodeURIComponent(id)}`;
           const proxy = getCorsProxyUrl(context.services.settings.get().corsProxyUrl);
           const url = proxy + encodeURIComponent(base);
-          // #region agent log
-          log('loadDetail request', { id, proxy: proxy.slice(0, 40) }, 'D');
-          // #endregion
           const data = await network.fetchJson<{ meals: MealDetail[] | null }>(url);
           const meal = data?.meals?.[0] ?? null;
-          // #region agent log
-          log('loadDetail response', { hasMeal: !!meal, strMeal: meal?.strMeal ?? null }, 'D');
-          // #endregion
           setDetail(meal || null);
           if (meal) await storage.set(cacheKey, meal);
         } catch (e) {
-          // #region agent log
-          log('loadDetail error', { err: e instanceof Error ? e.message : String(e) }, 'D');
-          // #endregion
           setError(e instanceof Error ? e.message : 'Load failed');
         } finally {
           setDetailLoading(false);
@@ -173,9 +146,6 @@ function RecipeApp(context: AppContext): AppInstance {
         }).filter(Boolean) as { ing: string; measure: string }[]
       : [];
 
-    // #region agent log
-    log('RecipeUI render', { view }, 'E');
-    // #endregion
     if (view === 'detail') {
       return (
         <div class="recipes-app">
@@ -262,22 +232,8 @@ function RecipeApp(context: AppContext): AppInstance {
 
   return {
     render: () => <RecipeUI />,
-    getTitle: () => {
-      const currentView = backRef.current?.view ?? 'search';
-      const title = currentView === 'detail' ? 'Recipe' : 'Recipes';
-      // #region agent log
-      log('getTitle called', { view: currentView, title }, 'A');
-      // #endregion
-      return title;
-    },
-    canGoBack: () => {
-      const currentView = backRef.current?.view ?? 'search';
-      const can = currentView === 'detail';
-      // #region agent log
-      log('canGoBack called', { view: currentView, canGoBack: can }, 'A');
-      // #endregion
-      return can;
-    },
+    getTitle: () => (backRef.current?.view === 'detail' ? 'Recipe' : 'Recipes'),
+    canGoBack: () => backRef.current?.view === 'detail',
     goBack: () => {
       backRef.current?.setView('search');
       backRef.current?.setDetailId(null);

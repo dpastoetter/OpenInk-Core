@@ -68,6 +68,10 @@ Read current values from `context.services.settings.get()` or `context.services.
 
 Global classes like `.panel-title`, `.list`, `.btn`, `.btn-nav` are defined in `src/index.css` and keep the look consistent across apps. Use `.widget-hint` for short in-app help text (e.g. "Search recipes by name. Results from TheMealDB, cached offline."); style is muted and compact.
 
+## Feed / RSS apps
+
+Blog, News, and Comics share a common pattern: CORS proxy and cache TTL from `context.services.settings.get()`, cache keys in storage, and RSS/Atom parsing. Use **`@core/utils/rss`** for `parseRssItems(xml, source)` and `getFeedTitleFromXml(xml)`, and **`src/types/feed.ts`** for the shared `RssItem` type. Proxy and cache helpers are in **`@core/constants`** (`getCorsProxyUrl`, `getDefaultCacheTtlMs`).
+
 ## Header actions (e.g. board zoom)
 
 Games that need resizable boards (Chess, Snake, Sudoku, Minesweeper) use the shared **GameBoardResize** component and inject it into the shell header via **AppHeaderActionsContext**. In your app, call `useContext(AppHeaderActionsContext)` to get `setHeaderActions`; pass a VNode (e.g. `<GameBoardResize min={…} max={…} valuePx={…} onDecrease={…} onIncrease={…} />`) and clear it on unmount with `setHeaderActions(null)`. See `src/apps/games/snake.tsx` or `chess.tsx` for the pattern.

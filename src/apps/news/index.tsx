@@ -4,6 +4,8 @@ import { PLUGIN_API_VERSION } from '../../types/plugin';
 import { PageNav } from '@core/ui/PageNav';
 import { stripHtml } from '@core/utils/html';
 import { getCorsProxyUrl, getDefaultCacheTtlMs } from '@core/constants';
+import { parseRssItems } from '@core/utils/rss';
+import type { RssItem } from '../../types/feed';
 
 const CACHE_KEY = 'news:cache';
 
@@ -39,36 +41,10 @@ function sourceNameFromUrl(url: string): string {
   }
 }
 
-interface NewsItem {
-  title: string;
-  link: string;
-  pubDate: string;
-  description: string;
-  source: string;
-  content?: string;
-}
-
 interface CachedFeed {
   url: string;
-  items: NewsItem[];
+  items: RssItem[];
   fetchedAt: number;
-}
-
-
-function parseRss(xml: string, source: string): NewsItem[] {
-  const items: NewsItem[] = [];
-  const doc = new DOMParser().parseFromString(xml, 'text/xml');
-  const entries = doc.querySelectorAll('item');
-  entries.forEach((el) => {
-    items.push({
-      title: el.querySelector('title')?.textContent?.trim() ?? '',
-      link: el.querySelector('link')?.textContent?.trim() ?? '',
-      pubDate: el.querySelector('pubDate')?.textContent?.trim() ?? '',
-      description: el.querySelector('description')?.textContent?.trim() ?? '',
-      source,
-    });
-  });
-  return items;
 }
 
 const ITEMS_PER_PAGE = 5;
@@ -77,15 +53,15 @@ function NewsApp(context: AppContext): AppInstance {
   const { storage, network, settings } = context.services;
   const titleRef: { current: string } = { current: 'Headlines' };
   const backRef: {
-    current: { setSelected: (item: NewsItem | null) => void; setArticlePage: (p: number) => void } | null;
+    current: { setSelected: (item: RssItem | null) => void; setArticlePage: (p: number) => void } | null;
   } = { current: null };
 
   function NewsUI() {
     const [feeds] = useState<string[]>(DEFAULT_FEEDS);
-    const [items, setItems] = useState<NewsItem[]>([]);
+    const [items, setItems] = useState<RssItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [selected, setSelected] = useState<NewsItem | null>(null);
+    const [selected, setSelected] = useState<RssItem | null>(null);
     const [articlePage, setArticlePage] = useState(1);
     const [listPage, setListPage] = useState(1);
     backRef.current = { setSelected, setArticlePage };
@@ -94,7 +70,7 @@ function NewsApp(context: AppContext): AppInstance {
     const loadFeeds = useCallback(async () => {
       setLoading(true);
       setError(null);
-      const all: NewsItem[] = [];
+      const all: RssItem[] = [];
       let lastError: string | null = null;
       const proxy = getCorsProxyUrl(settings.get().corsProxyUrl);
       const cacheTtl = getDefaultCacheTtlMs(settings.get().defaultCacheTtl);
@@ -110,7 +86,7 @@ function NewsApp(context: AppContext): AppInstance {
           }
           const proxyUrl = proxy + encodeURIComponent(url);
           const xml = await network.fetchText(proxyUrl);
-          const parsed = parseRss(xml, sourceName);
+          const parsed = parseRssItems(xml, sourceName);
           await storage.set(cacheKey, { url, items: parsed, fetchedAt: Date.now() });
           all.push(...parsed);
         } catch (e) {

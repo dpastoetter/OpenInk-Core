@@ -5,15 +5,15 @@ import { PageNav } from '@core/ui/PageNav';
 import { stripHtml } from '@core/utils/html';
 import { sanitizeUrl } from '@core/utils/url';
 import { getCorsProxyUrl, getDefaultCacheTtlMs } from '@core/constants';
+import { parseRssItems, getFeedTitleFromXml } from '@core/utils/rss';
+import { parseJsonArray, isBlogFeed } from '@core/utils/settings-parsers';
+import type { BlogFeedInput } from '@core/utils/settings-parsers';
+import type { RssItem } from '../../types/feed';
 import { AppHeaderActionsContext } from '@core/kernel/AppHeaderActionsContext';
 
 const CACHE_KEY = 'blog:cache';
 
-export interface BlogFeed {
-  id: string;
-  name: string;
-  url: string;
-}
+export type BlogFeed = BlogFeedInput;
 
 const DEFAULT_FEEDS: BlogFeed[] = [
   { id: 'hackernews', name: 'Hacker News', url: 'https://hnrss.org/frontpage' },
@@ -23,21 +23,11 @@ const DEFAULT_FEEDS: BlogFeed[] = [
 ];
 
 function parseBlogFeeds(json: string | undefined): BlogFeed[] {
-  if (!json || !json.trim()) return [...DEFAULT_FEEDS];
-  try {
-    const arr = JSON.parse(json) as unknown;
-    if (!Array.isArray(arr)) return [...DEFAULT_FEEDS];
-    const out: BlogFeed[] = [];
-    for (const x of arr) {
-      if (x && typeof x === 'object' && typeof (x as BlogFeed).id === 'string' && typeof (x as BlogFeed).name === 'string' && typeof (x as BlogFeed).url === 'string') {
-        const u = (x as BlogFeed).url.trim();
-        if (u) out.push({ id: (x as BlogFeed).id, name: (x as BlogFeed).name, url: u });
-      }
-    }
-    return out.length ? out : [...DEFAULT_FEEDS];
-  } catch {
-    return [...DEFAULT_FEEDS];
-  }
+  return parseJsonArray(json, [...DEFAULT_FEEDS], isBlogFeed).map((x) => ({
+    id: x.id,
+    name: x.name,
+    url: x.url.trim(),
+  }));
 }
 
 function blogFeedsToJson(feeds: BlogFeed[]): string {
@@ -53,43 +43,10 @@ function slugFromUrl(url: string): string {
   }
 }
 
-interface BlogItem {
-  title: string;
-  link: string;
-  pubDate: string;
-  description: string;
-  source: string;
-}
-
 interface CachedBlogFeed {
   url: string;
-  items: BlogItem[];
+  items: RssItem[];
   fetchedAt: number;
-}
-
-function parseRss(xml: string, source: string): BlogItem[] {
-  const items: BlogItem[] = [];
-  const doc = new DOMParser().parseFromString(xml, 'text/xml');
-  const entries = doc.querySelectorAll('item');
-  entries.forEach((el) => {
-    items.push({
-      title: el.querySelector('title')?.textContent?.trim() ?? '',
-      link: el.querySelector('link')?.textContent?.trim() ?? '',
-      pubDate: el.querySelector('pubDate')?.textContent?.trim() ?? '',
-      description: el.querySelector('description')?.textContent?.trim() ?? '',
-      source,
-    });
-  });
-  return items;
-}
-
-/** Get feed title from RSS/Atom XML. */
-function getFeedTitleFromXml(xml: string): string | null {
-  const doc = new DOMParser().parseFromString(xml, 'text/xml');
-  const rssTitle = doc.querySelector('channel > title')?.textContent?.trim();
-  if (rssTitle) return rssTitle;
-  const atomTitle = doc.querySelector('feed > title')?.textContent?.trim();
-  return atomTitle ?? null;
 }
 
 /** Normalize input to a URL (prepend https if needed). */
@@ -108,8 +65,8 @@ function BlogApp(context: AppContext): AppInstance {
   const backRef: {
     current: {
       setSelectedFeed: (f: BlogFeed | null) => void;
-      setSelectedItem: (item: BlogItem | null) => void;
-      selectedItem: BlogItem | null;
+      setSelectedItem: (item: RssItem | null) => void;
+      selectedItem: RssItem | null;
       selectedFeed: BlogFeed | null;
     } | null;
   } = { current: null };
@@ -122,10 +79,10 @@ function BlogApp(context: AppContext): AppInstance {
     const [discoverLoading, setDiscoverLoading] = useState(false);
     const [discoverError, setDiscoverError] = useState<string | null>(null);
     const [selectedFeed, setSelectedFeed] = useState<BlogFeed | null>(null);
-    const [items, setItems] = useState<BlogItem[]>([]);
+    const [items, setItems] = useState<RssItem[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [selectedItem, setSelectedItem] = useState<BlogItem | null>(null);
+    const [selectedItem, setSelectedItem] = useState<RssItem | null>(null);
     const [articlePage, setArticlePage] = useState(1);
     const [listPage, setListPage] = useState(1);
     const setHeaderActions = useContext(AppHeaderActionsContext);
@@ -259,7 +216,7 @@ function BlogApp(context: AppContext): AppInstance {
         }
         const proxyUrl = proxy + encodeURIComponent(feed.url);
         const xml = await network.fetchText(proxyUrl);
-        const parsed = parseRss(xml, feed.name);
+        const parsed = parseRssItems(xml, feed.name);
         await storage.set(cacheKey, { url: feed.url, items: parsed, fetchedAt: Date.now() });
         setItems(parsed);
       } catch (e) {

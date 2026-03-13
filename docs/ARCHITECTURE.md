@@ -33,6 +33,7 @@ The shell is the root UI when not on the home screen. It holds:
 
 **Behavior:**
 
+- **Tap vs scroll**: The shell uses `useTapVsScrollThreshold` (in `src/core/hooks/`) to ignore click when the pointer or touch has moved beyond a small threshold, reducing accidental app launches while scrolling on touch devices (e.g. Kindle).
 - **Home**: When `currentAppId === null`, the shell renders `<HomeScreen />`, which shows the grid of registered apps.
 - **App open**: When the user taps an app, `launchApp(app)` is called. The shell builds an `AppContext` (navigate, closeApp, services), calls `app.launch(context)`, stores the returned `AppInstance`, and pushes a history state. The UI then shows:
   - **App header**: Home button, Back button, and a title. The title comes from `instance.getTitle?.()` or the app name. The Back button calls `instance.goBack()` if `instance.canGoBack?.()` is true, otherwise `closeApp()`.
@@ -81,7 +82,7 @@ Settings and theme are separate so that theme is the single source of “what is
 - **App header**: Rendered by the shell (Home, Back, title, optional header actions). Title is dynamic via `getTitle()`. Apps can inject custom header controls (e.g. board zoom for games) via **AppHeaderActionsContext** (`setHeaderActions`).
 - **App content**: The result of `instance.render()`; each app owns its layout and uses shared CSS classes (e.g. `.list`, `.btn`, `.panel-title`) and optional core components like `PageNav`.
 
-Core UI components live in `src/core/ui/` (e.g. `PageNav`, `Button`, `List`). Apps may use them or use plain HTML with the same CSS classes.
+Core UI components live in `src/core/ui/` (e.g. `PageNav`, `Button`, `List`). Apps may use them or use plain HTML with the same CSS classes; many list-based apps use raw `<ul class="list">` with global CSS, so `List` is optional.
 
 ## Data flow
 
@@ -96,6 +97,8 @@ Core UI components live in `src/core/ui/` (e.g. `PageNav`, `Button`, `List`). Ap
 - **`src/core/utils/url.ts`**: `isSafeUrl(url)` and `sanitizeUrl(url)` for safe links and image URLs (https/http only).
 - **`src/core/utils/safe-svg.ts`**: `isSafeLegacySvg(html)` to allow only SVG markup without script or event handlers; used for app tile icons in the shell.
 - **`src/core/utils/fallback-ui.ts`**: `setRootFallback(root, message)` for init/load errors (DOM only, no innerHTML from variables).
+- **`src/core/utils/rss.ts`**: `parseRssItems(xml, source)` and `getFeedTitleFromXml(xml)` for RSS/Atom feeds; shared by Blog, News, and optionally Comics. Item shape is `RssItem` in `src/types/feed.ts`.
+- **`src/core/utils/settings-parsers.ts`**: `parseJsonArray` and type guards for parsing settings JSON (e.g. blog feeds, finance items, world clock zones).
 - **`src/apps/games/`**: Chess (move generation, Stockfish worker + fallback engine), Snake, Sudoku, Minesweeper. Shared **GameBoardResize** component provides − / size / + controls in the app header for all four games. Chess uses `stockfish-worker.ts` for UCI/FEN; the Stockfish worker is kept alive across games (reset sends `ucinewgame` only). A simple fallback engine is used when Stockfish is unavailable (e.g. legacy/Kindle).
 - **`src/types/`**: Shared TypeScript types (plugin, settings, services). Implementations live in `core/services` and are re-exported or used via interfaces.
 
