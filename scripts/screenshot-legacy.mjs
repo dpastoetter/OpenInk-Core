@@ -1,5 +1,6 @@
 /**
  * Takes screenshots of the app home screen (light/dark), Reddit widget, and Chess in-game; saves to docs/screenshots/.
+ * Uses typical e-ink display format/resolution (Kindle Paperwhite 11th gen 6.8" at 1/3 scale: 412×549).
  * Requires: npm run build, then npm run screenshot (starts preview, captures, exits).
  */
 import { spawn } from 'node:child_process';
@@ -67,9 +68,10 @@ async function main() {
   fs.mkdirSync(screenshotsDir, { recursive: true });
 
   const browser = await playwright.chromium.launch({ headless: true });
+  // Typical e-ink display format/resolution: Kindle Paperwhite 11th gen (6.8") 1236×1648 → 1/3 scale 412×549
   const context = await browser.newContext({
-    viewport: { width: 600, height: 900 },
-    deviceScaleFactor: 2,
+    viewport: { width: 412, height: 549 },
+    deviceScaleFactor: 1,
   });
 
   try {
