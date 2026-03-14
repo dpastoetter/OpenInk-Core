@@ -238,6 +238,8 @@ html, body {
 }
 
 .shell-main {
+  font-size: 115%;
+  --tap-min: calc(52px * 1.15);
   flex: 1;
   overflow: auto;
   background: var(--bg);
@@ -445,8 +447,8 @@ html, body {
   margin: 0 auto;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 4.2rem), 1fr));
-  grid-auto-rows: 4.2rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 5.5rem), 1fr));
+  grid-auto-rows: 5.5rem;
   contain: layout style;
   gap: 0.35rem;
   max-width: min(100%, var(--content-max-width, 28rem));
@@ -523,9 +525,11 @@ html, body {
   text-align: center;
   line-height: 1.15;
   max-width: 100%;
-  white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  word-break: break-word;
 }
 
 /* App container */
@@ -613,6 +617,7 @@ textarea {
 }
 
 .app-content {
+  --space: calc(16px * 0.7 * 1.15); /* 30% less then +15%: widget spacing */
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -1620,8 +1625,8 @@ html .app-grid {
   gap: 0;
 }
 html .app-grid > li {
-  width: 4.2rem;
-  height: 4.2rem;
+  width: 5.5rem;
+  height: 5.5rem;
   margin: 0.2rem;
   min-height: 0;
 }
