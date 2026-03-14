@@ -208,6 +208,7 @@ html, body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: var(--bg);
 }
 
 /* Shell – containment limits reflow on e-ink */
@@ -221,7 +222,8 @@ html, body {
 .shell-main {
   flex: 1;
   overflow: auto;
-  contain: layout style;
+  background: var(--bg);
+  contain: layout style paint;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
   scroll-behavior: auto;
@@ -527,7 +529,8 @@ textarea {
   overflow: auto;
   padding: calc(var(--space) * 1.25);
   min-height: 0;
-  contain: layout style;
+  background: var(--bg);
+  contain: layout style paint;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
   scroll-behavior: auto;
@@ -540,15 +543,27 @@ textarea {
   box-sizing: border-box;
 }
 
-/* Widget buttons: match app header size + lightweight 3D (raised / pressed) */
+/* Widget buttons: compact width + lightweight 3D (raised / pressed) */
 .app-content .btn {
   min-height: 24px;
-  padding: 0 8px;
+  padding: 0 6px;
   font-size: 0.8rem;
+  width: max-content;
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.15) inset, 0 2px 2px rgba(0, 0, 0, 0.07);
 }
 .app-content .btn:active {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) inset;
+}
+
+/* All widget (app-content) icons same size */
+.app-content .weather-icon,
+.app-content .weather-day-icon,
+.app-content .btn svg,
+.app-content [class*="icon"] {
+  width: 1.25rem;
+  height: 1.25rem;
+  font-size: 1.25rem;
+  flex-shrink: 0;
 }
 
 /* Buttons */
@@ -1048,18 +1063,6 @@ textarea {
 .reddit-comment:last-child { border-bottom: none; }
 .reddit-comment p { margin: 0.25em 0 0; }
 
-@supports (content-visibility: auto) {
-  .list li,
-  .reddit-comment,
-  .finance-row,
-  .weather-forecast li,
-  .todo-item,
-  .blog-discover-item {
-    content-visibility: auto;
-    contain-intrinsic-size: auto 48px;
-  }
-}
-
 /* News */
 .news-meta { color: var(--muted); font-size: 0.9rem; }
 .news-article-body p { margin: 0 0 1em; }
@@ -1098,7 +1101,7 @@ textarea {
 .finance-change-down { color: var(--finance-down, #c00); }
 .finance-actions { display: flex; gap: var(--space); flex-wrap: wrap; margin-top: calc(var(--space) * 2); align-items: center; }
 .finance-delete { min-width: 2rem; padding: 0.2em 0.4em; font-size: 1.2rem; line-height: 1; }
-.finance-add-section { margin-top: calc(var(--space) * 2); padding-top: var(--space); border-top: 1px solid var(--border); }
+.finance-add-section { margin-top: calc(var(--space) * 2); padding-top: var(--space); }
 .finance-add-row { display: flex; gap: var(--space); align-items: center; flex-wrap: wrap; margin-bottom: var(--space); }
 .finance-add-input { flex: 1; min-width: 12rem; }
 .finance-add-error { color: var(--finance-down, #c00); font-size: 0.9rem; margin: 0 0 var(--space); }
