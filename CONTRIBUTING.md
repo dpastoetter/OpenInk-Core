@@ -18,6 +18,10 @@ Open http://localhost:5173 (or the **Network** URL Vite prints if you want to te
 3. **Build** – Run `npm run build` and fix any TypeScript or build errors.
 4. **Style** – Follow existing patterns: TypeScript strict, Preact functional components, semantic CSS classes and design tokens in `src/index.css`. No Tailwind; no `any`. See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for code style and conventions.
 
+## Version and testing branch
+
+Before committing or pushing to the **GitHub testing branch**, bump the project version in `package.json` so each test deployment is identifiable (e.g. `0.1.1` → `0.1.2`). Bump → run tests/build → then commit and push to testing.
+
 ## Where to look
 
 - **New app** – [docs/plugins.md](docs/plugins.md) and `src/apps/` (e.g. `dictionary`, `comics`).
