@@ -5,7 +5,6 @@ import type {
   FontSize,
   ThemePreset,
   Appearance,
-  AppsPerRowPreset,
 } from '../../types/settings';
 import { PLUGIN_API_VERSION } from '../../types/plugin';
 

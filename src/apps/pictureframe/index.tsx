@@ -106,13 +106,6 @@ function PictureFrameApp(_context: AppContext): AppInstance {
       setFullscreen(false);
     }, []);
 
-    useEffect(() => {
-      return () => {
-        if (releaseTimerRef.current) clearTimeout(releaseTimerRef.current);
-        if (wakeLockRef.current) wakeLockRef.current.release().catch(() => {});
-      };
-    }, []);
-
     const prev = () => setCurrentIndex((i) => (i === 0 ? usePictures.length - 1 : i - 1));
     const next = () => setCurrentIndex((i) => (i === usePictures.length - 1 ? 0 : i + 1));
 
