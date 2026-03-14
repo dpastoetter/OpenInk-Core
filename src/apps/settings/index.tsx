@@ -200,6 +200,7 @@ function SettingsApp(context: AppContext): AppInstance {
               type="button"
               class={`btn ${settings.fontSize === opt.value ? 'btn-active' : ''}`}
               onClick={() => update({ fontSize: opt.value })}
+              onTouchEnd={(e) => { e.preventDefault(); update({ fontSize: opt.value }); }}
             >
               {opt.label}
             </button>
@@ -213,6 +214,7 @@ function SettingsApp(context: AppContext): AppInstance {
               type="button"
               class={`btn ${settings.appearance === opt.value ? 'btn-active' : ''}`}
               onClick={() => update({ appearance: opt.value })}
+              onTouchEnd={(e) => { e.preventDefault(); update({ appearance: opt.value }); }}
             >
               {opt.label}
             </button>
@@ -221,7 +223,7 @@ function SettingsApp(context: AppContext): AppInstance {
         <section class="panel">
           <h2 class="panel-title">Data</h2>
           <p class="panel-description">Clear cached data for News, Reddit, Comics, Weather, etc.</p>
-          <button type="button" class="btn" onClick={handleClearCaches}>Clear all caches</button>
+          <button type="button" class="btn" onClick={handleClearCaches} onTouchEnd={(e) => { e.preventDefault(); handleClearCaches(); }}>Clear all caches</button>
           {clearCacheMessage && <p class="settings-import-message" role="status">{clearCacheMessage}</p>}
         </section>
         <section class="panel">
@@ -231,7 +233,7 @@ function SettingsApp(context: AppContext): AppInstance {
         <section class="panel">
           <h2 class="panel-title">Export / Import</h2>
           <p class="panel-description">Export your settings to a CSV file or restore from a previously exported file.</p>
-          <button type="button" class="btn" onClick={handleExport}>
+          <button type="button" class="btn" onClick={handleExport} onTouchEnd={(e) => { e.preventDefault(); handleExport(); }}>
             Export settings (CSV)
           </button>
           <input
@@ -242,7 +244,7 @@ function SettingsApp(context: AppContext): AppInstance {
             style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;"
             onChange={handleImportFile}
           />
-          <button type="button" class="btn" onClick={handleImportClick}>
+          <button type="button" class="btn" onClick={handleImportClick} onTouchEnd={(e) => { e.preventDefault(); handleImportClick(); }}>
             Import settings (CSV)
           </button>
           {importMessage && <p class="settings-import-message" role="status">{importMessage}</p>}

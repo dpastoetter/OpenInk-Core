@@ -9,9 +9,9 @@ function createMockTheme(): ThemeService {
   return {
     getSettings: () => ({ ...settings }),
     subscribe: () => () => {},
-    applySettings: (s) => { settings = s; },
     applySettingsMinimal: (s) => { settings = s; },
-  } as ThemeService;
+    applySettings: (s) => { settings = s; },
+  };
 }
 
 describe('SettingsService', () => {

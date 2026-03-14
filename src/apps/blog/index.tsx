@@ -14,13 +14,9 @@ const DEFAULT_NEWS_FEEDS = [
   'https://feeds.bbci.co.uk/news/rss.xml',
   'https://www.theguardian.com/world/rss',
   'https://feeds.npr.org/1001/rss.xml',
-  'https://www.reutersagency.com/feed/?best-topics=world',
-  'https://www.aljazeera.com/xml/rss/all.xml',
   'https://www.wired.com/feed/rss',
   'https://techcrunch.com/feed/',
   'https://feeds.arstechnica.com/arstechnica/index',
-  'https://www.theguardian.com/technology/rss',
-  'https://feeds.bbci.co.uk/news/technology/rss.xml',
 ];
 
 function sourceNameFromUrl(url: string): string {
@@ -28,10 +24,8 @@ function sourceNameFromUrl(url: string): string {
     const u = new URL(url);
     const host = u.hostname.replace(/^www\./, '');
     if (host.includes('bbci.co.uk')) return host.includes('technology') ? 'BBC Technology' : 'BBC News';
-    if (host.includes('theguardian.com')) return u.pathname.includes('technology') ? 'Guardian Tech' : 'Guardian';
+    if (host.includes('theguardian.com')) return 'Guardian';
     if (host.includes('npr.org')) return 'NPR';
-    if (host.includes('reutersagency.com')) return 'Reuters';
-    if (host.includes('aljazeera.com')) return 'Al Jazeera';
     if (host.includes('wired.com')) return 'Wired';
     if (host.includes('techcrunch.com')) return 'TechCrunch';
     if (host.includes('arstechnica.com')) return 'Ars Technica';
@@ -115,7 +109,6 @@ function parseRss(xml: string, source: string): BlogItem[] {
   return items;
 }
 
-/** Get feed title from RSS/Atom XML. */
 function getFeedTitleFromXml(xml: string): string | null {
   const doc = new DOMParser().parseFromString(xml, 'text/xml');
   const rssTitle = doc.querySelector('channel > title')?.textContent?.trim();
@@ -124,7 +117,6 @@ function getFeedTitleFromXml(xml: string): string | null {
   return atomTitle ?? null;
 }
 
-/** Normalize input to a URL (prepend https if needed). */
 function toUrl(input: string): string {
   const s = input.trim();
   if (!s) return '';
@@ -133,7 +125,16 @@ function toUrl(input: string): string {
 }
 
 const ITEMS_PER_PAGE = 10;
-const NEWS_ITEMS_PER_PAGE = 5;
+const NEWS_ITEMS_PER_PAGE = 10;
+
+function scrollAppContentToTop() {
+  try {
+    const appContent = document.querySelector('.app-content') as HTMLElement | null;
+    if (appContent) appContent.scrollTo(0, 0);
+    const root = document.getElementById('root');
+    if (root) root.scrollTo(0, 0);
+  } catch { /* no-op */ }
+}
 
 interface PanelBackRef {
   canGoBack: () => boolean;
@@ -148,15 +149,12 @@ function BlogNewsApp(context: AppContext): AppInstance {
   function CombinedUI() {
     const [mode, setMode] = useState<'blog' | 'news'>('blog');
     modeRef.current = mode;
+    const setTab = (m: 'blog' | 'news') => () => setMode(m);
     return (
       <div class="blog-news-app">
         <div class="timer-stopwatch-tabs">
-          <button type="button" class={`btn ${mode === 'blog' ? 'btn-active' : ''}`} onClick={() => setMode('blog')}>
-            Blog
-          </button>
-          <button type="button" class={`btn ${mode === 'news' ? 'btn-active' : ''}`} onClick={() => setMode('news')}>
-            News
-          </button>
+          <button type="button" class={`btn ${mode === 'blog' ? 'btn-active' : ''}`} onClick={setTab('blog')} onTouchEnd={(e) => { e.preventDefault(); setMode('blog'); }}>Blog</button>
+          <button type="button" class={`btn ${mode === 'news' ? 'btn-active' : ''}`} onClick={setTab('news')} onTouchEnd={(e) => { e.preventDefault(); setMode('news'); }}>News</button>
         </div>
         {mode === 'blog' && <BlogPanel context={context} backRef={blogBackRef} />}
         {mode === 'news' && <NewsPanel context={context} backRef={newsBackRef} />}
@@ -166,7 +164,7 @@ function BlogNewsApp(context: AppContext): AppInstance {
 
   return {
     render: () => <CombinedUI />,
-    getTitle: () => 'Blog & News',
+    getTitle: () => '',
     canGoBack: () => (modeRef.current === 'blog' ? blogBackRef.current?.canGoBack() : newsBackRef.current?.canGoBack()) ?? false,
     goBack: () => {
       if (modeRef.current === 'blog') blogBackRef.current?.goBack();
@@ -175,23 +173,8 @@ function BlogNewsApp(context: AppContext): AppInstance {
   };
 }
 
-function BlogPanel({
-  context,
-  backRef,
-}: {
-  context: AppContext;
-  backRef: preact.RefObject<PanelBackRef | null>;
-}) {
+function BlogPanel({ context, backRef }: { context: AppContext; backRef: preact.RefObject<PanelBackRef | null> }) {
   const { storage, network, settings } = context.services;
-  const titleRef: { current: string } = { current: 'Blogs' };
-  const internalBackRef: {
-    current: {
-      setSelectedFeed: (f: BlogFeed | null) => void;
-      setSelectedItem: (item: BlogItem | null) => void;
-      selectedItem: BlogItem | null;
-      selectedFeed: BlogFeed | null;
-    } | null;
-  } = { current: null };
 
   function BlogUI() {
     const [feeds, setFeeds] = useState<BlogFeed[]>(() => parseBlogFeeds(settings.get().blogFeeds));
@@ -209,9 +192,6 @@ function BlogPanel({
     const [listPage, setListPage] = useState(1);
     const setHeaderActions = useContext(AppHeaderActionsContext);
 
-    internalBackRef.current = { setSelectedFeed, setSelectedItem, selectedItem, selectedFeed };
-    titleRef.current = selectedItem ? selectedItem.title : selectedFeed ? selectedFeed.name : 'Blogs';
-
     useEffect(() => {
       backRef.current = {
         canGoBack: () => !!selectedItem || !!selectedFeed,
@@ -220,18 +200,22 @@ function BlogPanel({
           else if (selectedFeed) setSelectedFeed(null);
         },
       };
-      return () => {
-        backRef.current = null;
-      };
+      return () => { backRef.current = null; };
     }, [selectedItem, selectedFeed, backRef]);
 
-    const persistFeeds = useCallback(
-      (next: BlogFeed[]) => {
-        setFeeds(next);
-        settings.set({ blogFeeds: blogFeedsToJson(next) });
-      },
-      [settings]
-    );
+    useEffect(() => {
+      if (selectedItem) scrollAppContentToTop();
+    }, [selectedItem]);
+    useEffect(() => {
+      if (selectedFeed) scrollAppContentToTop();
+    }, [selectedFeed]);
+    useEffect(() => { const t = setTimeout(scrollAppContentToTop, 0); return () => clearTimeout(t); }, [listPage]);
+    useEffect(() => { const t = setTimeout(scrollAppContentToTop, 0); return () => clearTimeout(t); }, [articlePage]);
+
+    const persistFeeds = useCallback((next: BlogFeed[]) => {
+      setFeeds(next);
+      settings.set({ blogFeeds: blogFeedsToJson(next) });
+    }, [settings]);
 
     const removeFeed = (feed: BlogFeed) => {
       persistFeeds(feeds.filter((f) => f.id !== feed.id));
@@ -256,17 +240,14 @@ function BlogPanel({
           const doc = new DOMParser().parseFromString(text, 'text/html');
           const links = doc.querySelectorAll('link[rel="alternate"]');
           const found: { name: string; url: string }[] = [];
-          const base = url;
           links.forEach((el) => {
             const type = (el.getAttribute('type') || '').toLowerCase();
             const href = el.getAttribute('href');
             if (!href || (type !== 'application/rss+xml' && type !== 'application/atom+xml')) return;
             try {
-              const absolute = new URL(href, base).href;
+              const absolute = new URL(href, url).href;
               if (!found.some((f) => f.url === absolute)) found.push({ name: slugFromUrl(absolute), url: absolute });
-            } catch {
-              /* skip invalid */
-            }
+            } catch { /* skip */ }
           });
           if (found.length) setDiscoverResults(found);
           else setDiscoverError('No RSS/Atom feed link found on this page.');
@@ -278,27 +259,21 @@ function BlogPanel({
       }
     }, [searchAddInput, network, settings]);
 
-    const addFeedByUrl = useCallback(
-      (name: string, url: string) => {
-        const id = slugFromUrl(url).toLowerCase().replace(/[^a-z0-9-]/g, '-').slice(0, 32) || 'feed-' + Date.now();
-        if (feeds.some((f) => f.id === id || f.url === url)) return;
-        persistFeeds([...feeds, { id, name, url }]);
-        setSearchAddInput('');
-        setDiscoverResults(null);
-        setDiscoverError(null);
-      },
-      [feeds, persistFeeds]
-    );
+    const addFeedByUrl = useCallback((name: string, url: string) => {
+      const id = slugFromUrl(url).toLowerCase().replace(/[^a-z0-9-]/g, '-').slice(0, 32) || 'feed-' + Date.now();
+      if (feeds.some((f) => f.id === id || f.url === url)) return;
+      persistFeeds([...feeds, { id, name, url }]);
+      setSearchAddInput('');
+      setDiscoverResults(null);
+      setDiscoverError(null);
+    }, [feeds, persistFeeds]);
 
     const addFeed = useCallback(async () => {
       const url = toUrl(searchAddInput);
       if (!url) return;
       if (discoverResults?.length) {
         const match = discoverResults.find((r) => r.url === url);
-        if (match) {
-          addFeedByUrl(match.name, match.url);
-          return;
-        }
+        if (match) { addFeedByUrl(match.name, match.url); return; }
         addFeedByUrl(discoverResults[0].name, discoverResults[0].url);
         return;
       }
@@ -309,39 +284,31 @@ function BlogPanel({
         const text = await network.fetchText(proxyUrl);
         const title = getFeedTitleFromXml(text);
         if (title) name = title;
-      } catch {
-        /* use slug */
-      }
+      } catch { /* use slug */ }
       addFeedByUrl(name, url);
     }, [searchAddInput, discoverResults, network, settings, addFeedByUrl]);
 
     useEffect(() => {
       if (!setHeaderActions) return;
-      if (selectedFeed != null) {
+      if (selectedFeed != null || selectedItem != null) {
         setHeaderActions(null);
         return () => setHeaderActions(null);
       }
       const node = (
-        <button
-          type="button"
-          class="btn"
-          onClick={() => setEditMode((e) => !e)}
-          aria-label={editMode ? 'Done editing' : 'Edit feeds'}
-          title={editMode ? 'Done' : 'Edit'}
-        >
+        <button type="button" class="btn" onClick={() => setEditMode((prev) => !prev)} onTouchEnd={(e) => { e.preventDefault(); setEditMode((prev) => !prev); }} aria-label={editMode ? 'Done editing' : 'Edit feeds'} title={editMode ? 'Done' : 'Edit'}>
           {editMode ? 'Done' : 'Edit'}
         </button>
       );
       setHeaderActions(node);
       return () => setHeaderActions(null);
-    }, [setHeaderActions, selectedFeed, editMode]);
+    }, [setHeaderActions, selectedFeed, selectedItem, editMode]);
 
     const loadFeed = useCallback(async (feed: BlogFeed) => {
       setLoading(true);
       setError(null);
-      const proxy = getCorsProxyUrl(settings.get().corsProxyUrl);
       const cacheTtl = getDefaultCacheTtlMs(settings.get().defaultCacheTtl);
       const cacheKey = CACHE_KEY + ':' + encodeURIComponent(feed.url).slice(0, 500);
+      const proxy = getCorsProxyUrl(settings.get().corsProxyUrl);
       try {
         const cached = await storage.get<CachedBlogFeed>(cacheKey);
         if (cached && Date.now() - cached.fetchedAt < cacheTtl) {
@@ -367,12 +334,9 @@ function BlogPanel({
     }, [selectedFeed, loadFeed]);
 
     const totalListPages = useMemo(() => Math.max(1, Math.ceil(items.length / ITEMS_PER_PAGE)), [items.length]);
-    const listItems = useMemo(
-      () => items.slice((listPage - 1) * ITEMS_PER_PAGE, listPage * ITEMS_PER_PAGE),
-      [items, listPage]
-    );
+    const listItems = useMemo(() => items.slice((listPage - 1) * ITEMS_PER_PAGE, listPage * ITEMS_PER_PAGE), [items, listPage]);
 
-    // Article view (selected item)
+    // Article detail (same pattern as Reddit post view)
     if (selectedItem) {
       const body = stripHtml(selectedItem.description || '');
       const paragraphs = body ? body.split(/\n+/).filter((p) => p.trim()) : [];
@@ -380,46 +344,33 @@ function BlogPanel({
       const page = Math.min(articlePage, totalPages);
       const start = (page - 1) * 3;
       const pageParas = paragraphs.slice(start, start + 3);
+      const safeLink = typeof selectedItem.link === 'string' ? sanitizeUrl(selectedItem.link) : '';
 
       return (
-        <div class="blog-article">
+        <div class="blog-app">
           <p class="blog-meta">{selectedItem.source} · {selectedItem.pubDate}</p>
           <div class="blog-article-body">
             {pageParas.length > 0 ? pageParas.map((p, i) => <p key={i}>{p}</p>) : <p class="blog-meta">No content.</p>}
           </div>
-          {(() => {
-            const safeLink = typeof selectedItem.link === 'string' ? sanitizeUrl(selectedItem.link) : '';
-            return safeLink ? (
-              <p class="blog-link">
-                <a href={safeLink} target="_blank" rel="noopener noreferrer">Open article</a>
-              </p>
-            ) : null;
-          })()}
-          {totalPages > 1 && (
-            <PageNav current={page} total={totalPages} onPrev={() => setArticlePage((p) => Math.max(1, p - 1))} onNext={() => setArticlePage((p) => Math.min(totalPages, p + 1))} />
-          )}
+          {safeLink ? <p class="blog-link"><a href={safeLink} target="_blank" rel="noopener noreferrer">Open article</a></p> : null}
+          {totalPages > 1 && <PageNav current={page} total={totalPages} onPrev={() => setArticlePage((p) => Math.max(1, p - 1))} onNext={() => setArticlePage((p) => Math.min(totalPages, p + 1))} />}
         </div>
       );
     }
 
-    // Feed posts list
+    // Feed items list (same pattern as Reddit post list)
     if (selectedFeed) {
       if (loading && items.length === 0) return <p>Loading…</p>;
       if (error && items.length === 0) return <p class="browser-error">{error}</p>;
 
       return (
         <div class="blog-app">
-          {error && items.length > 0 && <p class="blog-error-hint">{error}</p>}
-          <div class="blog-actions">
-            <button type="button" class="btn" onClick={() => loadFeed(selectedFeed)} disabled={loading}>
-              Refresh
-            </button>
-          </div>
+          {error && items.length > 0 && <p class="widget-hint">{error}</p>}
           <ul class="list">
             {listItems.length === 0 && !loading && <li><p class="blog-meta">No posts. Try Refresh.</p></li>}
             {listItems.map((item, i) => (
               <li key={item.link || i}>
-                <button type="button" onClick={() => setSelectedItem(item)}>
+                <button type="button" class="btn blog-list-btn" onClick={() => setSelectedItem(item)} onTouchEnd={(e) => { e.preventDefault(); setSelectedItem(item); }}>
                   <strong>{item.title}</strong>
                   <br />
                   <small class="blog-meta">{item.source} · {item.pubDate}</small>
@@ -427,56 +378,46 @@ function BlogPanel({
               </li>
             ))}
           </ul>
-          <PageNav current={listPage} total={totalListPages} onPrev={() => setListPage((p) => Math.max(1, p - 1))} onNext={() => setListPage((p) => Math.min(totalListPages, p + 1))} />
+          <PageNav current={listPage} total={totalListPages} onPrev={() => { setListPage((p) => Math.max(1, p - 1)); scrollAppContentToTop(); }} onNext={() => { setListPage((p) => Math.min(totalListPages, p + 1)); scrollAppContentToTop(); }} />
+          <button type="button" class="btn" style="margin-top: var(--space);" onClick={() => loadFeed(selectedFeed)} onTouchEnd={(e) => { e.preventDefault(); loadFeed(selectedFeed); }} disabled={loading}>Refresh</button>
         </div>
       );
     }
 
-    // Feed list (home)
+    // Landing: feed picker (same pattern as Reddit sub picker)
     return (
       <div class="blog-app">
-        <div class="blog-add blog-search-add-bar">
+        <p class="widget-hint">Add a feed by URL or pick one below.</p>
+        <div class="blog-search">
           <input
             type="text"
-            class="input blog-add-input"
-            placeholder="Feed URL or site URL (e.g. https://wired.com/feed/rss or wired.com)"
+            class="input"
+            placeholder="Feed URL or site (e.g. wired.com/feed/rss)"
             value={searchAddInput}
             onInput={(e) => setSearchAddInput((e.target as HTMLInputElement).value)}
             onKeyDown={(e) => e.key === 'Enter' && addFeed()}
           />
-          <button type="button" class="btn" onClick={discover} disabled={discoverLoading || !searchAddInput.trim()}>
-            {discoverLoading ? '…' : 'Discover'}
-          </button>
-          <button type="button" class="btn" onClick={addFeed} disabled={!searchAddInput.trim()}>
-            Add
-          </button>
+          <button type="button" class="btn" onClick={discover} onTouchEnd={(e) => { e.preventDefault(); discover(); }} disabled={discoverLoading || !searchAddInput.trim()}>{discoverLoading ? '…' : 'Discover'}</button>
+          <button type="button" class="btn" onClick={addFeed} onTouchEnd={(e) => { e.preventDefault(); addFeed(); }} disabled={!searchAddInput.trim()}>Add</button>
         </div>
-        {discoverError && <p class="blog-add-error">{discoverError}</p>}
+        {discoverError && <p class="widget-hint" style="color: var(--finance-down, #c00);">{discoverError}</p>}
         {discoverResults && discoverResults.length > 0 && (
-          <ul class="blog-discover-results">
+          <ul class="list blog-discover-list">
             {discoverResults.map((r) => (
               <li key={r.url} class="blog-discover-item">
                 <span>{r.name}</span>
-                <button type="button" class="btn btn-small" onClick={() => addFeedByUrl(r.name, r.url)}>Add</button>
+                <button type="button" class="btn btn-small" onClick={() => addFeedByUrl(r.name, r.url)} onTouchEnd={(e) => { e.preventDefault(); addFeedByUrl(r.name, r.url); }}>Add</button>
               </li>
             ))}
           </ul>
         )}
-        <p class="blog-hint">Pick a feed:</p>
+        <p class="widget-hint">Or pick one below:</p>
         <ul class="list blog-feed-list">
           {feeds.map((feed) => (
             <li key={feed.id} class="blog-feed-item">
-              <button type="button" onClick={() => setSelectedFeed(feed)}>{feed.name}</button>
+              <button type="button" class="btn blog-feed-btn" onClick={() => setSelectedFeed(feed)} onTouchEnd={(e) => { e.preventDefault(); setSelectedFeed(feed); }}>{feed.name}</button>
               {editMode && (
-                <button
-                  type="button"
-                  class="btn btn-small blog-feed-delete"
-                  onClick={() => removeFeed(feed)}
-                  aria-label={`Remove ${feed.name}`}
-                  title="Remove"
-                >
-                  ×
-                </button>
+                <button type="button" class="btn btn-small blog-feed-delete" onClick={() => removeFeed(feed)} onTouchEnd={(e) => { e.preventDefault(); removeFeed(feed); }} aria-label={`Remove ${feed.name}`} title="Remove">×</button>
               )}
             </li>
           ))}
@@ -505,8 +446,7 @@ interface CachedNewsFeed {
 function parseNewsRss(xml: string, source: string): NewsItem[] {
   const items: NewsItem[] = [];
   const doc = new DOMParser().parseFromString(xml, 'text/xml');
-  const entries = doc.querySelectorAll('item');
-  entries.forEach((el) => {
+  doc.querySelectorAll('item').forEach((el) => {
     items.push({
       title: el.querySelector('title')?.textContent?.trim() ?? '',
       link: el.querySelector('link')?.textContent?.trim() ?? '',
@@ -518,13 +458,7 @@ function parseNewsRss(xml: string, source: string): NewsItem[] {
   return items;
 }
 
-function NewsPanel({
-  context,
-  backRef,
-}: {
-  context: AppContext;
-  backRef: preact.RefObject<PanelBackRef | null>;
-}) {
+function NewsPanel({ context, backRef }: { context: AppContext; backRef: preact.RefObject<PanelBackRef | null> }) {
   const { storage, network, settings } = context.services;
 
   function NewsUI() {
@@ -549,8 +483,7 @@ function NewsPanel({
           const cacheKey = NEWS_CACHE_KEY + ':' + encodeURIComponent(url).slice(0, 500);
           const cached = await storage.get<CachedNewsFeed>(cacheKey);
           if (cached && Date.now() - cached.fetchedAt < cacheTtl) {
-            const withSource = cached.items.map((it) => ({ ...it, source: it.source ?? sourceName }));
-            all.push(...withSource);
+            all.push(...cached.items.map((it) => ({ ...it, source: it.source ?? sourceName })));
             continue;
           }
           const proxyUrl = proxy + encodeURIComponent(url);
@@ -562,38 +495,23 @@ function NewsPanel({
           lastError = e instanceof Error ? e.message : 'Failed to load feed';
         }
       }
-      const byDate = [...all].sort((a, b) => {
-        const tA = a.pubDate ? new Date(a.pubDate).getTime() : 0;
-        const tB = b.pubDate ? new Date(b.pubDate).getTime() : 0;
-        return tB - tA;
-      });
+      const byDate = [...all].sort((a, b) => (b.pubDate ? new Date(b.pubDate).getTime() : 0) - (a.pubDate ? new Date(a.pubDate).getTime() : 0));
       setItems(byDate.slice(0, 50));
       setError(all.length === 0 ? lastError : null);
       setLoading(false);
     }, [feeds, storage, network, settings]);
 
+    useEffect(() => { loadFeeds(); }, [loadFeeds]);
     useEffect(() => {
-      loadFeeds();
-    }, [loadFeeds]);
-
-    useEffect(() => {
-      backRef.current = {
-        canGoBack: () => selected != null,
-        goBack: () => {
-          setSelected(null);
-          setArticlePage(1);
-        },
-      };
-      return () => {
-        backRef.current = null;
-      };
+      backRef.current = { canGoBack: () => selected != null, goBack: () => { setSelected(null); setArticlePage(1); } };
+      return () => { backRef.current = null; };
     }, [selected, backRef]);
+    useEffect(() => { if (selected) scrollAppContentToTop(); }, [selected]);
+    useEffect(() => { const t = setTimeout(scrollAppContentToTop, 0); return () => clearTimeout(t); }, [listPage]);
+    useEffect(() => { const t = setTimeout(scrollAppContentToTop, 0); return () => clearTimeout(t); }, [articlePage]);
 
     const totalListPages = useMemo(() => Math.max(1, Math.ceil(items.length / NEWS_ITEMS_PER_PAGE)), [items.length]);
-    const listItems = useMemo(
-      () => items.slice((listPage - 1) * NEWS_ITEMS_PER_PAGE, listPage * NEWS_ITEMS_PER_PAGE),
-      [items, listPage]
-    );
+    const listItems = useMemo(() => items.slice((listPage - 1) * NEWS_ITEMS_PER_PAGE, listPage * NEWS_ITEMS_PER_PAGE), [items, listPage]);
 
     if (selected) {
       const body = stripHtml(selected.description || '');
@@ -602,16 +520,13 @@ function NewsPanel({
       const page = Math.min(articlePage, totalPages);
       const start = (page - 1) * 3;
       const pageParas = paragraphs.slice(start, start + 3);
-
       return (
-        <div class="news-article">
-          <p class="news-meta">{selected.source} · {selected.pubDate}</p>
-          <div class="news-article-body">
-            {pageParas.length > 0 ? pageParas.map((p, i) => <p key={i}>{p}</p>) : <p class="news-meta">No content.</p>}
+        <div class="blog-app">
+          <p class="blog-meta">{selected.source} · {selected.pubDate}</p>
+          <div class="blog-article-body">
+            {pageParas.length > 0 ? pageParas.map((p, i) => <p key={i}>{p}</p>) : <p class="blog-meta">No content.</p>}
           </div>
-          {totalPages > 1 && (
-            <PageNav current={page} total={totalPages} onPrev={() => setArticlePage((p) => Math.max(1, p - 1))} onNext={() => setArticlePage((p) => Math.min(totalPages, p + 1))} />
-          )}
+          {totalPages > 1 && <PageNav current={page} total={totalPages} onPrev={() => setArticlePage((p) => Math.max(1, p - 1))} onNext={() => setArticlePage((p) => Math.min(totalPages, p + 1))} />}
         </div>
       );
     }
@@ -620,21 +535,21 @@ function NewsPanel({
     if (error && items.length === 0) return <p class="browser-error">{error}</p>;
 
     return (
-      <div class="news-app">
-        {error && items.length > 0 && <p class="news-error-hint">{error}</p>}
+      <div class="blog-app">
+        {error && items.length > 0 && <p class="widget-hint">{error}</p>}
         <ul class="list">
-          {listItems.length === 0 && !loading && <li><p class="news-meta">No headlines. Reload the page to refresh.</p></li>}
+          {listItems.length === 0 && !loading && <li><p class="blog-meta">No headlines. Pull to refresh or reopen.</p></li>}
           {listItems.map((item, i) => (
             <li key={item.link || i}>
-              <button type="button" onClick={() => setSelected(item)}>
+              <button type="button" class="btn blog-list-btn" onClick={() => setSelected(item)} onTouchEnd={(e) => { e.preventDefault(); setSelected(item); }}>
                 <strong>{item.title}</strong>
                 <br />
-                <small class="news-meta">{item.source} · {item.pubDate}</small>
+                <small class="blog-meta">{item.source} · {item.pubDate}</small>
               </button>
             </li>
           ))}
         </ul>
-        <PageNav current={listPage} total={totalListPages} onPrev={() => setListPage((p) => Math.max(1, p - 1))} onNext={() => setListPage((p) => Math.min(totalListPages, p + 1))} />
+        <PageNav current={listPage} total={totalListPages} onPrev={() => { setListPage((p) => Math.max(1, p - 1)); scrollAppContentToTop(); }} onNext={() => { setListPage((p) => Math.min(totalListPages, p + 1)); scrollAppContentToTop(); }} />
       </div>
     );
   }

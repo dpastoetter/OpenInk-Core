@@ -660,7 +660,7 @@ textarea {
 .app-content [class*="icon"] {
   width: 1.1rem;
   height: 1.1rem;
-  font-size: 1.1rem;
+  font-size: var(--widget-title);
   flex-shrink: 0;
 }
 
@@ -821,7 +821,7 @@ textarea {
   flex-shrink: 0;
 }
 .game-board-zoom-label {
-  font-size: 0.9rem;
+  font-size: var(--widget-meta);
   color: var(--muted);
   min-width: 3rem;
   text-align: center;
@@ -855,7 +855,7 @@ textarea {
 
 .chess-level-select {
   padding: 0.25em 0.5em;
-  font-size: 1rem;
+  font-size: var(--widget-font);
   background: var(--surface);
   color: var(--fg);
   border: 1px solid var(--border);
@@ -865,7 +865,7 @@ textarea {
 
 .chess-level-hint {
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: var(--widget-meta);
 }
 
 .chess-board {
@@ -976,7 +976,7 @@ textarea {
 
 .minesweeper-flag-btn {
   padding: 0.2em 0.5em;
-  font-size: 0.75rem;
+  font-size: var(--widget-meta);
   min-height: 0;
   line-height: 1.2;
 }
@@ -1025,7 +1025,7 @@ textarea {
 .minesweeper-status {
   font-weight: 500;
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: var(--widget-meta);
 }
 
 /* Snake */
@@ -1044,7 +1044,7 @@ textarea {
   flex-shrink: 0;
   margin-bottom: var(--space);
   font-weight: 500;
-  font-size: 0.95rem;
+  font-size: var(--widget-font);
 }
 
 .snake-score { color: var(--fg); }
@@ -1108,7 +1108,7 @@ textarea {
   height: 2.25rem;
   padding: 0;
   border-radius: 50%;
-  font-size: 1.25rem;
+  font-size: var(--widget-title);
   line-height: 1;
   display: inline-flex;
   align-items: center;
@@ -1140,16 +1140,16 @@ textarea {
   min-width: 2.25rem;
   min-height: 2.25rem;
   padding: 0.2rem;
-  font-size: 1.15rem;
+  font-size: var(--widget-title);
   line-height: 1;
   touch-action: manipulation;
 }
 
-.snake-dpad-center { font-size: 0.95rem; }
+.snake-dpad-center { font-size: var(--widget-font); }
 
 .snake-hint {
   margin: var(--space) 0 0;
-  font-size: 0.85rem;
+  font-size: var(--widget-meta);
   color: var(--muted);
 }
 
@@ -1157,83 +1157,83 @@ textarea {
 .reddit-search { display: flex; gap: var(--space); align-items: center; margin-bottom: var(--space); }
 .reddit-search .input { flex: 1; min-width: 0; }
 .reddit-search-hint { color: var(--muted); font-size: var(--widget-meta); margin: 0 0 var(--space); }
-/* Reddit sub list: same look as comics feed list (bordered buttons, spacing between rows) */
+/* Reddit sub list: same style as comics feed list (rely on .app-content .btn) */
 .reddit-sub-list { list-style: none; margin: 0 0 var(--space); padding: 0; }
 .reddit-sub-list .reddit-sub-item { margin-bottom: 0.5em; display: flex; justify-content: space-between; align-items: stretch; gap: var(--space); border-bottom: none; }
 .reddit-sub-list .reddit-sub-item:last-child { margin-bottom: 0; }
-.reddit-sub-btn { flex: 1; width: 100%; text-align: left; min-height: var(--tap-min); font-size: var(--widget-font); }
+.reddit-sub-btn { flex: 1; width: 100%; text-align: left; min-height: var(--tap-min); }
 .reddit-sub-delete { min-width: 2rem; padding: 0.2em 0.4em; font-size: var(--widget-font); line-height: 1; flex-shrink: 0; }
 .reddit-meta { color: var(--muted); font-size: var(--widget-meta); }
-.reddit-selftext { margin: var(--space) 0; }
+.reddit-selftext { margin: var(--space) 0; font-size: var(--widget-font); line-height: 1.4; }
+.reddit-selftext p { margin: 0 0 0.75em; }
 .reddit-comments { list-style: none; margin: 0; padding: 0; }
-.reddit-comment { border-bottom: 1px solid var(--border); padding: var(--space) 0; }
+.reddit-comment { border-bottom: 1px solid var(--border); padding: var(--space) 0; font-size: var(--widget-font); }
 .reddit-comment:last-child { border-bottom: none; }
 .reddit-comment p { margin: 0.25em 0 0; }
 
-/* News */
+/* News – meta and error hint match widget-hint/widget-meta */
 .news-meta { color: var(--muted); font-size: var(--widget-meta); }
-.news-article-body p { margin: 0 0 1em; }
+.news-article-body p { margin: 0 0 1em; font-size: var(--widget-font); }
 .news-error-hint { color: var(--muted); font-size: var(--widget-meta); margin: 0 0 var(--space); }
 
 /* Blog */
-.blog-app { cursor: none; }
-.blog-article { cursor: none; }
-.blog-add { display: flex; gap: var(--space); align-items: center; flex-wrap: wrap; margin-bottom: var(--space); }
-.blog-add .input { min-width: 10rem; }
-.blog-add-input { flex: 1; min-width: 12rem; }
-.blog-add-error { color: var(--finance-down, #c00); font-size: var(--widget-meta); margin: 0 0 var(--space); }
-.blog-discover-results { list-style: none; margin: 0 0 var(--space); padding: 0; }
+/* Blog & News: same patterns as Reddit (feed list = sub list, list/detail) */
+.blog-search { display: flex; gap: var(--space); align-items: center; margin-bottom: var(--space); }
+.blog-search .input { flex: 1; min-width: 0; }
+.blog-feed-list { list-style: none; margin: 0 0 var(--space); padding: 0; }
+.blog-feed-list .blog-feed-item { margin-bottom: 0.5em; display: flex; justify-content: space-between; align-items: stretch; gap: var(--space); border-bottom: none; }
+.blog-feed-list .blog-feed-item:last-child { margin-bottom: 0; }
+.blog-feed-btn { flex: 1; width: 100%; text-align: left; min-height: var(--tap-min); }
+.blog-feed-delete { min-width: 2rem; padding: 0.2em 0.4em; font-size: var(--widget-font); line-height: 1; flex-shrink: 0; }
+.blog-discover-list { list-style: none; margin: 0 0 var(--space); padding: 0; }
 .blog-discover-item { display: flex; justify-content: space-between; align-items: center; gap: var(--space); padding: 0.25em 0; border-bottom: 1px solid var(--border); }
 .blog-discover-item:last-child { border-bottom: none; }
-.blog-hint { color: var(--muted); font-size: var(--widget-meta); margin: 0 0 var(--space); }
-.blog-feed-list { margin: 0; padding: 0; }
-.blog-feed-item { display: flex; justify-content: space-between; align-items: center; gap: var(--space); }
-.blog-feed-item .btn:first-child { flex: 1; text-align: left; }
-.blog-feed-delete { min-width: 2rem; padding: 0.2em 0.4em; font-size: var(--widget-font); line-height: 1; }
+.blog-list-btn { width: 100%; text-align: left; min-height: var(--tap-min); }
 .blog-meta { color: var(--muted); font-size: var(--widget-meta); }
 .blog-article-body p { margin: 0 0 1em; }
 .blog-link { margin-top: var(--space); }
 .blog-link a { color: var(--accent); }
-.blog-actions { margin-bottom: var(--space); }
-.blog-error-hint { color: var(--muted); font-size: var(--widget-meta); margin: 0 0 var(--space); }
 
-/* Finance */
-.finance-list { list-style: none; margin: 0; padding: 0; }
-.finance-row { display: flex; justify-content: space-between; align-items: center; padding: var(--space); border-bottom: 1px solid var(--border); min-height: var(--tap-min); }
-.finance-name { font-weight: 500; }
+/* Finance – list rows match Comics/Reddit row rhythm (padding, border, tap-min, widget font) */
+.finance-list { list-style: none; margin: 0 0 var(--space); padding: 0; }
+.finance-row { display: flex; justify-content: space-between; align-items: center; padding: var(--space); border-bottom: 1px solid var(--border); min-height: var(--tap-min); font-size: var(--widget-font); }
+.finance-name { font-weight: 500; font-size: var(--widget-font); }
 .finance-right { display: flex; align-items: center; gap: var(--space); font-variant-numeric: tabular-nums; }
-.finance-price { color: var(--muted); }
+.finance-price { color: var(--muted); font-size: var(--widget-meta); }
 .finance-change { font-size: var(--widget-meta); font-weight: 500; }
 .finance-change-up { color: var(--finance-up, #0d7a0d); }
 .finance-change-down { color: var(--finance-down, #c00); }
-.finance-actions { display: flex; gap: var(--space); flex-wrap: wrap; margin-top: calc(var(--space) * 2); align-items: center; }
+.finance-actions { display: flex; gap: var(--space); flex-wrap: wrap; margin-top: var(--space); align-items: center; }
 .finance-delete { min-width: 2rem; padding: 0.2em 0.4em; font-size: var(--widget-font); line-height: 1; }
-.finance-add-section { margin-top: calc(var(--space) * 2); padding-top: var(--space); }
+.finance-add-section { margin-top: var(--space); padding-top: var(--space); border-top: 1px solid var(--border); }
 .finance-add-row { display: flex; gap: var(--space); align-items: center; flex-wrap: wrap; margin-bottom: var(--space); }
 .finance-add-input { flex: 1; min-width: 12rem; }
 .finance-add-error { color: var(--finance-down, #c00); font-size: var(--widget-meta); margin: 0 0 var(--space); }
 .finance-search-label { margin: var(--space) 0 0.25em; font-size: var(--widget-font); }
 .finance-search-results { list-style: none; margin: 0 0 var(--space); padding: 0; }
-.finance-search-item { display: flex; justify-content: space-between; align-items: center; padding: 0.25em 0; gap: var(--space); }
+.finance-search-item { display: flex; justify-content: space-between; align-items: center; padding: var(--space) 0; border-bottom: 1px solid var(--border); gap: var(--space); min-height: var(--tap-min); font-size: var(--widget-font); }
+.finance-search-item:last-child { border-bottom: none; }
 .btn-small { min-height: 28px; padding: 0 8px; font-size: var(--widget-meta); }
 
-/* Weather */
+/* Weather – hint, search row, list rhythm like Comics/Reddit */
 .weather-app { }
 .weather-search { display: flex; gap: var(--space); align-items: center; margin-bottom: var(--space); }
+.weather-search .input { flex: 1; min-width: 0; }
 .weather-search-input { flex: 1; min-width: 0; }
 .weather-city { font-size: var(--widget-title); font-weight: 600; margin: 0 0 var(--space); color: var(--fg); }
 .weather-current { display: flex; align-items: center; gap: var(--space); flex-wrap: wrap; margin-bottom: var(--space); padding-bottom: var(--space); border-bottom: 1px solid var(--border); }
 .weather-icon { font-size: 2rem; }
 .weather-temp { font-size: 1.75rem; font-weight: 600; font-variant-numeric: tabular-nums; }
 .weather-desc { color: var(--muted); font-size: var(--widget-meta); }
-.weather-forecast { margin: 0 0 var(--space); }
+.weather-forecast { margin: 0 0 var(--space); list-style: none; padding: 0; }
 .weather-forecast li { display: flex; align-items: center; gap: var(--space); padding: var(--space); border-bottom: 1px solid var(--border); min-height: var(--tap-min); font-size: var(--widget-font); }
-.weather-day { flex: 1; font-weight: 500; }
+.weather-forecast li:last-child { border-bottom: none; }
+.weather-day { flex: 1; font-weight: 500; font-size: var(--widget-font); }
 .weather-day-icon { font-size: var(--widget-title); }
-.weather-day-range { color: var(--muted); font-variant-numeric: tabular-nums; }
-.weather-actions { margin-top: calc(var(--space) * 2); }
+.weather-day-range { color: var(--muted); font-variant-numeric: tabular-nums; font-size: var(--widget-meta); }
+.weather-actions { margin-top: var(--space); }
 
-/* Timer */
+/* Timer – hint/label = widget-meta, actions row = var(--space) like others */
 .timer-app { }
 .timer-stopwatch-app { }
 .timer-stopwatch-tabs { display: flex; gap: var(--space); margin-bottom: var(--space); flex-wrap: wrap; }
@@ -1280,10 +1280,12 @@ textarea {
   grid-row: 3 / 5;
 }
 
-/* Shared widget styles (Kindle reader widgets) */
+/* Shared widget styles – canonical template (Comics/Reddit): hint above, search row, list with tap-min rows, meta text */
 .widget-hint { color: var(--muted); font-size: var(--widget-meta); margin: 0 0 var(--space); }
 .widget-meta { color: var(--muted); font-size: var(--widget-meta); margin: 0 0 var(--space); }
 .widget-actions { display: flex; gap: var(--space); flex-wrap: wrap; margin-top: var(--space); }
+/* Error/empty: same typography and spacing as other widget text */
+.browser-error { font-size: var(--widget-meta); margin: 0 0 var(--space); }
 .widget-add-btn { margin-bottom: var(--space); }
 .widget-textarea { width: 100%; min-height: 100px; padding: var(--space); margin: 0 0 var(--space); border: 1px solid var(--border); border-radius: var(--radius); font: inherit; resize: vertical; box-sizing: border-box; }
 .widget-preview { color: var(--muted); }
@@ -1299,34 +1301,36 @@ textarea {
 .dictionary-defs { margin: 0.25em 0 0 1em; padding: 0; list-style: disc; }
 .dictionary-example { color: var(--muted); font-style: italic; font-size: var(--widget-meta); }
 
-/* To-do */
+/* To-do – same row rhythm as Reddit/Comics list (padding var(--space), border, tap-min) */
 .todo-app { }
 .todo-add { display: flex; gap: var(--space); align-items: center; margin-bottom: var(--space); }
 .todo-input { flex: 1; min-width: 0; }
-.todo-list { list-style: none; margin: 0; padding: 0; }
-.todo-item { display: flex; align-items: center; gap: var(--space); padding: 0.5rem 0; border-bottom: 1px solid var(--border); min-height: var(--tap-min, 44px); }
+.todo-list { list-style: none; margin: 0 0 var(--space); padding: 0; }
+.todo-item { display: flex; align-items: center; gap: var(--space); padding: var(--space) 0; border-bottom: 1px solid var(--border); min-height: var(--tap-min); }
 .todo-item:last-child { border-bottom: none; }
-.todo-check { min-width: 2rem; min-height: 2rem; padding: 0; border: 2px solid var(--border); border-radius: var(--radius); background: var(--surface); font-size: 1rem; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.todo-check { min-width: 2rem; min-height: 2rem; padding: 0; border: 2px solid var(--border); border-radius: var(--radius); background: var(--surface); font-size: var(--widget-font); display: flex; align-items: center; justify-content: center; cursor: pointer; }
 .todo-item-done .todo-check { background: var(--accent); border-color: var(--accent); color: var(--header-fg); }
-.todo-text { flex: 1; min-width: 0; }
+.todo-text { flex: 1; min-width: 0; font-size: var(--widget-font); }
 .todo-item-done .todo-text { text-decoration: line-through; color: var(--muted); }
 .todo-remove { min-width: 2rem; padding: 0.2em 0.4em; font-size: var(--widget-font); line-height: 1; flex-shrink: 0; }
-.todo-empty { color: var(--muted); margin: var(--space) 0; }
+.todo-empty { color: var(--muted); font-size: var(--widget-meta); margin: var(--space) 0; }
 .todo-clear { margin-top: var(--space); }
 
-/* Recipes */
+/* Recipes – search row + list like Comics/Reddit; list rows card-style but same padding/font */
 .recipes-app { }
 .recipes-search { display: flex; gap: var(--space); align-items: center; margin-bottom: var(--space); }
+.recipes-search .input { flex: 1; min-width: 0; }
 .recipes-input { flex: 1; min-width: 0; }
-.recipes-list { list-style: none; margin: 0; padding: 0; }
+.recipes-list { list-style: none; margin: 0 0 var(--space); padding: 0; }
 .recipes-list li { margin-bottom: 0.5em; }
-.recipes-list-btn { width: 100%; text-align: left; display: flex; align-items: center; gap: var(--space); padding: var(--space); border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); min-height: var(--tap-min); }
+.recipes-list-btn { width: 100%; text-align: left; display: flex; align-items: center; gap: var(--space); padding: var(--space); border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); min-height: var(--tap-min); font-size: var(--widget-font); }
 .recipes-list-thumb { width: 48px; height: 48px; object-fit: cover; border-radius: var(--radius); flex-shrink: 0; }
 .recipes-detail-title { margin: 0 0 var(--space); font-size: var(--widget-heading); }
 .recipes-detail-img { max-width: 100%; height: auto; border-radius: var(--radius); margin-bottom: var(--space); }
-.recipes-ingredients, .recipes-instructions { margin: var(--space) 0; }
-.recipes-ingredients h3, .recipes-instructions h3 { font-size: var(--widget-title); margin: 0 0 0.5rem; }
-.recipes-instructions-text { white-space: pre-line; margin: 0; }
+.recipes-ingredients, .recipes-instructions { margin: var(--space) 0; font-size: var(--widget-font); }
+.recipes-ingredients h3, .recipes-instructions h3 { font-size: var(--widget-title); margin: 0 0 0.5em; }
+.recipes-instructions-text { white-space: pre-line; margin: 0; font-size: var(--widget-font); }
+.recipes-app > p { color: var(--muted); font-size: var(--widget-meta); margin: 0 0 var(--space); }
 
 /* Picture Frame */
 .pictureframe-app { display: flex; flex-direction: column; align-items: center; flex: 1; min-height: 0; }
@@ -1339,9 +1343,9 @@ textarea {
 .pictureframe-wake-label { font-size: var(--widget-meta); color: var(--muted); }
 .pictureframe-select { width: auto; min-width: 8rem; }
 .pictureframe-unsupported { font-size: var(--widget-meta); color: var(--muted); margin: var(--space) 0 0; }
-.pictureframe-loading { margin: var(--space); color: var(--muted); }
+.pictureframe-loading { font-size: var(--widget-meta); color: var(--muted); margin: var(--space) 0 0; }
 .pictureframe-add { margin-top: var(--space); width: 100%; max-width: 28rem; flex-shrink: 0; }
-.pictureframe-add-label { font-size: var(--widget-meta); color: var(--muted); display: block; margin-bottom: 0.35rem; }
+.pictureframe-add-label { font-size: var(--widget-meta); color: var(--muted); display: block; margin-bottom: 0.25em; }
 .pictureframe-add-url { display: flex; gap: var(--space); margin-bottom: var(--space); }
 .pictureframe-input { flex: 1; min-width: 0; }
 .pictureframe-browse { margin-bottom: var(--space); }
@@ -1381,7 +1385,6 @@ textarea {
   border-radius: 50%;
   background: var(--surface);
   color: var(--fg);
-  font-size: 0.9rem;
   font-weight: 300;
   line-height: 1;
   cursor: pointer;
@@ -1391,6 +1394,7 @@ textarea {
   z-index: 1;
   box-shadow: var(--shadow-soft);
   transition: background 0.15s ease, box-shadow 0.15s ease;
+  font-size: var(--widget-font);
 }
 .pictureframe-fullscreen-close:hover {
   background: var(--muted);
@@ -1411,16 +1415,16 @@ textarea {
 .stopwatch-app { }
 .stopwatch-app .timer-display { font-size: 2.25rem; font-weight: 600; font-variant-numeric: tabular-nums; margin: var(--space) 0; text-align: center; }
 
-/* World clock */
+/* World clock – add row + list rows like Reddit/Comics (padding, border, tap-min, widget font) */
 .worldclock-app { }
 .worldclock-add { display: flex; gap: var(--space); align-items: center; flex-wrap: wrap; margin-bottom: var(--space); }
 .worldclock-add .input { min-width: 8rem; }
 .worldclock-add-offset { width: 6rem; }
-.worldclock-list { list-style: none; margin: 0; padding: 0; }
-.worldclock-row { display: flex; justify-content: space-between; align-items: center; padding: var(--space) 0; border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; gap: var(--space); }
+.worldclock-list { list-style: none; margin: 0 0 var(--space); padding: 0; }
+.worldclock-row { display: flex; justify-content: space-between; align-items: center; padding: var(--space); border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; gap: var(--space); min-height: var(--tap-min); font-size: var(--widget-font); }
 .worldclock-row:last-child { border-bottom: none; }
-.worldclock-label { font-weight: 500; }
-.worldclock-time { color: var(--muted); font-size: var(--widget-font); }
+.worldclock-label { font-weight: 500; font-size: var(--widget-font); }
+.worldclock-time { color: var(--muted); font-size: var(--widget-meta); }
 .worldclock-delete { min-width: 2rem; padding: 0.2em 0.4em; font-size: var(--widget-font); line-height: 1; flex-shrink: 0; }
 
 /* Comics (xkcd + Comics RSS) */
@@ -1441,13 +1445,15 @@ textarea {
 .comics-no-img { color: var(--muted); font-style: italic; margin: var(--space) 0; }
 .comics-source-link { display: inline-block; margin-top: var(--space); color: var(--accent); }
 
-.settings-app .panel .btn { margin-right: var(--space); margin-bottom: var(--space); }
+/* Settings: align typography with other widgets (--widget-*) */
+.settings-app .panel-title { font-size: var(--widget-title); }
+.settings-app .panel .btn { margin-right: var(--space); margin-bottom: var(--space); font-size: var(--widget-font); }
 .settings-app .panel-description { color: var(--muted); font-size: var(--widget-meta); margin: 0 0 var(--space); }
 .settings-app .settings-import-message { margin: 0.5rem 0 0; font-size: var(--widget-meta); color: var(--muted); }
 .settings-app .settings-row { margin-bottom: 0.75rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
 .settings-app .settings-row .settings-label { min-width: 6rem; color: var(--muted); font-size: var(--widget-meta); }
 .settings-app .settings-toggle { display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; font-size: var(--widget-font); cursor: pointer; }
-.settings-app .settings-input { width: 100%; max-width: 20rem; margin-bottom: 0.5rem; padding: 0.5rem; font: inherit; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--fg); box-sizing: border-box; }
+.settings-app .settings-input { width: 100%; max-width: 20rem; margin-bottom: 0.5rem; padding: 0.5rem; font-size: var(--widget-font); font-family: inherit; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--fg); box-sizing: border-box; }
 
 /* Panel / card */
 .panel {
@@ -1461,7 +1467,7 @@ textarea {
 
 .panel-title {
   margin: 0 0 var(--space);
-  font-size: 1.1rem;
+  font-size: var(--widget-title);
 }
 
 /* Flex gap fallbacks for Kindle / Chrome 75 (no flexbox gap support). Use margin between siblings; modern browsers get gap via @supports below. */
@@ -1470,6 +1476,7 @@ textarea {
 .status-bar-right > * + *,
 .browser-actions > * + *,
 .reddit-search > * + *,
+.blog-search > * + *,
 .finance-right > * + *,
 .finance-actions > * + *,
 .weather-search > * + *,
@@ -1483,7 +1490,8 @@ textarea {
 .todo-add > * + *,
 .recipes-search > * + *,
 .pictureframe-controls > * + *,
-.pictureframe-wake > * + * {
+.pictureframe-wake > * + *,
+.worldclock-add > * + * {
   margin-left: var(--space);
 }
 .status-bar-right > * + * {
@@ -1502,6 +1510,7 @@ textarea {
   .status-bar-right > * + *,
   .browser-actions > * + *,
   .reddit-search > * + *,
+  .blog-search > * + *,
   .finance-right > * + *,
   .finance-actions > * + *,
   .weather-search > * + *,
@@ -1515,7 +1524,8 @@ textarea {
   .todo-add > * + *,
   .recipes-search > * + *,
   .pictureframe-controls > * + *,
-  .pictureframe-wake > * + * { margin-left: 0; }
+  .pictureframe-wake > * + *,
+  .worldclock-add > * + * { margin-left: 0; }
   .chess-mode-select > * + * { margin-left: 0; }
   .chess-mode-buttons > * + * { margin-top: 0; }
   .chess-footer > * + * { margin-left: 0; }
@@ -1531,6 +1541,21 @@ html *::before,
 html *::after {
   transition: none !important;
   animation: none !important;
+}
+/* Touch/coarse devices (e.g. Kindle): hide cursor; larger status bar tap targets */
+@media (pointer: coarse) {
+  html,
+  html body,
+  html * {
+    cursor: none !important;
+  }
+  html .status-bar .btn-status-zoom,
+  html .status-bar .btn-status-theme {
+    min-width: var(--tap-min);
+    min-height: var(--tap-min);
+    width: var(--tap-min);
+    height: var(--tap-min);
+  }
 }
 html,
 html body {

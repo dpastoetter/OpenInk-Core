@@ -138,6 +138,7 @@ function StatusBarInner({ theme, settings }: StatusBarProps) {
           type="button"
           class="btn btn-status btn-status-zoom"
           onClick={zoomOut}
+          onTouchEnd={(e) => { if (zoom > ZOOM_MIN) { e.preventDefault(); zoomOut(); } }}
           disabled={zoom <= ZOOM_MIN}
           aria-label="Zoom out"
         >
@@ -147,6 +148,7 @@ function StatusBarInner({ theme, settings }: StatusBarProps) {
           type="button"
           class="btn btn-status btn-status-zoom"
           onClick={zoomIn}
+          onTouchEnd={(e) => { if (zoom < ZOOM_MAX) { e.preventDefault(); zoomIn(); } }}
           disabled={zoom >= ZOOM_MAX}
           aria-label="Zoom in"
         >
@@ -156,6 +158,7 @@ function StatusBarInner({ theme, settings }: StatusBarProps) {
           type="button"
           class="btn btn-status btn-status-theme"
           onClick={toggleAppearance}
+          onTouchEnd={(e) => { e.preventDefault(); toggleAppearance(); }}
           aria-label={`Switch to ${appearance === 'light' ? 'dark' : 'light'} mode`}
         >
           {isLegacy ? (appearance === 'light' ? 'D' : 'L') : (appearance === 'light' ? <StatusBarSun /> : <StatusBarMoon />)}

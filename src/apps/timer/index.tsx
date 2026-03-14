@@ -186,7 +186,7 @@ function TimerStopwatchApp(context: AppContext): AppInstance {
 
     return (
       <>
-        <p class="timer-hint">Countdown timer. No sound — good for reading sessions.</p>
+        <p class="widget-hint">Countdown timer. No sound — good for reading sessions.</p>
         {totalSeconds === 0 ? (
           <>
             <p class="timer-label">Choose minutes</p>
