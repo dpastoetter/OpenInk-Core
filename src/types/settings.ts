@@ -49,6 +49,8 @@ export interface GlobalSettings {
 
   invertColors: boolean;
   reduceFlashes: boolean;
+  /** Simple layout for e-ink: hide search/filter UIs, larger font. */
+  simpleLayout: boolean;
 
   /** JSON array of { id, name, source } for Finance widget. source: 'yahoo' | 'coingecko'. */
   financeItems: string;
@@ -94,6 +96,7 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
 
   invertColors: false,
   reduceFlashes: false,
+  simpleLayout: false,
 
   financeItems: '[{"id":"^GSPC","name":"S&P 500","source":"yahoo"},{"id":"GC=F","name":"Gold","source":"yahoo"},{"id":"bitcoin","name":"Bitcoin","source":"coingecko"},{"id":"ethereum","name":"Ethereum","source":"coingecko"}]',
 

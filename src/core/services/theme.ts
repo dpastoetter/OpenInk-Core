@@ -32,6 +32,7 @@ export function createThemeService(initial: GlobalSettings): ThemeService {
           root.setAttribute('data-appearance', next.appearance);
           root.setAttribute('data-theme', next.theme);
           root.setAttribute('data-apps-per-row', next.appsPerRow);
+          root.setAttribute('data-simple-layout', next.simpleLayout ? 'true' : 'false');
           const zoom = Math.max(0.5, Math.min(2, Number(next.zoom) || 1));
           root.style.setProperty('--zoom', String(zoom));
           const tapMin = next.tapTargetSize === 'extraLarge' ? 60 : next.tapTargetSize === 'large' ? 52 : 44;
@@ -63,6 +64,7 @@ export function createThemeService(initial: GlobalSettings): ThemeService {
           root.setAttribute('data-high-contrast-focus', next.highContrastFocus ? 'true' : 'false');
           root.setAttribute('data-invert-colors', next.invertColors ? 'true' : 'false');
           root.setAttribute('data-reduce-flashes', next.reduceFlashes ? 'true' : 'false');
+          root.setAttribute('data-simple-layout', next.simpleLayout ? 'true' : 'false');
           root.setAttribute('data-apps-per-row', next.appsPerRow);
           const zoom = Math.max(0.5, Math.min(2, Number(next.zoom) || 1));
           root.style.setProperty('--zoom', String(zoom));

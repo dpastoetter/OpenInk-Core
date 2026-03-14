@@ -14,7 +14,7 @@ const SETTINGS_CSV_KEYS: (keyof GlobalSettings)[] = [
   'showGamesSection', 'appsPerRow', 'sortOrder',
   'defaultCacheTtl', 'offlinePreference',
   'tapTargetSize', 'focusRing', 'highContrastFocus',
-  'invertColors', 'reduceFlashes',
+  'invertColors', 'reduceFlashes', 'simpleLayout',
   'financeItems',
   'redditSubreddits',
   'blogFeeds',
@@ -91,7 +91,7 @@ function parseSettingsFromCsv(csv: string): Partial<GlobalSettings> | null {
       if (val && val.trim()) out.blogFeeds = val.trim();
     } else if (key === 'worldClockZones') {
       if (val && val.trim()) out.worldClockZones = val.trim();
-    } else if (key === 'showClock' || key === 'showAppTitle' || key === 'showGamesSection' || key === 'highContrastFocus' || key === 'invertColors' || key === 'reduceFlashes') {
+    } else if (key === 'showClock' || key === 'showAppTitle' || key === 'showGamesSection' || key === 'highContrastFocus' || key === 'invertColors' || key === 'reduceFlashes' || key === 'simpleLayout') {
       out[key] = val === 'true';
     } else {
       const allowed = VALID[key];
@@ -217,6 +217,17 @@ function SettingsApp(context: AppContext): AppInstance {
               {opt.label}
             </button>
           ))}
+          <div class="settings-row">
+            <span>Simple layout (e-ink)</span>
+            <button
+              type="button"
+              class={`btn ${settings.simpleLayout ? 'btn-active' : ''}`}
+              onClick={() => update({ simpleLayout: !settings.simpleLayout })}
+            >
+              {settings.simpleLayout ? 'On' : 'Off'}
+            </button>
+          </div>
+          <p class="panel-description">Hides search/filter UIs and uses larger font for e-ink.</p>
         </section>
         <section class="panel">
           <h2 class="panel-title">Data</h2>

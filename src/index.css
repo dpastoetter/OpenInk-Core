@@ -161,6 +161,24 @@ html[data-appearance="dark"][data-theme="highContrast"] {
 [data-reduce-flashes="true"] .btn,
 [data-reduce-flashes="true"] .panel { transition: none; box-shadow: none; }
 
+/* Simple layout (e-ink): strip dynamic elements (search/filter), larger font, minimal layout */
+[data-simple-layout="true"] {
+  font-size: 1.2rem;
+}
+[data-simple-layout="true"] .finance-add-section,
+[data-simple-layout="true"] .reddit-search,
+[data-simple-layout="true"] .reddit-search-hint,
+[data-simple-layout="true"] .weather-search,
+[data-simple-layout="true"] .recipes-search,
+[data-simple-layout="true"] .blog-add,
+[data-simple-layout="true"] .blog-discover-results,
+[data-simple-layout="true"] .dictionary-search,
+[data-simple-layout="true"] .finance-search-results { display: none !important; }
+[data-simple-layout="true"] .app-content { font-size: 1.15rem; }
+[data-simple-layout="true"] .list li,
+[data-simple-layout="true"] .reddit-comment,
+[data-simple-layout="true"] .finance-row { min-height: 2.5rem; padding-top: 0.5rem; padding-bottom: 0.5rem; }
+
 /* Apps per row (home grid) */
 [data-apps-per-row="2"] .app-grid { grid-template-columns: repeat(2, 1fr); }
 [data-apps-per-row="3"] .app-grid { grid-template-columns: repeat(3, 1fr); }
