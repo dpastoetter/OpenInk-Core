@@ -78,7 +78,7 @@ scripts/
 docs/                         # Documentation
 ├── ARCHITECTURE.md           # High-level design (this repo)
 ├── DEVELOPMENT.md            # This file
-├── KINDLE-COMPATIBILITY.md   # Kindle/e-ink constraints and legacy behaviour
+├── COMPATIBILITY.md   # Kindle/e-ink constraints and legacy behaviour
 ├── plugins.md                # How to add and implement apps
 ├── SECURITY.md               # Security and deployment checklist
 └── screenshots/              # legacy-home-light.png, legacy-home-dark.png, reddit-widget.png, chess-widget.png
@@ -116,12 +116,12 @@ docs/                         # Documentation
 - `npm run build` produces `dist/` (static assets). Deploy `dist/` to any static host (Netlify, Vercel, GitHub Pages, etc.). To preview the build on your LAN, run `npm run preview -- --host`.
 - If the app is served from a subpath (e.g. `/browserOS/`), set `base: '/browserOS/'` in `vite.config.ts` and rebuild.
 - The app uses the History API; the server must serve `index.html` for all routes (SPA fallback).
-- **Kindle / e-ink:** The app is a single page. `npm run build` produces `dist/index.html` and `dist/assets/openink-legacy-single.js` (and CSS). The bundle is built with Babel (Chrome 44 target). If the app does not mount within ~22 seconds, a fallback with "Try again" is shown. Deploy the full `dist/`. See [KINDLE-COMPATIBILITY.md](KINDLE-COMPATIBILITY.md) and [ReKindle COMPATIBILITY.md](https://github.com/ReKindleOS/ReKindle/blob/main/COMPATIBILITY.md).
+- **Kindle / e-ink:** The app is a single page. `npm run build` produces `dist/index.html` and `dist/assets/openink-legacy-single.js` (and CSS). The bundle is built with Babel (Chrome 44 target). If the app does not mount within ~22 seconds, a fallback with "Try again" is shown. Deploy the full `dist/`. See [COMPATIBILITY.md](COMPATIBILITY.md) and [ReKindle COMPATIBILITY.md](https://github.com/ReKindleOS/ReKindle/blob/main/COMPATIBILITY.md).
 
 ## Documentation
 
 - **ARCHITECTURE.md** – How the shell, plugins, and services fit together.
-- **KINDLE-COMPATIBILITY.md** – Kindle/e-ink constraints (ReKindle-style): legacy loader, static fallback, no flex gap, no emoji, no animations on legacy, system fonts, etc.
+- **COMPATIBILITY.md** – Kindle/e-ink constraints (ReKindle-style): legacy loader, static fallback, no flex gap, no emoji, no animations on legacy, system fonts, etc.
 - **plugins.md** – Step-by-step app plugin implementation and use of context/services.
 - **SECURITY.md** – Security measures and deployment checklist for public sites.
 - **README.md** – Quick start, commands, and links to the docs above.
@@ -141,7 +141,7 @@ The legacy bundle and runtime are tuned for low-spec e-ink devices:
 - **Smaller legacy bundle** – Lucide is not included in the legacy build. The legacy launcher uses `app-icons-legacy.ts` (aliased in `vite.legacy-single.config.ts`), so tiles use inline SVG from `legacy-svg.ts` or fallback text only; this keeps the IIFE bundle smaller and parse/execution faster.
 - **Stable Shell callbacks** – `launchApp`, `closeApp`, and `goToHome` are stabilized with a ref to the current app instance, so child components (e.g. HomeScreen) receive stable props and avoid unnecessary re-renders when switching apps.
 - **Clock and theme** – On legacy, the status bar clock uses a simple formatter and updates every 60 seconds to limit reflows; theme is applied via `setAttribute` on the document so high-contrast works without extra layout.
-- **CSS** – Legacy uses `html.legacy-browser` scoping: no transitions/animations, system fonts, grayscale, and flex-based app grid (no CSS Grid). See `index.css` and [KINDLE-COMPATIBILITY.md](KINDLE-COMPATIBILITY.md).
+- **CSS** – Legacy uses `html.legacy-browser` scoping: no transitions/animations, system fonts, grayscale, and flex-based app grid (no CSS Grid). See `index.css` and [COMPATIBILITY.md](COMPATIBILITY.md).
 
 ## Possible improvements
 

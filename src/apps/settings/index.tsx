@@ -120,13 +120,6 @@ const APPEARANCE_OPTIONS: { value: Appearance; label: string }[] = [
   { value: 'dark', label: 'Dark' },
 ];
 
-const APPS_PER_ROW_OPTIONS: { value: AppsPerRowPreset; label: string }[] = [
-  { value: 'auto', label: 'Auto' },
-  { value: '2', label: '2' },
-  { value: '3', label: '3' },
-  { value: '4', label: '4' },
-];
-
 function SettingsApp(context: AppContext): AppInstance {
   function SettingsUI() {
     const settingsSvc = context.services.settings;
@@ -240,20 +233,6 @@ function SettingsApp(context: AppContext): AppInstance {
               type="button"
               class={`btn ${settings.appearance === opt.value ? 'btn-active' : ''}`}
               onClick={() => update({ appearance: opt.value })}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </section>
-        <section class="panel">
-          <h2 class="panel-title">Home</h2>
-          <p class="panel-description">Apps per row on the home screen.</p>
-          {APPS_PER_ROW_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              class={`btn ${settings.appsPerRow === opt.value ? 'btn-active' : ''}`}
-              onClick={() => update({ appsPerRow: opt.value })}
             >
               {opt.label}
             </button>

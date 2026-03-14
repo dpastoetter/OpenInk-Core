@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'preact/hooks';
+import { useState, useCallback, useEffect } from 'preact/hooks';
 import { createPortal } from 'preact/compat';
 import type { AppContext, AppInstance } from '../../types/plugin';
 import { PLUGIN_API_VERSION } from '../../types/plugin';
@@ -78,15 +78,6 @@ const PREINSTALLED_GRAPHICS: PictureItem[] = [
   { id: 'pf-56', name: 'Pagoda', src: 'https://picsum.photos/seed/pagoda1/1200/800' },
 ];
 
-const WAKE_DURATIONS = [
-  { value: 0, label: '1 hour', ms: 60 * 60 * 1000 },
-  { value: 1, label: '3 hours', ms: 3 * 60 * 60 * 1000 },
-  { value: 2, label: '5 hours', ms: 5 * 60 * 60 * 1000 },
-  { value: 3, label: '12 hours', ms: 12 * 60 * 60 * 1000 },
-  { value: 4, label: '24 hours', ms: 24 * 60 * 60 * 1000 },
-  { value: 5, label: 'Forever', ms: 0 },
-] as const;
-
 function PictureFrameApp(_context: AppContext): AppInstance {
   const allPictures = PREINSTALLED_GRAPHICS.map((p) => ({
         ...p,
@@ -98,14 +89,7 @@ function PictureFrameApp(_context: AppContext): AppInstance {
 
   function PictureFrameUI() {
     const [currentIndex, setCurrentIndex] = useState(0);
-    const [wakeDurationIndex, setWakeDurationIndex] = useState(0);
-    const [wakeActive, setWakeActive] = useState(false);
     const [fullscreen, setFullscreen] = useState(false);
-    const [wakeUnsupported, setWakeUnsupported] = useState(false);
-    const wakeLockRef = useRef<WakeLockSentinel | null>(null);
-    const releaseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-    const hasWakeLock = typeof navigator !== 'undefined' && 'wakeLock' in navigator;
     const current = usePictures[Math.min(currentIndex, usePictures.length - 1)] ?? usePictures[0];
 
     useEffect(() => {
@@ -114,69 +98,13 @@ function PictureFrameApp(_context: AppContext): AppInstance {
       }
     }, [usePictures.length, currentIndex]);
 
-    const releaseWakeLock = useCallback(async () => {
-      if (releaseTimerRef.current) {
-        clearTimeout(releaseTimerRef.current);
-        releaseTimerRef.current = null;
-      }
-      if (wakeLockRef.current) {
-        try {
-          await wakeLockRef.current.release();
-        } catch { /* wake lock release can fail if already released */ }
-        wakeLockRef.current = null;
-      }
-      setWakeActive(false);
-    }, []);
-
-    const requestWakeLockOnly = useCallback(async () => {
-      try {
-        const sentinel = await (navigator as Navigator & { wakeLock: { request(t: string): Promise<WakeLockSentinel> } }).wakeLock.request('screen');
-        wakeLockRef.current = sentinel;
-        setWakeActive(true);
-      } catch { /* wake lock not supported or denied */ }
-    }, []);
-
-    const startFullscreen = useCallback(async () => {
-      if (!hasWakeLock) {
-        setWakeUnsupported(true);
-        return;
-      }
-      setWakeUnsupported(false);
-      await releaseWakeLock();
-      try {
-        await requestWakeLockOnly();
-        setFullscreen(true);
-        const duration = WAKE_DURATIONS[wakeDurationIndex];
-        if (duration.ms > 0) {
-          releaseTimerRef.current = setTimeout(() => {
-            releaseWakeLock();
-          }, duration.ms);
-        }
-      } catch {
-        setWakeUnsupported(true);
-      }
-    }, [hasWakeLock, wakeDurationIndex, releaseWakeLock, requestWakeLockOnly]);
-
     const openFullscreen = useCallback(() => {
       setFullscreen(true);
     }, []);
 
     const closeFullscreen = useCallback(() => {
       setFullscreen(false);
-      releaseWakeLock();
-    }, [releaseWakeLock]);
-
-    useEffect(() => {
-      if (!hasWakeLock || !wakeActive) return;
-      const onVisibilityChange = () => {
-        if (document.visibilityState === 'visible' && wakeLockRef.current === null) {
-          const duration = WAKE_DURATIONS[wakeDurationIndex];
-          if (duration.ms === 0) requestWakeLockOnly();
-        }
-      };
-      document.addEventListener('visibilitychange', onVisibilityChange);
-      return () => document.removeEventListener('visibilitychange', onVisibilityChange);
-    }, [hasWakeLock, wakeActive, wakeDurationIndex, requestWakeLockOnly]);
+    }, []);
 
     useEffect(() => {
       return () => {
@@ -240,39 +168,6 @@ function PictureFrameApp(_context: AppContext): AppInstance {
             Full screen
           </button>
         </div>
-        <div class="pictureframe-wake">
-            <label class="pictureframe-wake-label" htmlFor="pictureframe-wake-duration">Keep screen on</label>
-            <select
-              id="pictureframe-wake-duration"
-              class="input pictureframe-select"
-              value={wakeDurationIndex}
-              onChange={(e) => setWakeDurationIndex(Number((e.target as HTMLSelectElement).value))}
-              aria-label="Duration"
-            >
-              {WAKE_DURATIONS.map((d, i) => (
-                <option key={d.value} value={i}>
-                  {d.label}
-                </option>
-              ))}
-            </select>
-            {wakeActive && !fullscreen ? (
-              <button type="button" class="btn btn-secondary" onClick={releaseWakeLock}>
-                Cancel
-              </button>
-            ) : (
-              <button
-                type="button"
-                class="btn"
-                onClick={startFullscreen}
-                disabled={!hasWakeLock}
-              >
-                Start
-              </button>
-            )}
-          </div>
-        {wakeUnsupported && (
-          <p class="pictureframe-unsupported">Keep-awake not supported in this browser.</p>
-        )}
       </div>
     );
   }

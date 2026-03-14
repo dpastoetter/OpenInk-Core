@@ -40,7 +40,7 @@ Open the URL shown (e.g. `http://localhost:5173`). The dev server listens on all
 npm run build
 ```
 
-Deploy the full `dist/` (single `index.html` and `assets/`). See **[docs/KINDLE-COMPATIBILITY.md](docs/KINDLE-COMPATIBILITY.md)** for deployment and troubleshooting.
+Deploy the full `dist/` (single `index.html` and `assets/`). See **[docs/COMPATIBILITY.md](docs/COMPATIBILITY.md)** for deployment and troubleshooting.
 
 ```bash
 npm run preview   # optional: preview the built app
@@ -104,7 +104,7 @@ No secrets in the bundle; sanitized API content (XSS prevention); Content-Securi
 - **[docs/SECURITY.md](docs/SECURITY.md)** – Security and deployment checklist.
 - **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** – Shell, plugin system, services, data flow.
 - **[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)** – Workflow, structure, testing, deploy.
-- **[docs/KINDLE-COMPATIBILITY.md](docs/KINDLE-COMPATIBILITY.md)** – Kindle/e-ink constraints and legacy loader.
+- **[docs/COMPATIBILITY.md](docs/COMPATIBILITY.md)** – Kindle/e-ink constraints and legacy loader.
 - **[docs/plugins.md](docs/plugins.md)** – Building and registering apps, context, services, shell hooks.
 
 ## Project structure
