@@ -149,7 +149,7 @@ export function SnakeGame() {
   );
 
   const onDirTap = (e: Event, d: Dir) => {
-    if (e.type === 'touchend') (e as TouchEvent).preventDefault();
+    if (e.type === 'touchstart') (e as TouchEvent).preventDefault();
     setDirSafe(d);
   };
 
@@ -178,13 +178,13 @@ export function SnakeGame() {
         </div>
         {!gameOver && (
           <div class="snake-dpad" role="group" aria-label="Direction">
-            <button type="button" class="btn snake-dpad-btn" onClick={(e) => onDirTap(e, 'up')} onTouchEnd={(e) => onDirTap(e, 'up')} aria-label="Up">↑</button>
+            <button type="button" class="btn snake-dpad-btn" onClick={(e) => onDirTap(e, 'up')} onTouchStart={(e) => onDirTap(e, 'up')} aria-label="Up">↑</button>
             <div class="snake-dpad-mid">
-              <button type="button" class="btn snake-dpad-btn" onClick={(e) => onDirTap(e, 'left')} onTouchEnd={(e) => onDirTap(e, 'left')} aria-label="Left">←</button>
-              <button type="button" class="btn snake-dpad-btn snake-dpad-center" onClick={() => setPaused((p) => !p)} onTouchEnd={(e) => { (e as TouchEvent).preventDefault(); setPaused((p) => !p); }} aria-label={paused ? 'Resume' : 'Pause'}>{paused ? '▶' : '‖'}</button>
-              <button type="button" class="btn snake-dpad-btn" onClick={(e) => onDirTap(e, 'right')} onTouchEnd={(e) => onDirTap(e, 'right')} aria-label="Right">→</button>
+              <button type="button" class="btn snake-dpad-btn" onClick={(e) => onDirTap(e, 'left')} onTouchStart={(e) => onDirTap(e, 'left')} aria-label="Left">←</button>
+              <button type="button" class="btn snake-dpad-btn snake-dpad-center" onClick={() => setPaused((p) => !p)} onTouchStart={(e) => { (e as TouchEvent).preventDefault(); setPaused((p) => !p); }} aria-label={paused ? 'Resume' : 'Pause'}>{paused ? '▶' : '‖'}</button>
+              <button type="button" class="btn snake-dpad-btn" onClick={(e) => onDirTap(e, 'right')} onTouchStart={(e) => onDirTap(e, 'right')} aria-label="Right">→</button>
             </div>
-            <button type="button" class="btn snake-dpad-btn" onClick={(e) => onDirTap(e, 'down')} onTouchEnd={(e) => onDirTap(e, 'down')} aria-label="Down">↓</button>
+            <button type="button" class="btn snake-dpad-btn" onClick={(e) => onDirTap(e, 'down')} onTouchStart={(e) => onDirTap(e, 'down')} aria-label="Down">↓</button>
           </div>
         )}
       </div>

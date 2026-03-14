@@ -999,6 +999,7 @@ textarea {
   align-items: center;
   gap: 0.2rem;
   flex-shrink: 0;
+  touch-action: manipulation;
 }
 
 .snake-dpad-mid {
@@ -1013,6 +1014,7 @@ textarea {
   padding: 0.2rem;
   font-size: 1.15rem;
   line-height: 1;
+  touch-action: manipulation;
 }
 
 .snake-dpad-center { font-size: 0.95rem; }
@@ -1035,6 +1037,7 @@ textarea {
 .reddit-selftext { margin: var(--space) 0; }
 .reddit-comments { list-style: none; margin: 0; padding: 0; }
 .reddit-comment { border-bottom: 1px solid var(--border); padding: var(--space) 0; }
+.reddit-comment:last-child { border-bottom: none; }
 .reddit-comment p { margin: 0.25em 0 0; }
 
 /* News */

@@ -10,12 +10,15 @@ interface PictureItem {
   name: string;
 }
 
-/** Local SVGs only (Kindle/e-ink safe: no network, no heavy decode). */
+/** Inline SVG data URLs so Picture Frame works on Kindle (no path or external SVG dependency). */
+function svgDataUrl(svg: string): string {
+  return 'data:image/svg+xml,' + encodeURIComponent(svg.trim().replace(/\s+/g, ' '));
+}
 const LOCAL_GRAPHICS: PictureItem[] = [
-  { id: 'pf-1', name: 'Sun', src: '/pictureframe/1-sun.svg' },
-  { id: 'pf-2', name: 'Mountain', src: '/pictureframe/2-mountain.svg' },
-  { id: 'pf-3', name: 'Tree', src: '/pictureframe/3-tree.svg' },
-  { id: 'pf-4', name: 'Moon', src: '/pictureframe/4-moon.svg' },
+  { id: 'pf-1', name: 'Sun', src: svgDataUrl('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="128" height="128"><rect width="32" height="32" fill="#1a1a2e"/><circle cx="16" cy="16" r="6" fill="#eaeaea"/><rect x="15" y="2" width="2" height="4" fill="#eaeaea"/><rect x="15" y="26" width="2" height="4" fill="#eaeaea"/><rect x="2" y="15" width="4" height="2" fill="#eaeaea"/><rect x="26" y="15" width="4" height="2" fill="#eaeaea"/><rect x="6" y="6" width="2" height="2" fill="#eaeaea"/><rect x="24" y="6" width="2" height="2" fill="#eaeaea"/><rect x="6" y="24" width="2" height="2" fill="#eaeaea"/><rect x="24" y="24" width="2" height="2" fill="#eaeaea"/></svg>') },
+  { id: 'pf-2', name: 'Mountain', src: svgDataUrl('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="128" height="128"><rect width="32" height="32" fill="#87ceeb"/><polygon points="0,32 8,20 16,24 24,12 32,32" fill="#4a5568"/><polygon points="4,32 12,24 20,28 28,16 32,32" fill="#2d3748"/><polygon points="0,32 6,26 14,30 22,22 32,32" fill="#1a202c"/><rect x="14" y="8" width="4" height="4" fill="#eaeaea"/></svg>') },
+  { id: 'pf-3', name: 'Tree', src: svgDataUrl('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="128" height="128"><rect width="32" height="32" fill="#1a2f1a"/><rect x="14" y="24" width="4" height="8" fill="#5d4e37"/><polygon points="16,4 6,20 26,20" fill="#2d5a27"/><polygon points="16,10 10,22 22,22" fill="#3d7a37"/><polygon points="16,14 12,24 20,24" fill="#4d9a47"/></svg>') },
+  { id: 'pf-4', name: 'Moon', src: svgDataUrl('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="128" height="128"><rect width="32" height="32" fill="#0f0f23"/><circle cx="20" cy="12" r="8" fill="#e8e4d9"/><circle cx="22" cy="10" r="8" fill="#0f0f23"/><circle cx="8" cy="26" r="1.5" fill="#6b7280"/><circle cx="24" cy="6" r="0.8" fill="#6b7280"/><circle cx="6" cy="8" r="0.6" fill="#6b7280"/></svg>') },
 ];
 
 /** Full list: local SVGs + external (optional; network images can be heavy on e-ink). */

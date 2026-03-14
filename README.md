@@ -1,7 +1,5 @@
 # OpenInk
 
-**Current version: 1.0.0**
-
 A minimal, plugin-based “webOS-style” launcher for low-spec and e-ink devices. It provides a home screen, status bar, and a set of built-in apps that run inside a shared shell—tuned for Kindle, grayscale displays, and slow hardware.
 
 ## Features
