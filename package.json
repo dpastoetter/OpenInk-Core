@@ -11,7 +11,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint src",
-    "screenshot": "node scripts/screenshot-legacy.mjs"
+    "screenshot": "node scripts/screenshot-legacy.mjs",
+    "push:github": "./scripts/push-to-github.sh"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
