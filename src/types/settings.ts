@@ -77,7 +77,7 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
   letterSpacing: 'normal',
 
   showClock: true,
-  timeFormat: '12h',
+  timeFormat: '24h',
   showAppTitle: true,
 
   showGamesSection: true,
