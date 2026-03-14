@@ -141,7 +141,6 @@ interface PanelBackRef {
 }
 
 function BlogNewsApp(context: AppContext): AppInstance {
-  const { storage, network, settings } = context.services;
   const modeRef = useRef<'blog' | 'news'>('blog');
   const blogBackRef = useRef<PanelBackRef | null>(null);
   const newsBackRef = useRef<PanelBackRef | null>(null);

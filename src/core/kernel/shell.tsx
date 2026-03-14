@@ -219,7 +219,6 @@ export function Shell({ services }: ShellProps) {
   }, [currentAppId, goToHome]);
 
   const showHome = currentAppId === null && !loadingAppId;
-  const currentApp = currentAppId ? AppRegistry.getApp(currentAppId) : null;
   const [showAppTitle, setShowAppTitle] = useState(() => services.theme.getSettings().showAppTitle);
   const showAppTitleRef = useRef(showAppTitle);
   showAppTitleRef.current = showAppTitle;
