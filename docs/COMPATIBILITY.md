@@ -28,15 +28,24 @@ OpenInk follows [ReKindle COMPATIBILITY.md](https://github.com/ReKindleOS/ReKind
 ## Quick tips for Kindle users
 
 - **Bookmark the main URL** (e.g. `https://yoursite.com/`) so the Kindle opens the app with one request.
-- **JIT-less engine:** The Kindle browser runs JavaScript 5–10× slower than a normal phone (ReKindle: V8 Ignition interpreter only). We avoid blocking the main thread before first paint: the shell renders immediately with no theme DOM work; theme and storage load run after first paint (e.g. `requestAnimationFrame` then deferred settings load).
+- **JIT-less engine:** The Kindle browser runs JavaScript 5–10× slower than a normal phone (ReKindle: V8 Ignition interpreter only). We apply theme once before rendering so e-ink gets a single full-screen paint; storage load is deferred (280ms) so it doesn’t block the first frame.
 - **Date/time:** We use manual string formatting (`@core/utils/date`) instead of `Intl` / `toLocaleString` options, which are unreliable on Kindle (ReKindle).
 - **Images:** `image-rendering: pixelated` is set for crisp edges on e-ink.
 
 ## Performance (ReKindle-aligned)
 
-- **First paint first:** No `theme.applySettings()` or storage read before the first frame; theme is applied in the next animation frame so the shell can paint immediately.
-- **No heavy work on load:** Avoid large data parsing or heavy computation in the initial script; app code is lazy-loaded when the user opens an app.
+- **One paint on e-ink:** Theme is applied before the shell renders so the first paint is the full app with correct theme. That avoids a second full-screen refresh (e-ink is slow to refresh).
+- **Sync bootstrap:** The legacy script runs services and render in one go (no deferred bootstrap), so the app appears as soon as the script finishes; this matches the faster behaviour from before the “defer” experiments.
+- **Script preload:** `index.html` includes `<link rel="preload" href="assets/openink-legacy-single.js" as="script">` so the browser can start fetching the bundle in parallel with parsing.
+- **No heavy work on load:** App code is lazy-loaded when the user opens an app.
 - **CSS:** Main stylesheet is loaded with `media="print"` and switched to `all` in `onload` so it does not block parsing or first paint.
+- **Settings load:** Stored settings are loaded 280ms after first paint so we don’t block on localStorage during the initial render.
+
+## If it’s still slow
+
+- **Bundle size:** Run `npm run build` and check `dist/assets/openink-legacy-single.js` size. A smaller bundle parses and runs faster on the JIT-less engine; consider removing unused apps from the registry if you need a minimal build.
+- **Network:** Use a fast host or CDN and ensure the Kindle has a good connection; the single JS file must download before the app can start.
+- **Cache:** Serve with long-lived cache headers for the script and CSS so repeat visits skip the download.
 
 ## References
 
