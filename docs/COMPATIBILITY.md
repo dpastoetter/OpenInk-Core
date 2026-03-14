@@ -15,7 +15,7 @@ OpenInk follows [ReKindle COMPATIBILITY.md](https://github.com/ReKindleOS/ReKind
 
 - **Single legacy bundle** – IIFE `openink-legacy-single.js` built with Babel (Chrome 44 target). Optional chaining and nullish coalescing are transpiled.
 - **No flexbox `gap`** – We use margin-based fallbacks in CSS; modern browsers get `gap` via `@supports (gap: 1px)`.
-- **No CSS Grid on legacy** – The app launcher grid uses flexbox (fixed-width tiles, 6rem) so tiles don’t span the full screen.
+- **No CSS Grid on legacy** – The app launcher grid uses flexbox (fixed-width tiles, 6rem) so tiles don't span the full screen.
 - **Higher contrast (normal theme)** – For e-ink readability, the normal theme uses stronger contrast: near-black text and dark borders in light mode, bright text and clearer borders in dark mode.
 - **No animations/transitions** – `index.html` sets `class="legacy-browser"` on `<html>`. Our CSS disables `transition` and `animation` for `html.legacy-browser *` to avoid e-ink ghosting.
 - **System fonts only** – No web fonts. We use `Arial, Verdana, "Courier New", serif, sans-serif` (ReKindle-style).
@@ -28,9 +28,15 @@ OpenInk follows [ReKindle COMPATIBILITY.md](https://github.com/ReKindleOS/ReKind
 ## Quick tips for Kindle users
 
 - **Bookmark the main URL** (e.g. `https://yoursite.com/`) so the Kindle opens the app with one request.
-- **JIT-less engine:** The Kindle browser runs JavaScript 5–10× slower than a normal phone. We avoid blocking on storage before first paint: the app renders immediately with default settings, then loads stored settings in the background.
+- **JIT-less engine:** The Kindle browser runs JavaScript 5–10× slower than a normal phone (ReKindle: V8 Ignition interpreter only). We avoid blocking the main thread before first paint: the shell renders immediately with no theme DOM work; theme and storage load run after first paint (e.g. `requestAnimationFrame` then deferred settings load).
 - **Date/time:** We use manual string formatting (`@core/utils/date`) instead of `Intl` / `toLocaleString` options, which are unreliable on Kindle (ReKindle).
 - **Images:** `image-rendering: pixelated` is set for crisp edges on e-ink.
+
+## Performance (ReKindle-aligned)
+
+- **First paint first:** No `theme.applySettings()` or storage read before the first frame; theme is applied in the next animation frame so the shell can paint immediately.
+- **No heavy work on load:** Avoid large data parsing or heavy computation in the initial script; app code is lazy-loaded when the user opens an app.
+- **CSS:** Main stylesheet is loaded with `media="print"` and switched to `all` in `onload` so it does not block parsing or first paint.
 
 ## References
 
