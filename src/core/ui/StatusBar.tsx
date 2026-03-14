@@ -1,5 +1,5 @@
 import { memo } from 'preact/compat';
-import { useState, useEffect } from 'preact/hooks';
+import { useState, useEffect, useRef } from 'preact/hooks';
 import type { ThemeService } from '../services/theme';
 import type { SettingsService } from '../services/settings';
 import { formatTimeLegacy, formatTimeLegacy12h } from '../utils/date';
@@ -12,8 +12,6 @@ interface StatusBarProps {
   theme: ThemeService;
   settings: SettingsService;
 }
-
-const isLegacy = typeof import.meta.env.LEGACY !== 'undefined' && import.meta.env.LEGACY;
 
 function formatTime(d: Date, timeFormat: '12h' | '24h'): string {
   return timeFormat === '12h' ? formatTimeLegacy12h(d) : formatTimeLegacy(d);
@@ -68,13 +66,26 @@ function StatusBarInner({ theme, settings }: StatusBarProps) {
   const time = useClock(timeFormat);
   const [appearance, setAppearance] = useState<'light' | 'dark'>(s.appearance);
   const [zoom, setZoom] = useState(s.zoom);
+  const ref = useRef({ appearance: s.appearance, zoom: s.zoom, showClock: s.showClock, timeFormat: s.timeFormat });
 
   useEffect(() => {
     return theme.subscribe((next) => {
-      setAppearance(next.appearance);
-      setZoom(next.zoom);
-      setShowClock(next.showClock);
-      setTimeFormat(next.timeFormat);
+      if (next.appearance !== ref.current.appearance) {
+        ref.current.appearance = next.appearance;
+        setAppearance(next.appearance);
+      }
+      if (next.zoom !== ref.current.zoom) {
+        ref.current.zoom = next.zoom;
+        setZoom(next.zoom);
+      }
+      if (next.showClock !== ref.current.showClock) {
+        ref.current.showClock = next.showClock;
+        setShowClock(next.showClock);
+      }
+      if (next.timeFormat !== ref.current.timeFormat) {
+        ref.current.timeFormat = next.timeFormat;
+        setTimeFormat(next.timeFormat);
+      }
     });
   }, [theme]);
 
@@ -127,7 +138,7 @@ function StatusBarInner({ theme, settings }: StatusBarProps) {
           onClick={toggleAppearance}
           aria-label={`Switch to ${appearance === 'light' ? 'dark' : 'light'} mode`}
         >
-          {isLegacy ? (appearance === 'light' ? 'D' : 'L') : (appearance === 'light' ? <StatusBarSun /> : <StatusBarMoon />)}
+          {appearance === 'light' ? <StatusBarSun /> : <StatusBarMoon />}
         </button>
       </span>
     </header>

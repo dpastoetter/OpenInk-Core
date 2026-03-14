@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'preact/hooks';
+import { memo } from 'preact/compat';
 import type { VNode } from 'preact';
 import type { WebOSApp, AppInstance, AppContext, AppDescriptor } from '../../types/plugin';
 import { AppRegistry } from '../plugins/registry';
@@ -25,6 +26,21 @@ const HISTORY_STATE_KEY = 'openInk';
 
 /** Ignore click if pointer/touch moved more than this (px) — reduces accidental taps while scrolling on Kindle. */
 const TAP_VS_SCROLL_THRESHOLD_PX = 24;
+
+/** Memoized so app tree only re-renders when instance changes, not on every Shell re-render (e.g. header title/actions). */
+const AppContentArea = memo(function AppContentArea({
+  instance,
+  setHeaderActions,
+}: {
+  instance: AppInstance;
+  setHeaderActions: (node: VNode | null) => void;
+}) {
+  return (
+    <AppHeaderActionsContext.Provider value={setHeaderActions}>
+      {instance.render()}
+    </AppHeaderActionsContext.Provider>
+  );
+});
 
 export function Shell({ services }: ShellProps) {
   const [currentAppId, setCurrentAppId] = useState<string | null>(null);
@@ -203,8 +219,15 @@ export function Shell({ services }: ShellProps) {
   const showHome = currentAppId === null && !loadingAppId;
   const currentApp = currentAppId ? AppRegistry.getApp(currentAppId) : null;
   const [showAppTitle, setShowAppTitle] = useState(() => services.theme.getSettings().showAppTitle);
+  const showAppTitleRef = useRef(showAppTitle);
+  showAppTitleRef.current = showAppTitle;
   useEffect(() => {
-    return services.theme.subscribe((s) => setShowAppTitle(s.showAppTitle));
+    return services.theme.subscribe((s) => {
+      if (s.showAppTitle !== showAppTitleRef.current) {
+        showAppTitleRef.current = s.showAppTitle;
+        setShowAppTitle(s.showAppTitle);
+      }
+    });
   }, [services.theme]);
   const headerTitle = showAppTitle ? (instance?.getTitle?.() ?? currentApp?.name ?? currentAppId ?? '') : '';
   const [headerActions, setHeaderActions] = useState<VNode | null>(null);
@@ -242,9 +265,7 @@ export function Shell({ services }: ShellProps) {
               {headerActions != null && <div class="app-header-actions">{headerActions}</div>}
             </header>
             <div class="app-content">
-              <AppHeaderActionsContext.Provider value={setHeaderActions}>
-                {instance.render()}
-              </AppHeaderActionsContext.Provider>
+              <AppContentArea instance={instance} setHeaderActions={setHeaderActions} />
             </div>
           </div>
         ) : null}

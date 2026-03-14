@@ -1,5 +1,5 @@
 import { memo } from 'preact/compat';
-import { useMemo, useCallback, useState, useEffect } from 'preact/hooks';
+import { useMemo, useCallback, useState, useEffect, useRef } from 'preact/hooks';
 import type { AppDescriptor } from '../../types/plugin';
 import { getAppIcon } from '@core/icons/app-icons';
 import { isSafeLegacySvg } from '../utils/safe-svg';
@@ -66,10 +66,17 @@ const HomeScreenInner = function HomeScreen({ apps, onLaunch, theme }: HomeScree
   const s = theme.getSettings();
   const [showGamesSection, setShowGamesSection] = useState(s.showGamesSection);
   const [sortOrder, setSortOrder] = useState(s.sortOrder);
+  const ref = useRef({ showGamesSection: s.showGamesSection, sortOrder: s.sortOrder });
   useEffect(() => {
     return theme.subscribe((next) => {
-      setShowGamesSection(next.showGamesSection);
-      setSortOrder(next.sortOrder);
+      if (next.showGamesSection !== ref.current.showGamesSection) {
+        ref.current.showGamesSection = next.showGamesSection;
+        setShowGamesSection(next.showGamesSection);
+      }
+      if (next.sortOrder !== ref.current.sortOrder) {
+        ref.current.sortOrder = next.sortOrder;
+        setSortOrder(next.sortOrder);
+      }
     });
   }, [theme]);
 
