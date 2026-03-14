@@ -39,6 +39,7 @@ const legacyHtml = `<!DOCTYPE html>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https:; font-src 'self'; base-uri 'self'; form-action 'self'">
 <link rel="icon" type="image/svg+xml" href="/openink-logo.svg">
 <title>OpenInk</title>
+<link rel="preload" href="assets/openink-legacy-single.js" as="script">
 <style>${criticalStyle}</style>
 </head>
 <body>

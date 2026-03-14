@@ -89,23 +89,17 @@ function init() {
   const root = document.getElementById('root');
   if (!root) return;
   try {
-    // ReKindle: first paint with no theme DOM work — JIT-less engine is 5–10× slower; avoid blocking main thread
+    // Apply theme before first paint so e-ink gets one full-screen paint (faster than shell-then-theme)
+    theme.applySettings(DEFAULT_SETTINGS);
     renderShell(root);
-    const afterFirstPaint =
-      typeof requestAnimationFrame !== 'undefined'
-        ? (fn: () => void) => requestAnimationFrame(() => requestAnimationFrame(fn))
-        : (fn: () => void) => setTimeout(fn, 0);
-    afterFirstPaint(() => {
-      theme.applySettings(DEFAULT_SETTINGS);
-      // Defer storage read so we don't block; Kindle/localStorage can be slow
-      const loadSettings = () => {
-        settings
-          .load()
-          .then((loaded) => theme.applySettings(loaded))
-          .catch(() => theme.applySettings(DEFAULT_SETTINGS));
-      };
-      setTimeout(loadSettings, 280);
-    });
+    // Defer settings load so first paint completes before touching storage (smoother on Kindle)
+    const loadSettings = () => {
+      settings
+        .load()
+        .then((loaded) => theme.applySettings(loaded))
+        .catch(() => theme.applySettings(DEFAULT_SETTINGS));
+    };
+    setTimeout(loadSettings, 280);
   } catch (e) {
     showLegacyFallback(e);
   }
