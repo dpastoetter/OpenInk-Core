@@ -740,9 +740,11 @@ textarea {
   min-width: 0;
   min-height: 0;
   border: none;
+  padding: 0;
   background: var(--bg);
   color: var(--fg);
   font-size: var(--chess-piece-size, clamp(0.75rem, 4.5vmin, 1.5rem));
+  line-height: 1;
   cursor: pointer;
   display: flex;
   align-items: center;
