@@ -320,7 +320,6 @@ function FinanceApp(context: AppContext): AppInstance {
         </ul>
 
         <div class="finance-add-section">
-          <h3 class="finance-add-heading">Add item</h3>
           <div class="finance-add-row finance-search-add-bar">
             <input
               type="text"

@@ -1,4 +1,4 @@
-import { useEffect } from 'preact/hooks';
+import { useEffect, useRef } from 'preact/hooks';
 
 /**
  * Suppresses click events when the pointer or touch has moved more than thresholdPx
@@ -72,20 +72,24 @@ function installTapVsScrollListeners(thresholdPx: number): () => void {
   };
 }
 
-export function useTapVsScrollThreshold(thresholdPx: number = 24): void {
+/** Install tap-vs-scroll only on first user interaction so load is zero-cost. */
+function useTapVsScrollThreshold(thresholdPx: number = 24): void {
+  const thresholdRef = useRef(thresholdPx);
+  thresholdRef.current = thresholdPx;
   useEffect(() => {
     let remove: (() => void) | undefined;
-    const schedule =
-      typeof requestIdleCallback !== 'undefined'
-        ? requestIdleCallback
-        : (cb: () => void) => setTimeout(cb, 0) as unknown as number;
-    const cancel = typeof cancelIdleCallback !== 'undefined' ? cancelIdleCallback : clearTimeout;
-    const id = schedule(() => {
-      remove = installTapVsScrollListeners(thresholdPx);
-    });
+    const onFirstInteraction = () => {
+      remove = installTapVsScrollListeners(thresholdRef.current);
+      document.removeEventListener('pointerdown', onFirstInteraction, true);
+      document.removeEventListener('touchstart', onFirstInteraction, true);
+    };
+    document.addEventListener('pointerdown', onFirstInteraction, true);
+    document.addEventListener('touchstart', onFirstInteraction, { capture: true, passive: true });
     return () => {
-      cancel(id as number);
+      document.removeEventListener('pointerdown', onFirstInteraction, true);
+      document.removeEventListener('touchstart', onFirstInteraction, true);
       if (remove) remove();
     };
-  }, [thresholdPx]);
+  }, []);
 }
+export { useTapVsScrollThreshold };

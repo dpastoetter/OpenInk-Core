@@ -222,22 +222,24 @@ export function Shell({ services }: ShellProps) {
   const showAppTitleRef = useRef(showAppTitle);
   showAppTitleRef.current = showAppTitle;
   const themeUnsubRef = useRef<(() => void) | undefined>(undefined);
+  const appContentRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const schedule =
-      typeof requestIdleCallback !== 'undefined'
-        ? requestIdleCallback
-        : (cb: () => void) => setTimeout(cb, 0) as unknown as number;
-    const cancel = typeof cancelIdleCallback !== 'undefined' ? cancelIdleCallback : clearTimeout;
-    const id = schedule(() => {
+    appContentRef.current?.scrollTo(0, 0);
+  }, [currentAppId]);
+  useEffect(() => {
+    const t = setTimeout(() => {
       themeUnsubRef.current = services.theme.subscribe((s) => {
         if (s.showAppTitle !== showAppTitleRef.current) {
           showAppTitleRef.current = s.showAppTitle;
           setShowAppTitle(s.showAppTitle);
         }
       });
-    });
+      const sync = services.theme.getSettings();
+      showAppTitleRef.current = sync.showAppTitle;
+      setShowAppTitle(sync.showAppTitle);
+    }, 400);
     return () => {
-      cancel(id as number);
+      clearTimeout(t);
       themeUnsubRef.current?.();
       themeUnsubRef.current = undefined;
     };
@@ -277,7 +279,7 @@ export function Shell({ services }: ShellProps) {
               {headerTitle && <h1 class="app-header-title">{headerTitle}</h1>}
               {headerActions != null && <div class="app-header-actions">{headerActions}</div>}
             </header>
-            <div class="app-content">
+            <div ref={appContentRef} class="app-content">
               <AppContentArea instance={instance} setHeaderActions={setHeaderActions} />
             </div>
           </div>

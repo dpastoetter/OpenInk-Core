@@ -63,42 +63,47 @@ function StatusBarMoon() {
 
 function StatusBarInner({ theme, settings }: StatusBarProps) {
   const s = theme.getSettings();
-  const [showClock, setShowClock] = useState(s.showClock);
-  const [timeFormat, setTimeFormat] = useState(s.timeFormat);
+  const [themeState, setThemeState] = useState({
+    showClock: s.showClock,
+    timeFormat: s.timeFormat,
+    appearance: s.appearance as 'light' | 'dark',
+    zoom: s.zoom,
+  });
+  const { showClock, timeFormat, appearance, zoom } = themeState;
   const time = useClock(timeFormat);
-  const [appearance, setAppearance] = useState<'light' | 'dark'>(s.appearance);
-  const [zoom, setZoom] = useState(s.zoom);
-  const ref = useRef({ appearance: s.appearance, zoom: s.zoom, showClock: s.showClock, timeFormat: s.timeFormat });
+  const ref = useRef(themeState);
+  ref.current = themeState;
 
   const unsubRef = useRef<(() => void) | undefined>(undefined);
   useEffect(() => {
-    const schedule =
-      typeof requestIdleCallback !== 'undefined'
-        ? requestIdleCallback
-        : (cb: () => void) => setTimeout(cb, 0) as unknown as number;
-    const cancel = typeof cancelIdleCallback !== 'undefined' ? cancelIdleCallback : clearTimeout;
-    const id = schedule(() => {
+    const t = setTimeout(() => {
       unsubRef.current = theme.subscribe((next) => {
-        if (next.appearance !== ref.current.appearance) {
-          ref.current.appearance = next.appearance;
-          setAppearance(next.appearance);
-        }
-        if (next.zoom !== ref.current.zoom) {
-          ref.current.zoom = next.zoom;
-          setZoom(next.zoom);
-        }
-        if (next.showClock !== ref.current.showClock) {
-          ref.current.showClock = next.showClock;
-          setShowClock(next.showClock);
-        }
-        if (next.timeFormat !== ref.current.timeFormat) {
-          ref.current.timeFormat = next.timeFormat;
-          setTimeFormat(next.timeFormat);
+        const nextState = {
+          appearance: next.appearance as 'light' | 'dark',
+          zoom: next.zoom,
+          showClock: next.showClock,
+          timeFormat: next.timeFormat,
+        };
+        if (
+          nextState.appearance !== ref.current.appearance ||
+          nextState.zoom !== ref.current.zoom ||
+          nextState.showClock !== ref.current.showClock ||
+          nextState.timeFormat !== ref.current.timeFormat
+        ) {
+          ref.current = nextState;
+          setThemeState(nextState);
         }
       });
-    });
+      const sync = theme.getSettings();
+      setThemeState({
+        appearance: sync.appearance as 'light' | 'dark',
+        zoom: sync.zoom,
+        showClock: sync.showClock,
+        timeFormat: sync.timeFormat,
+      });
+    }, 400);
     return () => {
-      cancel(id as number);
+      clearTimeout(t);
       unsubRef.current?.();
       unsubRef.current = undefined;
     };

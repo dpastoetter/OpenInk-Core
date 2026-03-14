@@ -62,8 +62,8 @@ const AppTile = memo(function AppTile({
   );
 });
 
-const INITIAL_APPS_LIMIT = 6;
-const INITIAL_GAMES_LIMIT = 4;
+const INITIAL_APPS_LIMIT = 3;
+const INITIAL_GAMES_LIMIT = 2;
 
 const HomeScreenInner = function HomeScreen({ apps, onLaunch, theme }: HomeScreenProps) {
   const s = theme.getSettings();
@@ -73,12 +73,7 @@ const HomeScreenInner = function HomeScreen({ apps, onLaunch, theme }: HomeScree
   const ref = useRef({ showGamesSection: s.showGamesSection, sortOrder: s.sortOrder });
   const themeUnsubRef = useRef<(() => void) | undefined>(undefined);
   useEffect(() => {
-    const schedule =
-      typeof requestIdleCallback !== 'undefined'
-        ? requestIdleCallback
-        : (cb: () => void) => setTimeout(cb, 0) as unknown as number;
-    const cancel = typeof cancelIdleCallback !== 'undefined' ? cancelIdleCallback : clearTimeout;
-    const id = schedule(() => {
+    const t = setTimeout(() => {
       themeUnsubRef.current = theme.subscribe((next) => {
         if (next.showGamesSection !== ref.current.showGamesSection) {
           ref.current.showGamesSection = next.showGamesSection;
@@ -89,20 +84,22 @@ const HomeScreenInner = function HomeScreen({ apps, onLaunch, theme }: HomeScree
           setSortOrder(next.sortOrder);
         }
       });
-    });
+      const s = theme.getSettings();
+      ref.current.showGamesSection = s.showGamesSection;
+      ref.current.sortOrder = s.sortOrder;
+      setShowGamesSection(s.showGamesSection);
+      setSortOrder(s.sortOrder);
+    }, 400);
     return () => {
-      cancel(id as number);
+      clearTimeout(t);
       themeUnsubRef.current?.();
       themeUnsubRef.current = undefined;
     };
   }, [theme]);
   useEffect(() => {
-    const schedule =
-      typeof requestIdleCallback !== 'undefined'
-        ? requestIdleCallback
-        : (cb: () => void) => setTimeout(cb, 0) as unknown as number;
-    const cancel = typeof cancelIdleCallback !== 'undefined' ? cancelIdleCallback : clearTimeout;
-    const id = schedule(() => setTileLimits({ apps: 999, games: 999 }));
+    const raf = typeof requestAnimationFrame !== 'undefined' ? requestAnimationFrame : (cb: () => void) => setTimeout(cb, 0) as unknown as number;
+    const cancel = typeof cancelAnimationFrame !== 'undefined' ? cancelAnimationFrame : clearTimeout;
+    const id = raf(() => setTileLimits({ apps: 999, games: 999 }));
     return () => cancel(id as number);
   }, []);
 
