@@ -19,6 +19,14 @@ const LOCAL_GRAPHICS: PictureItem[] = [
   { id: 'pf-2', name: 'Mountain', src: svgDataUrl('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="128" height="128"><rect width="32" height="32" fill="#87ceeb"/><polygon points="0,32 8,20 16,24 24,12 32,32" fill="#4a5568"/><polygon points="4,32 12,24 20,28 28,16 32,32" fill="#2d3748"/><polygon points="0,32 6,26 14,30 22,22 32,32" fill="#1a202c"/><rect x="14" y="8" width="4" height="4" fill="#eaeaea"/></svg>') },
   { id: 'pf-3', name: 'Tree', src: svgDataUrl('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="128" height="128"><rect width="32" height="32" fill="#1a2f1a"/><rect x="14" y="24" width="4" height="8" fill="#5d4e37"/><polygon points="16,4 6,20 26,20" fill="#2d5a27"/><polygon points="16,10 10,22 22,22" fill="#3d7a37"/><polygon points="16,14 12,24 20,24" fill="#4d9a47"/></svg>') },
   { id: 'pf-4', name: 'Moon', src: svgDataUrl('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="128" height="128"><rect width="32" height="32" fill="#0f0f23"/><circle cx="20" cy="12" r="8" fill="#e8e4d9"/><circle cx="22" cy="10" r="8" fill="#0f0f23"/><circle cx="8" cy="26" r="1.5" fill="#6b7280"/><circle cx="24" cy="6" r="0.8" fill="#6b7280"/><circle cx="6" cy="8" r="0.6" fill="#6b7280"/></svg>') },
+  { id: 'pf-1b', name: 'Star', src: svgDataUrl('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="128" height="128"><rect width="32" height="32" fill="#1a1a2e"/><polygon points="16,2 18,12 28,12 20,18 23,28 16,22 9,28 12,18 4,12 14,12" fill="#fef3c7"/></svg>') },
+  { id: 'pf-2b', name: 'Flower', src: svgDataUrl('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="128" height="128"><rect width="32" height="32" fill="#ecfdf5"/><circle cx="16" cy="16" r="4" fill="#fbbf24"/><circle cx="16" cy="10" r="3" fill="#f472b6"/><circle cx="22" cy="14" r="3" fill="#f472b6"/><circle cx="22" cy="20" r="3" fill="#f472b6"/><circle cx="16" cy="24" r="3" fill="#f472b6"/><circle cx="10" cy="20" r="3" fill="#f472b6"/><circle cx="10" cy="14" r="3" fill="#f472b6"/><rect x="15" y="24" width="2" height="6" fill="#15803d"/></svg>') },
+  { id: 'pf-3b', name: 'House', src: svgDataUrl('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="128" height="128"><rect width="32" height="32" fill="#93c5fd"/><polygon points="16,4 4,14 4,28 28,28 28,14" fill="#fef3c7"/><rect x="14" y="18" width="4" height="10" fill="#78350f"/><rect x="6" y="14" width="4" height="4" fill="#93c5fd"/><rect x="22" y="14" width="4" height="4" fill="#93c5fd"/></svg>') },
+  { id: 'pf-4b', name: 'Cloud', src: svgDataUrl('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="128" height="128"><rect width="32" height="32" fill="#7dd3fc"/><ellipse cx="16" cy="18" rx="10" ry="6" fill="#f8fafc"/><ellipse cx="10" cy="16" rx="6" ry="5" fill="#f8fafc"/><ellipse cx="22" cy="16" rx="6" ry="5" fill="#f8fafc"/></svg>') },
+  { id: 'pf-5b', name: 'Boat', src: svgDataUrl('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="128" height="128"><rect width="32" height="32" fill="#0ea5e9"/><polygon points="6,24 8,18 24,18 26,24" fill="#78716c"/><rect x="15" y="8" width="2" height="12" fill="#a8a29e"/><polygon points="16,6 20,14 16,20 12,14" fill="#fef3c7"/><path d="M4 26 L28 26" stroke="#1e3a5f" stroke-width="2"/></svg>') },
+  { id: 'pf-6b', name: 'Heart', src: svgDataUrl('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="128" height="128"><rect width="32" height="32" fill="#fce7f3"/><path d="M16 26 C16 26 4 18 4 12 C4 8 8 6 12 6 C14 6 16 8 16 8 C16 8 18 6 20 6 C24 6 28 8 28 12 C28 18 16 26 16 26 Z" fill="#e11d48"/></svg>') },
+  { id: 'pf-7b', name: 'Leaf', src: svgDataUrl('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="128" height="128"><rect width="32" height="32" fill="#dcfce7"/><path d="M16 4 Q28 12 24 28 Q16 20 8 28 Q4 14 16 4 Z" fill="#16a34a"/><path d="M16 6 L16 26" stroke="#15803d" stroke-width="1" fill="none"/></svg>') },
+  { id: 'pf-8b', name: 'Umbrella', src: svgDataUrl('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="128" height="128"><rect width="32" height="32" fill="#94a3b8"/><path d="M16 4 C8 4 4 12 4 18 L16 18 L28 18 C28 12 24 4 16 4 Z" fill="#f472b6"/><rect x="15" y="18" width="2" height="10" fill="#78716c"/><line x1="16" y1="28" x2="16" y2="32" stroke="#64748b" stroke-width="1"/></svg>') },
 ];
 
 /** Full list: local SVGs + external (optional; network images can be heavy on e-ink). */
@@ -76,6 +84,20 @@ const PREINSTALLED_GRAPHICS: PictureItem[] = [
   { id: 'pf-54', name: 'Wildflowers', src: 'https://picsum.photos/seed/wildflowers1/1200/800' },
   { id: 'pf-55', name: 'Dunes', src: 'https://picsum.photos/seed/dunes1/1200/800' },
   { id: 'pf-56', name: 'Pagoda', src: 'https://picsum.photos/seed/pagoda1/1200/800' },
+  { id: 'pf-57', name: 'Rooftop', src: 'https://picsum.photos/seed/rooftop1/1200/800' },
+  { id: 'pf-58', name: 'Pier', src: 'https://picsum.photos/seed/pier1/1200/800' },
+  { id: 'pf-59', name: 'Cottage', src: 'https://picsum.photos/seed/cottage1/1200/800' },
+  { id: 'pf-60', name: 'Windmill', src: 'https://picsum.photos/seed/windmill1/1200/800' },
+  { id: 'pf-61', name: 'Cliffs', src: 'https://picsum.photos/seed/cliffs2/1200/800' },
+  { id: 'pf-62', name: 'Island', src: 'https://picsum.photos/seed/island1/1200/800' },
+  { id: 'pf-63', name: 'Ridge', src: 'https://picsum.photos/seed/ridge1/1200/800' },
+  { id: 'pf-64', name: 'Mist', src: 'https://picsum.photos/seed/mist1/1200/800' },
+  { id: 'pf-65', name: 'Autumn', src: 'https://picsum.photos/seed/autumn1/1200/800' },
+  { id: 'pf-66', name: 'Spring', src: 'https://picsum.photos/seed/spring1/1200/800' },
+  { id: 'pf-67', name: 'Winter', src: 'https://picsum.photos/seed/winter1/1200/800' },
+  { id: 'pf-68', name: 'Summer', src: 'https://picsum.photos/seed/summer1/1200/800' },
+  { id: 'pf-69', name: 'Bay', src: 'https://picsum.photos/seed/bay1/1200/800' },
+  { id: 'pf-70', name: 'Meadows', src: 'https://picsum.photos/seed/meadows2/1200/800' },
 ];
 
 function PictureFrameApp(_context: AppContext): AppInstance {

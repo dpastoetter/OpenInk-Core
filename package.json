@@ -6,7 +6,8 @@
   "homepage": "https://github.com/dpastoetter/OpenInk-WebOS#readme",
   "scripts": {
     "dev": "node scripts/copy-stockfish.mjs && vite --host",
-    "build": "node scripts/copy-stockfish.mjs && tsc -b && vite build --config vite.legacy-single.config.ts && node scripts/generate-legacy-html.mjs",
+    "build": "node scripts/copy-stockfish.mjs && tsc -b && vite build --config vite.legacy-single.config.ts && node scripts/generate-legacy-html.mjs && node scripts/generate-static-html.mjs",
+    "build:legacy-check": "tsc --noEmit -p tsconfig.legacy.json",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",

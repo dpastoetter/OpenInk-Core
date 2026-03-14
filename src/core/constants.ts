@@ -9,7 +9,7 @@ export const CORS_PROXY = 'https://corsproxy.io/?';
 /** Cache TTL: 30 minutes (feeds, weather, comics RSS). */
 export const CACHE_TTL_SHORT_MS = 30 * 60 * 1000;
 
-/** Cache TTL: 24 hours (xkcd, long-lived API cache). */
+/** Cache TTL: 24 hours (long-lived API cache, e.g. comics RSS). */
 export const CACHE_TTL_DAY_MS = 24 * 60 * 60 * 1000;
 
 /** Resolve CORS proxy URL from settings (empty = use default). */

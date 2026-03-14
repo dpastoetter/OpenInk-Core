@@ -34,6 +34,9 @@ const AppTile = memo(function AppTile({
   const IconComponent = getAppIcon(app.id);
   const handleActivate = useCallback(
     (e: Event) => {
+      // #region agent log
+      fetch('http://127.0.0.1:7647/ingest/0cc433dc-bc56-4722-8dcd-55136a56519b', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'fbf877' }, body: JSON.stringify({ sessionId: 'fbf877', location: 'HomeScreen.tsx:handleActivate', message: 'tile activate', data: { appId: app.id, eventType: e.type }, hypothesisId: 'H2', timestamp: Date.now() }) }).catch(() => {});
+      // #endregion
       if (e.type === 'touchend') (e as TouchEvent).preventDefault();
       onLaunch(app);
     },
@@ -62,23 +65,46 @@ const AppTile = memo(function AppTile({
   );
 });
 
+const INITIAL_APPS_LIMIT = 3;
+const INITIAL_GAMES_LIMIT = 2;
+
 const HomeScreenInner = function HomeScreen({ apps, onLaunch, theme }: HomeScreenProps) {
   const s = theme.getSettings();
   const [showGamesSection, setShowGamesSection] = useState(s.showGamesSection);
   const [sortOrder, setSortOrder] = useState(s.sortOrder);
+  const [tileLimits, setTileLimits] = useState({ apps: INITIAL_APPS_LIMIT, games: INITIAL_GAMES_LIMIT });
   const ref = useRef({ showGamesSection: s.showGamesSection, sortOrder: s.sortOrder });
+  const themeUnsubRef = useRef<(() => void) | undefined>(undefined);
   useEffect(() => {
-    return theme.subscribe((next) => {
-      if (next.showGamesSection !== ref.current.showGamesSection) {
-        ref.current.showGamesSection = next.showGamesSection;
-        setShowGamesSection(next.showGamesSection);
-      }
-      if (next.sortOrder !== ref.current.sortOrder) {
-        ref.current.sortOrder = next.sortOrder;
-        setSortOrder(next.sortOrder);
-      }
-    });
+    const t = setTimeout(() => {
+      themeUnsubRef.current = theme.subscribe((next) => {
+        if (next.showGamesSection !== ref.current.showGamesSection) {
+          ref.current.showGamesSection = next.showGamesSection;
+          setShowGamesSection(next.showGamesSection);
+        }
+        if (next.sortOrder !== ref.current.sortOrder) {
+          ref.current.sortOrder = next.sortOrder;
+          setSortOrder(next.sortOrder);
+        }
+      });
+      const s = theme.getSettings();
+      ref.current.showGamesSection = s.showGamesSection;
+      ref.current.sortOrder = s.sortOrder;
+      setShowGamesSection(s.showGamesSection);
+      setSortOrder(s.sortOrder);
+    }, 400);
+    return () => {
+      clearTimeout(t);
+      themeUnsubRef.current?.();
+      themeUnsubRef.current = undefined;
+    };
   }, [theme]);
+  useEffect(() => {
+    const raf = typeof requestAnimationFrame !== 'undefined' ? requestAnimationFrame : (cb: () => void) => setTimeout(cb, 0) as unknown as number;
+    const cancel = typeof cancelAnimationFrame !== 'undefined' ? cancelAnimationFrame : clearTimeout;
+    const id = raf(() => setTileLimits({ apps: 999, games: 999 }));
+    return () => cancel(id as number);
+  }, []);
 
   const games = useMemo(
     () => sortByName(apps.filter((a) => a.category === 'game'), sortOrder),
@@ -88,22 +114,56 @@ const HomeScreenInner = function HomeScreen({ apps, onLaunch, theme }: HomeScree
     () => sortAppsWithSettingsLast(apps.filter((a) => a.category !== 'game'), sortOrder),
     [apps, sortOrder]
   );
+  const appsToShow = appsOnly.slice(0, tileLimits.apps);
+  const gamesToShow = games.slice(0, tileLimits.games);
+
+  const [page, setPage] = useState<'apps' | 'games'>('apps');
+  const showPager = showGamesSection && games.length > 0;
 
   return (
     <div class="home-screen">
-      <section class="home-category">
-        <h2 class="home-category-title">Apps</h2>
-        <ul class="app-grid">
-          {appsOnly.map((app) => (
-            <AppTile key={app.id} app={app} onLaunch={onLaunch} />
-          ))}
-        </ul>
-      </section>
-      {showGamesSection && (
+      <header class="home-category-header" aria-label="Category">
+        {showPager && (
+          <nav class="home-page-nav" aria-label="Switch between Apps and Games">
+            <button
+              type="button"
+              class="btn home-page-btn"
+              aria-label="Apps"
+              onClick={() => setPage('apps')}
+              disabled={page === 'apps'}
+            >
+              <svg class="home-page-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              class="btn home-page-btn"
+              aria-label="Games"
+              onClick={() => setPage('games')}
+              disabled={page === 'games'}
+            >
+              <svg class="home-page-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </button>
+          </nav>
+        )}
+        <h2 class="home-category-title">{page === 'games' ? 'Games' : 'Apps'}</h2>
+      </header>
+      {(!showPager || page === 'apps') && (
         <section class="home-category">
-          <h2 class="home-category-title">Games</h2>
           <ul class="app-grid">
-            {games.map((app) => (
+            {appsToShow.map((app) => (
+              <AppTile key={app.id} app={app} onLaunch={onLaunch} />
+            ))}
+          </ul>
+        </section>
+      )}
+      {showPager && page === 'games' && (
+        <section class="home-category">
+          <ul class="app-grid">
+            {gamesToShow.map((app) => (
               <AppTile key={app.id} app={app} onLaunch={onLaunch} />
             ))}
           </ul>

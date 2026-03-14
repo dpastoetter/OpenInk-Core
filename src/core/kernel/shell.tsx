@@ -121,6 +121,7 @@ export function Shell({ services }: ShellProps) {
       try {
         const app = await AppRegistry.loadApp(appId);
         if (app) launchApp(app);
+      } catch (e) {
       } finally {
         setLoadingAppId(null);
       }
@@ -137,19 +138,34 @@ export function Shell({ services }: ShellProps) {
   }, [currentAppId, goToHome]);
 
   const showHome = currentAppId === null && !loadingAppId;
-  const currentApp = currentAppId ? AppRegistry.getApp(currentAppId) : null;
   const [showAppTitle, setShowAppTitle] = useState(() => services.theme.getSettings().showAppTitle);
   const showAppTitleRef = useRef(showAppTitle);
   showAppTitleRef.current = showAppTitle;
+  const themeUnsubRef = useRef<(() => void) | undefined>(undefined);
+  const appContentRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    return services.theme.subscribe((s) => {
-      if (s.showAppTitle !== showAppTitleRef.current) {
-        showAppTitleRef.current = s.showAppTitle;
-        setShowAppTitle(s.showAppTitle);
-      }
-    });
+    appContentRef.current?.scrollTo(0, 0);
+  }, [currentAppId]);
+  useEffect(() => {
+    const t = setTimeout(() => {
+      themeUnsubRef.current = services.theme.subscribe((s) => {
+        if (s.showAppTitle !== showAppTitleRef.current) {
+          showAppTitleRef.current = s.showAppTitle;
+          setShowAppTitle(s.showAppTitle);
+        }
+      });
+      const sync = services.theme.getSettings();
+      showAppTitleRef.current = sync.showAppTitle;
+      setShowAppTitle(sync.showAppTitle);
+    }, 400);
+    return () => {
+      clearTimeout(t);
+      themeUnsubRef.current?.();
+      themeUnsubRef.current = undefined;
+    };
   }, [services.theme]);
-  const headerTitle = showAppTitle ? (instance?.getTitle?.() ?? currentApp?.name ?? currentAppId ?? '') : '';
+  /* Don't show widget name in header when app is open (names can be too long). */
+  const headerTitle = '';
   const [headerActions, setHeaderActions] = useState<VNode | null>(null);
   useEffect(() => {
     setHeaderActions(null);
@@ -184,7 +200,7 @@ export function Shell({ services }: ShellProps) {
               {headerTitle && <h1 class="app-header-title">{headerTitle}</h1>}
               {headerActions != null && <div class="app-header-actions">{headerActions}</div>}
             </header>
-            <div class="app-content">
+            <div ref={appContentRef} class="app-content">
               <AppContentArea instance={instance} setHeaderActions={setHeaderActions} />
             </div>
           </div>

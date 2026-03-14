@@ -1,14 +1,11 @@
-import { useState, useEffect, useCallback } from 'preact/hooks';
+import { useState, useCallback } from 'preact/hooks';
 import type { AppContext, AppInstance } from '../../types/plugin';
 import { PLUGIN_API_VERSION } from '../../types/plugin';
 import { PageNav } from '@core/ui/PageNav';
 import { getCorsProxyUrl, getDefaultCacheTtlMs } from '@core/constants';
 import { sanitizeUrl, isSafeUrl } from '@core/utils/url';
 
-const XKCD_JSON = (num: number) => `https://xkcd.com/${num}/info.0.json`;
-const XKCD_LATEST = 'https://xkcd.com/info.0.json';
 const COMICSRSS_BASE = 'https://www.comicsrss.com/rss/';
-const CACHE_PREFIX_XKCD = 'comics:xkcd:';
 const CACHE_PREFIX_RSS = 'comics:rss:';
 
 /** Curated Comics RSS feeds (comicsrss.com). Slug => feed URL. */
@@ -29,17 +26,6 @@ const COMICS_RSS_FEEDS: { slug: string; name: string }[] = [
   { slug: 'zits', name: 'Zits' },
   { slug: 'pickles', name: 'Pickles' },
 ];
-
-interface XkcdComic {
-  num: number;
-  title: string;
-  img: string;
-  alt: string;
-  year: string;
-  month: string;
-  day: string;
-  transcript?: string;
-}
 
 interface RssComicItem {
   title: string;
@@ -79,19 +65,9 @@ function parseComicsRss(xml: string): RssComicItem[] {
 function ComicsApp(context: AppContext): AppInstance {
   const { network, storage, settings } = context.services;
   const titleRef: { current: string } = { current: 'Comics' };
+  const backRef: { current: { canGoBack: () => boolean; goBack: () => void } | null } = { current: null };
 
   function ComicsUI() {
-    const [source, setSource] = useState<'xkcd' | 'rss'>('xkcd');
-
-    // xkcd state
-    const [maxNum, setMaxNum] = useState<number | null>(null);
-    const [currentNum, setCurrentNum] = useState<number | null>(null);
-    const [comic, setComic] = useState<XkcdComic | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [showAlt, setShowAlt] = useState(false);
-
-    // Comics RSS state
     const [rssFeedSlug, setRssFeedSlug] = useState<string | null>(null);
     const [rssFeedName, setRssFeedName] = useState('');
     const [rssItems, setRssItems] = useState<RssComicItem[]>([]);
@@ -99,75 +75,6 @@ function ComicsApp(context: AppContext): AppInstance {
     const [rssLoading, setRssLoading] = useState(false);
     const [rssError, setRssError] = useState<string | null>(null);
 
-    const fetchComic = useCallback(
-      async (num: number) => {
-        const cacheTtlDay = getDefaultCacheTtlMs('24h');
-        const cacheKey = CACHE_PREFIX_XKCD + num;
-        const cached = await storage.get<{ data: XkcdComic; fetchedAt: number }>(cacheKey);
-        if (cached && Date.now() - cached.fetchedAt < cacheTtlDay) {
-          setComic(cached.data);
-          setError(null);
-          return;
-        }
-        try {
-          const proxy = getCorsProxyUrl(settings.get().corsProxyUrl);
-          const url = proxy + encodeURIComponent(XKCD_JSON(num));
-          const data = await network.fetchJson<XkcdComic>(url);
-          setComic(data);
-          setError(null);
-          await storage.set(cacheKey, { data, fetchedAt: Date.now() });
-        } catch (e) {
-          setError(e instanceof Error ? e.message : 'Failed to load comic');
-          setComic(null);
-        }
-      },
-      [network, storage]
-    );
-
-    // xkcd: load latest on mount when source is xkcd
-    useEffect(() => {
-      if (source !== 'xkcd') return;
-      let cancelled = false;
-      (async () => {
-        try {
-          const proxy = getCorsProxyUrl(settings.get().corsProxyUrl);
-          const url = proxy + encodeURIComponent(XKCD_LATEST);
-          const latest = await network.fetchJson<XkcdComic>(url);
-          if (cancelled) return;
-          setMaxNum(latest.num);
-          setCurrentNum(latest.num);
-          setComic(latest);
-          titleRef.current = `Comics · ${latest.title}`;
-          await storage.set(CACHE_PREFIX_XKCD + latest.num, { data: latest, fetchedAt: Date.now() });
-        } catch (e) {
-          if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load');
-        } finally {
-          if (!cancelled) setLoading(false);
-        }
-      })();
-      return () => {
-        cancelled = true;
-      };
-    }, [source, network, storage, settings]);
-
-    useEffect(() => {
-      if (source !== 'xkcd' || currentNum == null || currentNum === comic?.num) return;
-      setLoading(true);
-      fetchComic(currentNum).finally(() => setLoading(false));
-    }, [source, currentNum, comic?.num, fetchComic]);
-
-    useEffect(() => {
-      if (comic) titleRef.current = `Comics · ${comic.title}`;
-    }, [comic]);
-
-    const goPrev = useCallback(() => {
-      if (currentNum != null && currentNum > 1) setCurrentNum(currentNum - 1);
-    }, [currentNum]);
-    const goNext = useCallback(() => {
-      if (maxNum != null && currentNum != null && currentNum < maxNum) setCurrentNum(currentNum + 1);
-    }, [currentNum, maxNum]);
-
-    // Comics RSS: when user selects a feed, fetch and parse
     const loadRssFeed = useCallback(
       async (slug: string, name: string) => {
         setRssFeedSlug(slug);
@@ -211,94 +118,15 @@ function ComicsApp(context: AppContext): AppInstance {
       if (rssIndex < rssItems.length - 1) setRssIndex(rssIndex + 1);
     }, [rssIndex, rssItems.length]);
 
-    // --- Source picker and xkcd view (unchanged) ---
-    if (source === 'xkcd') {
-      if (loading && !comic) {
-        return (
-          <div class="comics-app">
-            <p class="widget-hint">Free comics. One request at a time for e-ink.</p>
-            <div class="comics-source-tabs">
-              <button type="button" class="btn" onClick={() => setSource('xkcd')} aria-pressed="true">xkcd</button>
-              <button type="button" class="btn btn-ghost" onClick={() => setSource('rss')}>Comics RSS</button>
-            </div>
-            <p>Loading…</p>
-          </div>
-        );
-      }
-      if (error && !comic) {
-        return (
-          <div class="comics-app">
-            <div class="comics-source-tabs">
-              <button type="button" class="btn" onClick={() => setSource('xkcd')} aria-pressed="true">xkcd</button>
-              <button type="button" class="btn btn-ghost" onClick={() => setSource('rss')}>Comics RSS</button>
-            </div>
-            <p class="browser-error">{error}</p>
-          </div>
-        );
-      }
-      return (
-        <div class="comics-app">
-          <p class="widget-hint">xkcd — freely available. Prev/Next; no animation.</p>
-          <div class="comics-source-tabs">
-            <button type="button" class="btn" onClick={() => setSource('xkcd')} aria-pressed="true">xkcd</button>
-            <button type="button" class="btn btn-ghost" onClick={() => setSource('rss')}>Comics RSS</button>
-          </div>
-          {maxNum != null && currentNum != null && (
-            <nav class="page-nav" aria-label="Comic navigation">
-              <button
-                type="button"
-                class="btn btn-nav"
-                onClick={goNext}
-                disabled={currentNum >= maxNum}
-                aria-label="Newer comic"
-              >
-                Newer
-              </button>
-              <span class="page-nav-info" aria-live="polite">
-                Comic {currentNum} of {maxNum}
-              </span>
-              <button
-                type="button"
-                class="btn btn-nav"
-                onClick={goPrev}
-                disabled={currentNum <= 1}
-                aria-label="Older comic"
-              >
-                Older
-              </button>
-            </nav>
-          )}
-          {comic && (
-            <article class="comics-strip" aria-label={comic.title}>
-              <h2 class="comics-title">{comic.title}</h2>
-              <p class="comics-meta">
-                #{comic.num} · {comic.year}-{comic.month}-{comic.day}
-              </p>
-              <div class="comics-image-wrap">
-                {(() => {
-                  const src = sanitizeUrl(comic.img);
-                  return src ? <img src={src} alt={comic.title} title={comic.alt} class="comics-image" loading="lazy" decoding="async" /> : null;
-                })()}
-              </div>
-              {showAlt && comic.alt && <p class="comics-alt">{comic.alt}</p>}
-              <button type="button" class="btn comics-alt-btn" onClick={() => setShowAlt((s) => !s)}>
-                {showAlt ? 'Hide alt text' : 'Show alt text'}
-              </button>
-            </article>
-          )}
-        </div>
-      );
-    }
+    backRef.current = {
+      canGoBack: () => rssFeedSlug != null,
+      goBack: () => setRssFeedSlug(null),
+    };
 
-    // --- Comics RSS: feed list or strip view ---
+    // Feed list (no strip selected yet)
     if (!rssFeedSlug) {
       return (
         <div class="comics-app">
-          <p class="widget-hint">Comics from comicsrss.com. Pick a strip.</p>
-          <div class="comics-source-tabs">
-            <button type="button" class="btn btn-ghost" onClick={() => setSource('xkcd')}>xkcd</button>
-            <button type="button" class="btn" onClick={() => setSource('rss')} aria-pressed="true">Comics RSS</button>
-          </div>
           <ul class="comics-feed-list" aria-label="Comic strips">
             {COMICS_RSS_FEEDS.map((f) => (
               <li key={f.slug}>
@@ -315,10 +143,6 @@ function ComicsApp(context: AppContext): AppInstance {
     if (rssLoading && rssItems.length === 0) {
       return (
         <div class="comics-app">
-          <div class="comics-source-tabs">
-            <button type="button" class="btn btn-ghost" onClick={() => setSource('xkcd')}>xkcd</button>
-            <button type="button" class="btn" onClick={() => setSource('rss')} aria-pressed="true">Comics RSS</button>
-          </div>
           <p>Loading {rssFeedName}…</p>
         </div>
       );
@@ -327,10 +151,6 @@ function ComicsApp(context: AppContext): AppInstance {
     if (rssError && rssItems.length === 0) {
       return (
         <div class="comics-app">
-          <div class="comics-source-tabs">
-            <button type="button" class="btn btn-ghost" onClick={() => setSource('xkcd')}>xkcd</button>
-            <button type="button" class="btn" onClick={() => setSource('rss')} aria-pressed="true">Comics RSS</button>
-          </div>
           <p class="browser-error">{rssError}</p>
           <button type="button" class="btn" onClick={() => setRssFeedSlug(null)}>Back to strips</button>
         </div>
@@ -351,12 +171,6 @@ function ComicsApp(context: AppContext): AppInstance {
 
     return (
       <div class="comics-app">
-        <p class="widget-hint">comicsrss.com — Prev/Next; no animation.</p>
-        <div class="comics-source-tabs">
-          <button type="button" class="btn btn-ghost" onClick={() => setSource('xkcd')}>xkcd</button>
-          <button type="button" class="btn" onClick={() => setSource('rss')} aria-pressed="true">Comics RSS</button>
-        </div>
-        <button type="button" class="btn comics-back-feed" onClick={() => setRssFeedSlug(null)}>Change strip</button>
         {rssItems.length > 0 && (
           <PageNav
             current={rssIndex + 1}
@@ -400,6 +214,8 @@ function ComicsApp(context: AppContext): AppInstance {
   return {
     render: () => <ComicsUI />,
     getTitle: () => titleRef.current,
+    canGoBack: () => backRef.current?.canGoBack?.() ?? false,
+    goBack: () => backRef.current?.goBack?.(),
   };
 }
 

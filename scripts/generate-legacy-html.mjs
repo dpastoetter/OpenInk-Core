@@ -1,6 +1,7 @@
 /**
  * Post-build: generate index.html (single-page app for Kindle/e-ink).
- * Loads openink-legacy-single.js and its CSS. This is the only build output.
+ * Static HTML/CSS; critical CSS inlined, non-critical CSS deferred (media=print → all).
+ * Main JS loaded with defer; minified by build. Test on Kindle UA: Mozilla/5.0 (Kindle; ... WebKit/... Kindle/...).[web:14]
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -46,7 +47,7 @@ const legacyHtml = `<!DOCTYPE html>
 <div id="root">${initialContent}</div>
 <noscript><p style="padding:1rem;font-family:Arial,Verdana,sans-serif;">OpenInk needs JavaScript.</p></noscript>
 <script>
-// --- Legacy loader: global fallback handler and timeout ---
+// --- Critical: global fallback and timeout (ES5, inline) ---
 (function(){
   function setFallback(root, msg) {
     if (!root) return;
@@ -86,26 +87,12 @@ const legacyHtml = `<!DOCTYPE html>
   } catch(e) {}
 })();
 </script>
-${useSingleScript ? `<script>
-// --- Load openink-legacy-single.js (full app bundle) ---
+${useSingleScript ? `<script src="assets/openink-legacy-single.js" defer></script>\n<script>
 (function(){
-  var fallbackShown = false;
-  function showFallback(msg) {
-    if (fallbackShown) return;
-    fallbackShown = true;
-    if (window.__openinkFallback) window.__openinkFallback(msg);
-  }
-  try {
-    var s = document.createElement('script');
-    s.src = 'assets/openink-legacy-single.js';
-    s.async = false;
-    s.onerror = function() { showFallback('Could not load app. Run npm run build then npm run preview to test.'); };
-    s.onload = function() { if (!window.__openinkMounted) setTimeout(function(){ if (!window.__openinkMounted) showFallback('App script loaded but did not start.'); }, ${SCRIPT_LOADED_WAIT_MS}); };
-    document.body.appendChild(s);
-    setTimeout(function() {
-      if (!window.__openinkMounted) showFallback('App did not start. Run npm run build then npm run preview to test.');
-    }, ${SCRIPT_MOUNT_TIMEOUT_MS});
-  } catch(e) { showFallback('Could not load app.'); }
+  setTimeout(function(){
+    if (window.__openinkMounted) return;
+    if (window.__openinkFallback) window.__openinkFallback(${JSON.stringify(FALLBACK_MSG)});
+  }, ${SCRIPT_MOUNT_TIMEOUT_MS});
 })();
 </script>` : '<script>if (window.__openinkFallback) window.__openinkFallback("App not built. Run npm run build.");</script>'}
 ${cssHref ? `<link rel="stylesheet" href="${cssHref}" crossorigin="anonymous" media="print" onload="this.media='all'">\n<noscript><link rel="stylesheet" href="${cssHref}" crossorigin="anonymous"></noscript>` : ''}

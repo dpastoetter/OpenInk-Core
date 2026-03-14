@@ -89,8 +89,8 @@ function init() {
   const root = document.getElementById('root');
   if (!root) return;
   try {
-    // Apply theme before first paint so e-ink gets one full-screen paint (faster than shell-then-theme)
-    theme.applySettings(DEFAULT_SETTINGS);
+    // Minimal theme DOM for first paint (fewer setAttribute); full theme + notify when settings load
+    theme.applySettingsMinimal(DEFAULT_SETTINGS);
     renderShell(root);
     // Defer settings load so first paint completes before touching storage (smoother on Kindle)
     const loadSettings = () => {

@@ -173,6 +173,16 @@ function RedditApp(context: AppContext): AppInstance {
     }, [selectedPost]);
 
     useEffect(() => {
+      const t = setTimeout(scrollAppContentToTop, 0);
+      return () => clearTimeout(t);
+    }, [listPage]);
+
+    useEffect(() => {
+      const t = setTimeout(scrollAppContentToTop, 0);
+      return () => clearTimeout(t);
+    }, [commentPage]);
+
+    useEffect(() => {
       if (!setHeaderActions) return;
       if (selectedPost != null) {
         setHeaderActions(null);

@@ -1,6 +1,7 @@
 /**
  * Builds a single IIFE bundle for Kindle/legacy (no SystemJS, no polyfill).
  * Transpiled to ES5 via Babel so old engines (e.g. Kindle Silk) can parse and run it.
+ * Targets ES5 (basic JavaScript) for maximum Kindle compatibility.
  */
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -49,7 +50,7 @@ export default defineConfig({
             [
               '@babel/preset-env',
               {
-                targets: { chrome: 44 },
+                targets: { ie: 9 },
                 modules: false,
               },
             ],
