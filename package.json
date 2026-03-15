@@ -1,9 +1,9 @@
 {
-  "name": "browseros",
-  "version": "1.0.0",
+  "name": "libreink",
+  "version": "1.0.1",
   "type": "module",
-  "repository": "https://github.com/dpastoetter/OpenInk-WebOS.git",
-  "homepage": "https://github.com/dpastoetter/OpenInk-WebOS#readme",
+  "repository": "https://github.com/dpastoetter/LibreInk.git",
+  "homepage": "https://github.com/dpastoetter/LibreInk#readme",
   "scripts": {
     "dev": "node scripts/copy-stockfish.mjs && vite --host",
     "build": "node scripts/copy-stockfish.mjs && tsc -b && vite build --config vite.legacy-single.config.ts && node scripts/generate-legacy-html.mjs && node scripts/generate-static-html.mjs",

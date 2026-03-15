@@ -1,6 +1,6 @@
-# Contributing to OpenInk
+# Contributing to LibreInk
 
-Thanks for your interest in improving OpenInk. This file gives a short guide to running, testing, and contributing.
+Thanks for your interest in improving LibreInk. This file gives a short guide to running, testing, and contributing.
 
 ## Getting started
 

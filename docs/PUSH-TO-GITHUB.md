@@ -6,7 +6,7 @@
    - **HTTPS:** Create a [Personal Access Token](https://github.com/settings/tokens) and use it as the password when Git prompts. To cache it: `git config --global credential.helper store`
    - **SSH:** [Add your SSH key to GitHub](https://docs.github.com/en/authentication/connecting-to-github-with-ssh), then:
      ```bash
-     git remote set-url origin git@github.com:dpastoetter/OpenInk-WebOS.git
+     git remote set-url origin git@github.com:dpastoetter/LibreInk.git
      ```
 
 2. **Optional – track main:** So `git push` works when on main:

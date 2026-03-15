@@ -13,7 +13,7 @@ const OPEN_METEO_GEOCODE = (name: string) =>
   `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(name)}&count=5`;
 const NOMINATIM_REVERSE = (lat: number, lon: number) =>
   `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`;
-const NOMINATIM_UA = 'OpenInkWeather/1.0';
+const NOMINATIM_UA = 'LibreInkWeather/1.0';
 
 /** Get city name from Nominatim reverse geocode response. */
 function cityFromAddress(address: Record<string, string> | undefined): string {

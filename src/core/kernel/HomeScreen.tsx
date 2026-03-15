@@ -167,7 +167,7 @@ const HomeScreenInner = function HomeScreen({ apps, onLaunch, theme }: HomeScree
           </ul>
         </section>
       )}
-      <footer class="home-footer" aria-label="Product name">OpenInk - Designed for E-Ink Devices</footer>
+      <footer class="home-footer" aria-label="Product name">LibreInk - Designed for E-Ink Devices</footer>
     </div>
   );
 };

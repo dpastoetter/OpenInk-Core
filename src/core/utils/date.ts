@@ -33,6 +33,11 @@ export function formatDateLegacy(d: Date): string {
   return d.getMonth() + 1 + '/' + d.getDate() + '/' + d.getFullYear();
 }
 
+/** Date as dd.mm.yyyy. Safe on legacy/Kindle. */
+export function formatDateDDMMYY(d: Date): string {
+  return pad2(d.getDate()) + '.' + pad2(d.getMonth() + 1) + '.' + d.getFullYear();
+}
+
 /** Weekday as short label (Sun, Mon, ...). Safe on legacy/Kindle. */
 export function formatWeekdayShortLegacy(d: Date): string {
   return WEEKDAY_SHORT[d.getDay()] ?? '?';

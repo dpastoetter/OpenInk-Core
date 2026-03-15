@@ -49,11 +49,11 @@ const staticHtml = `<!DOCTYPE html>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#ffffff">
-<title>OpenInk – Simple view</title>
+<title>LibreInk – Simple view</title>
 <style>${staticCss}</style>
 </head>
 <body>
-<h1>OpenInk</h1>
+<h1>LibreInk</h1>
 <p>Simple view. No search, no filters. Large text for e-ink. This page uses no JavaScript.</p>
 <p>To use apps (Blog, Weather, etc.), open the full app below. The full app needs JavaScript.</p>
 <ul class="apps">

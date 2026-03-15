@@ -88,13 +88,13 @@ function SettingsApp(context: AppContext): AppInstance {
         </section>
         <section class="panel">
           <h2 class="panel-title">Data</h2>
-          <p class="panel-description">Clear cached data for News, Reddit, Comics, Weather, etc.</p>
+          <p class="panel-description">Clear cached data for Reddit, Comics, Weather, etc.</p>
           <button type="button" class="btn" onClick={handleClearCaches} onTouchEnd={(e) => { e.preventDefault(); handleClearCaches(); }}>Clear all caches</button>
           {clearCacheMessage && <p class="settings-import-message" role="status">{clearCacheMessage}</p>}
         </section>
         <section class="panel">
           <h2 class="panel-title">About</h2>
-          <p class="panel-description">OpenInk v{appVersion}. Lightweight webOS-style shell for e-ink and low-spec devices.</p>
+          <p class="panel-description">LibreInk v{appVersion}. Lightweight shell for e-ink and low-spec devices.</p>
         </section>
       </div>
     );

@@ -1,6 +1,6 @@
-# OpenInk
+# LibreInk
 
-A minimal, plugin-based “webOS-style” launcher for low-spec and e-ink devices. It provides a home screen, status bar, and a set of built-in apps that run inside a shared shell—tuned for Kindle, grayscale displays, and slow hardware.
+A minimal, plugin-based launcher for low-spec and e-ink devices. It provides a home screen, status bar, and a set of built-in apps that run inside a shared shell—tuned for Kindle, grayscale displays, and slow hardware.
 
 ## Features
 
@@ -82,7 +82,7 @@ Tuned for **slow hardware, grayscale e-ink, and low refresh rates**:
 
 ## Adding a new app
 
-1. Create a folder under `src/apps/<app-id>/` and implement the `WebOSApp` interface (see `src/apps/dictionary/` or `src/apps/comics/`).
+1. Create a folder under `src/apps/<app-id>/` and implement the app plugin interface (see `src/types/plugin.ts` and `src/apps/dictionary/` or `src/apps/comics/`).
 2. Register in `src/apps/registry.ts`: add a descriptor and lazy loader to `LAZY_APPS` (e.g. `load: () => import('./your-app').then(m => m.yourApp)`).
 
 Details: **[docs/plugins.md](docs/plugins.md)**.

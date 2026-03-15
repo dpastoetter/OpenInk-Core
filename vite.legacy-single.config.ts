@@ -36,7 +36,7 @@ export default defineConfig({
     outDir: 'dist',
     lib: {
       entry: path.resolve(__dirname, 'src/legacy-entry.ts'),
-      name: 'OpenInk',
+      name: 'LibreInk',
       formats: ['iife'],
       fileName: () => 'assets/openink-legacy-single.js',
     },

@@ -5,6 +5,7 @@
  * - Containment and minimal reflows; large tap targets (--tap-min).
  */
 
+/* --zoom is set on :root by the theme service (status bar +/-); affects home, all widgets, app pages and subpages */
 :root {
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --tap-min: calc(52px * var(--zoom, 1));
@@ -220,7 +221,7 @@ html, body {
   background: var(--bg);
 }
 
-/* Shell – containment limits reflow on e-ink */
+/* Shell – containment limits reflow on e-ink. --zoom inherited from :root (status bar zoom). */
 .shell {
   display: flex;
   flex-direction: column;
@@ -267,6 +268,13 @@ html, body {
   font-weight: 600;
   justify-self: start;
 }
+.status-bar-clock {
+  font-weight: normal;
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
 
 .status-bar-left,
 .status-bar-center,
@@ -308,7 +316,8 @@ html, body {
 }
 
 .status-bar .btn-status-zoom,
-.status-bar .btn-status-theme {
+.status-bar .btn-status-theme,
+.status-bar .btn-status-settings {
   width: calc(26px * var(--zoom, 1));
   height: calc(26px * var(--zoom, 1));
   min-width: calc(26px * var(--zoom, 1));
@@ -523,7 +532,7 @@ html, body {
   word-break: break-word;
 }
 
-/* App container */
+/* App container – inherits --zoom so all app content and subpages use status bar zoom */
 .app-container {
   display: flex;
   flex-direction: column;
@@ -1596,7 +1605,8 @@ html *::after {
     cursor: none !important;
   }
   html .status-bar .btn-status-zoom,
-  html .status-bar .btn-status-theme {
+  html .status-bar .btn-status-theme,
+  html .status-bar .btn-status-settings {
     min-width: var(--tap-min);
     min-height: var(--tap-min);
     width: var(--tap-min);

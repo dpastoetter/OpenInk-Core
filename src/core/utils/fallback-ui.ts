@@ -1,6 +1,6 @@
 /** Default message when the app fails to load (e.g. unsupported browser / Kindle). */
 export const LOAD_ERROR_MESSAGE =
-  'OpenInk could not load. Your browser may not be fully supported (e.g. Kindle). Try a different browser or device.';
+  'LibreInk could not load. Your browser may not be fully supported (e.g. Kindle). Try a different browser or device.';
 
 /**
  * Renders a plain-text fallback message into a root element using DOM APIs only (no innerHTML).

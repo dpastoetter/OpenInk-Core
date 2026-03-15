@@ -1,6 +1,6 @@
 # Kindle / E-ink browser compatibility
 
-OpenInk follows [ReKindle COMPATIBILITY.md](https://github.com/ReKindleOS/ReKindle/blob/main/COMPATIBILITY.md) for the build (Kindle, Kobo, and other e-ink browsers). The legacy build is **static HTML/CSS** with ES5 JavaScript: **index.html** loads the full app via `openink-legacy-single.js` (minified, deferred).
+LibreInk follows [ReKindle COMPATIBILITY.md](https://github.com/ReKindleOS/ReKindle/blob/main/COMPATIBILITY.md) for the build (Kindle, Kobo, and other e-ink browsers). The legacy build is **static HTML/CSS** with ES5 JavaScript: **index.html** loads the full app via the legacy single JS bundle (minified, deferred).
 
 ## index.html and static.html
 
@@ -14,7 +14,7 @@ OpenInk follows [ReKindle COMPATIBILITY.md](https://github.com/ReKindleOS/ReKind
 ## If the Kindle shows a blank screen
 
 1. **Server is serving the wrong file:** Deploy the full `dist/` so `index.html` and `dist/assets/openink-legacy-single.js` (and `.css`) exist. Ensure your host serves `index.html` at `/` and does not rewrite routes in a way that breaks asset paths.
-2. **Base path:** If you deploy under a subpath (e.g. `https://user.github.io/OpenInk-WebOS/`), set `base: '/OpenInk-WebOS/'` in `vite.legacy-single.config.ts` (and in the generate script if you customise it) so script and style URLs resolve correctly.
+2. **Base path:** If you deploy under a subpath (e.g. `https://user.github.io/LibreInk/`), set `base: '/LibreInk/'` in `vite.legacy-single.config.ts` (and in the generate script if you customise it) so script and style URLs resolve correctly.
 
 ## What we do
 

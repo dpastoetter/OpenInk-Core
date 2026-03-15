@@ -4,7 +4,7 @@ This document describes the high-level architecture of the shell, plugin system,
 
 ## Overview
 
-The app is a **single-page application (SPA)** built with Preact and Vite. It provides a webOS-style shell: a **home screen** that launches **apps** (plugins). Each app runs inside a shared **shell** that provides a global header (Home, Back, title), services (storage, network, theme, settings), and navigation.
+The app is a **single-page application (SPA)** built with Preact and Vite. It provides a shell: a **home screen** that launches **apps** (plugins). Each app runs inside a shared **shell** that provides a global header (Home, Back, title), services (storage, network, theme, settings), and navigation.
 
 - **No router library**: Navigation is driven by the shell state and the History API (pushState / popstate) so that the browser Back button closes the app and returns to home.
 - **Plugin-based apps**: Apps are registered at startup and launched on demand; they receive a context and return an instance with a `render()` function.
@@ -48,13 +48,13 @@ The shell is the root UI when not on the home screen. It holds:
 
 **Types**: `src/types/plugin.ts`
 
-- **WebOSApp**: Descriptor for an app (`id`, `name`, `icon`, `category`, `apiVersion`, `metadata`, `launch`).
+- **App plugin**: Descriptor for an app (`id`, `name`, `icon`, `category`, `apiVersion`, `metadata`, `launch`); type in `plugin.ts`.
 - **AppContext**: Passed to `launch()`: `navigate`, `closeApp`, and `services` (storage, network, theme, settings).
 - **AppInstance**: Returned by `launch()`: required `render()`, and optional `onSuspend`, `onResume`, `onDestroy`, `canGoBack`, `goBack`, `getTitle`.
 
 **Registry**: `src/core/plugins/registry.ts`
 
-- In-memory `Map<string, WebOSApp>` for loaded apps and a lazy map (descriptor + loader) for apps not yet loaded.
+- In-memory map of loaded apps and a lazy map (descriptor + loader) for apps not yet loaded.
 - `registerApp(app)` adds an app; `registerLazy(descriptor, load)` registers a lazy app; `getApp(id)` / `getAllApps()` / `getAllAppDescriptors()` for the shell and home screen. `loadApp(id)` loads a lazy app on first launch.
 
 **Registration**: `src/apps/registry.ts`

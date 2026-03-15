@@ -180,7 +180,7 @@ export function Shell({ services }: ShellProps) {
 
   return (
     <div class="shell">
-      <StatusBar theme={services.theme} settings={services.settings} />
+      <StatusBar theme={services.theme} settings={services.settings} onOpenSettings={() => launchAppById('settings')} />
       <main class="shell-main" role="main">
         {showHome ? (
           <HomeScreen apps={appDescriptors} onLaunch={handleLaunch} theme={services.theme} />

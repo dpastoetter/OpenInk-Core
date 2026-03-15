@@ -1,7 +1,7 @@
 {
-  "name": "OpenInk",
-  "short_name": "OpenInk",
-  "description": "Minimal webOS-style shell for low-spec e-ink devices",
+  "name": "LibreInk",
+  "short_name": "LibreInk",
+  "description": "Minimal shell for low-spec e-ink devices",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

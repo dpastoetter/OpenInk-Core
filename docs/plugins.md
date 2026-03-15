@@ -1,6 +1,6 @@
 # Building and Registering App Plugins
 
-This document explains how to add a new app to the webOS-style shell and how to use shared services and global settings.
+This document explains how to add a new app to the shell and how to use shared services and global settings.
 
 ## How to create a new app
 
@@ -8,7 +8,7 @@ This document explains how to add a new app to the webOS-style shell and how to 
 
 2. **Implement the plugin interface** in `index.tsx`:
 
-   - Export an object that satisfies `WebOSApp` from `../../types/plugin`:
+   - Export an object that satisfies the app plugin interface from `../../types/plugin`:
      - `id`: unique string (e.g. `"myapp"`)
      - `name`: human-readable label
      - `icon`: optional string (character or icon id)
@@ -85,4 +85,4 @@ Games that need resizable boards (Chess, Snake, Sudoku, Minesweeper) use the sha
 
 ## Type safety
 
-Use the types from `src/types/plugin.ts` and `src/types/services.ts`. Your `launch` function will be checked against `AppContext` and `AppInstance`, and the registry expects `WebOSApp`, so you get compile-time checks when adding a new app.
+Use the types from `src/types/plugin.ts` and `src/types/services.ts`. Your `launch` function will be checked against `AppContext` and `AppInstance`, and the registry expects the app plugin interface, so you get compile-time checks when adding a new app.

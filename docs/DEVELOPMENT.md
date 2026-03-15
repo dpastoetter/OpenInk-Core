@@ -27,7 +27,7 @@ src/
 ├── main.tsx                 # Entry: create services, register apps, render Shell
 ├── index.css                 # Global styles and design tokens
 ├── types/                    # Shared TypeScript types
-│   ├── plugin.ts             # WebOSApp, AppContext, AppInstance
+│   ├── plugin.ts             # App plugin interface, AppContext, AppInstance
 │   ├── settings.ts           # GlobalSettings, defaults
 │   ├── services.ts           # Service interfaces (storage, network, theme, settings)
 │   └── feed.ts                # RssItem (shared by Blog, News, Comics)
@@ -94,7 +94,7 @@ docs/                         # Documentation
 
 ## Adding a new app
 
-1. Create `src/apps/<app-id>/index.tsx` and implement `WebOSApp` (see [docs/plugins.md](plugins.md)).
+1. Create `src/apps/<app-id>/index.tsx` and implement the app plugin interface (see [docs/plugins.md](plugins.md)).
 2. In `src/apps/registry.ts`, add a descriptor and lazy loader to the `LAZY_APPS` array (e.g. `load: () => import('./your-app').then(m => m.yourApp)`).
 3. The app will appear on the home screen; no further wiring is needed.
 
@@ -122,7 +122,7 @@ docs/                         # Documentation
 ## Build and deploy
 
 - `npm run build` produces `dist/` (static assets). Deploy `dist/` to any static host (Netlify, Vercel, GitHub Pages, etc.). To preview the build on your LAN, run `npm run preview -- --host`.
-- If the app is served from a subpath (e.g. `/browserOS/`), set `base: '/browserOS/'` in `vite.config.ts` and rebuild.
+- If the app is served from a subpath (e.g. `/LibreInk/`), set `base: '/LibreInk/'` in `vite.config.ts` and rebuild.
 - The app uses the History API; the server must serve `index.html` for all routes (SPA fallback).
 - **Kindle / e-ink:** The app is a single page. `npm run build` produces `dist/index.html` and `dist/assets/openink-legacy-single.js` (and CSS). The bundle is built with Babel (Chrome 44 target). If the app does not mount within ~22 seconds, a fallback with "Try again" is shown. Deploy the full `dist/`. See [COMPATIBILITY.md](COMPATIBILITY.md) and [ReKindle COMPATIBILITY.md](https://github.com/ReKindleOS/ReKindle/blob/main/COMPATIBILITY.md).
 

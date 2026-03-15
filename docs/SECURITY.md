@@ -1,6 +1,6 @@
 # Security
 
-This document describes security measures for running OpenInk as a public website.
+This document describes security measures for running LibreInk as a public website.
 
 ## Client-side (application)
 
