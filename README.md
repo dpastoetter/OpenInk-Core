@@ -10,8 +10,11 @@ A minimal, plugin-based launcher for low-spec and e-ink devices. It provides a h
 
 | Light mode | Dark mode |
 |------------|-----------|
-| ![Home — light mode](docs/screenshots/legacy-home-light.png) | ![Home — dark mode](docs/screenshots/legacy-home-dark.png) |
+|  | ![Home — dark mode](docs/screenshots/legacy-home-dark.png) |
 
+| Reddit widget | Chess widget |
+|------------|-----------|
+| ![Home — light mode](docs/screenshots/legacy-home-light.png) | ![Home — dark mode](docs/screenshots/legacy-home-dark.png) |
 Screenshots show the home screen in light and dark mode (with **3 apps per row**). To regenerate: `npm run build` then `npm run screenshot`. Requires [Playwright](https://playwright.dev/) — run `npx playwright install chromium` once if needed (use `PLAYWRIGHT_BROWSERS_PATH=$HOME/.cache/ms-playwright` if browsers are installed in user cache).
 
 ## Tech stack
