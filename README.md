@@ -8,11 +8,15 @@ A minimal, plugin-based launcher for low-spec and e-ink devices. It provides a h
 - **Status bar** – Zoom (+ / −), theme toggle (light/dark), clock, compact controls.
 - **Single-page legacy build** – One HTML file and one JS bundle (no ES modules), so it runs on Kindle, Silk, and other no-ESM browsers. Black-and-white SVG icons where needed.
 
-| Light mode | Dark mode |
-|------------|-----------|
+| Home — light mode | Home — dark mode |
+|-------------------|------------------|
 | ![Home — light mode](docs/screenshots/legacy-home-light.png) | ![Home — dark mode](docs/screenshots/legacy-home-dark.png) |
 
-Screenshots show the home screen in light and dark mode (with **3 apps per row**). To regenerate: `npm run build` then `npm run screenshot`. Requires [Playwright](https://playwright.dev/) — run `npx playwright install chromium` once if needed (use `PLAYWRIGHT_BROWSERS_PATH=$HOME/.cache/ms-playwright` if browsers are installed in user cache).
+| Chess | Reddit |
+|-------|--------|
+| ![Chess](docs/screenshots/chess-widget.png) | ![Reddit feed](docs/screenshots/reddit-widget.png) |
+
+Screenshots show the home screen in light and dark mode (with **3 apps per row**), and sample app views (Chess, Reddit). To regenerate: `npm run build` then `npm run screenshot`. Requires [Playwright](https://playwright.dev/) — run `npx playwright install chromium` once if needed (use `PLAYWRIGHT_BROWSERS_PATH=$HOME/.cache/ms-playwright` if browsers are installed in user cache).
 
 ## Tech stack
 
