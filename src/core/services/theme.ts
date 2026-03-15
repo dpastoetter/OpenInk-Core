@@ -11,6 +11,19 @@ export interface ThemeService {
   applySettings(settings: GlobalSettings, notify?: boolean): void;
 }
 
+const FONT_SIZE_PX: Record<string, number> = { small: 15, medium: 17, large: 21 };
+
+function applyZoomAndFont(root: HTMLElement, zoom: number, fontSize: string, tapTargetSize: string, contentWidth: string) {
+  const zoomStr = String(zoom);
+  root.style.setProperty('--zoom', zoomStr);
+  const basePx = FONT_SIZE_PX[fontSize] ?? 17;
+  root.style.fontSize = `${basePx * zoom}px`;
+  const tapMin = tapTargetSize === 'extraLarge' ? 60 : tapTargetSize === 'large' ? 52 : 44;
+  root.style.setProperty('--tap-min', `${Math.round(tapMin * zoom)}px`);
+  const contentMaxWidth = contentWidth === 'full' ? '100%' : contentWidth === 'medium' ? '40rem' : '28rem';
+  root.style.setProperty('--content-max-width', contentMaxWidth);
+}
+
 /** Holds current theme state and notifies subscribers; actual CSS is applied via document classes. */
 export function createThemeService(initial: GlobalSettings): ThemeService {
   let settings = initial;
@@ -33,13 +46,14 @@ export function createThemeService(initial: GlobalSettings): ThemeService {
           root.setAttribute('data-theme', next.theme);
           root.setAttribute('data-apps-per-row', next.appsPerRow);
           root.setAttribute('data-simple-layout', next.simpleLayout ? 'true' : 'false');
-          /* --zoom on document root so all widgets, app pages, subpages and nested views inherit it */
           const zoom = Math.max(0.5, Math.min(2, Number(next.zoom) || 1));
-          root.style.setProperty('--zoom', String(zoom));
-          const tapMin = next.tapTargetSize === 'extraLarge' ? 60 : next.tapTargetSize === 'large' ? 52 : 44;
-          root.style.setProperty('--tap-min', `${Math.round(tapMin * zoom)}px`);
-          const contentMaxWidth = next.contentWidth === 'full' ? '100%' : next.contentWidth === 'medium' ? '40rem' : '28rem';
-          root.style.setProperty('--content-max-width', contentMaxWidth);
+          applyZoomAndFont(root, zoom, next.fontSize, next.tapTargetSize, next.contentWidth);
+          if (document.body) {
+            document.body.style.setProperty('--zoom', String(zoom));
+            document.body.style.fontSize = root.style.fontSize;
+          }
+          const appRoot = document.getElementById('root');
+          if (appRoot) appRoot.style.setProperty('--zoom', String(zoom));
         }
       } catch {
         // Old browsers (e.g. Kindle) may not support setAttribute or setProperty
@@ -67,13 +81,14 @@ export function createThemeService(initial: GlobalSettings): ThemeService {
           root.setAttribute('data-reduce-flashes', next.reduceFlashes ? 'true' : 'false');
           root.setAttribute('data-simple-layout', next.simpleLayout ? 'true' : 'false');
           root.setAttribute('data-apps-per-row', next.appsPerRow);
-          /* Same as applySettingsMinimal: --zoom on root so status-bar zoom affects all widgets, pages, subpages */
           const zoom = Math.max(0.5, Math.min(2, Number(next.zoom) || 1));
-          root.style.setProperty('--zoom', String(zoom));
-          const tapMin = next.tapTargetSize === 'extraLarge' ? 60 : next.tapTargetSize === 'large' ? 52 : 44;
-          root.style.setProperty('--tap-min', `${Math.round(tapMin * zoom)}px`);
-          const contentMaxWidth = next.contentWidth === 'full' ? '100%' : next.contentWidth === 'medium' ? '40rem' : '28rem';
-          root.style.setProperty('--content-max-width', contentMaxWidth);
+          applyZoomAndFont(root, zoom, next.fontSize, next.tapTargetSize, next.contentWidth);
+          if (document.body) {
+            document.body.style.setProperty('--zoom', String(zoom));
+            document.body.style.fontSize = root.style.fontSize;
+          }
+          const appRoot = document.getElementById('root');
+          if (appRoot) appRoot.style.setProperty('--zoom', String(zoom));
         }
         if (notify) {
           const snapshot = settings;

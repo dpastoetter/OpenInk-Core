@@ -150,14 +150,19 @@ function StatusBarInner({ theme, settings, onOpenSettings }: StatusBarProps) {
   return (
     <header class="status-bar" role="banner">
       {showClock ? (
-        <span class="status-bar-left status-bar-clock" aria-label="Current date and time">
-          <span>{clock.time}</span>
-          <span>{clock.date}</span>
+        <span class="status-bar-left status-bar-clock" aria-label="Current date">
+          {clock.date}
         </span>
       ) : (
         <span class="status-bar-left" aria-hidden="true" />
       )}
-      <span class="status-bar-center" aria-hidden="true" />
+      {showClock ? (
+        <span class="status-bar-center status-bar-clock" aria-label="Current time">
+          {clock.time}
+        </span>
+      ) : (
+        <span class="status-bar-center" aria-hidden="true" />
+      )}
       <span class="status-bar-right">
         <button
           type="button"

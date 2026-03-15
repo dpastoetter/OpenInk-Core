@@ -1267,23 +1267,104 @@ textarea {
 .btn-small { min-height: calc(28px * var(--zoom, 1)); padding: 0 calc(8px * var(--zoom, 1)); font-size: var(--widget-meta); }
 
 /* Weather – same structure as other widgets: hint, search row, title, list rows, actions */
-.weather-app { --weather-space: calc(var(--space) * 0.6); text-align: center; }
-.weather-search { display: flex; gap: var(--weather-space, var(--space)); align-items: center; margin-bottom: var(--weather-space, var(--space)); }
-.weather-search .input { flex: 1; min-width: 0; }
+.weather-app {
+  --weather-space: calc(var(--space) * 0.75);
+  max-width: 22rem;
+  margin: 0 auto;
+}
+.weather-app .widget-hint {
+  margin: 0 0 var(--weather-space);
+  text-align: center;
+  color: var(--muted);
+}
+.weather-search {
+  display: flex;
+  gap: var(--weather-space);
+  align-items: center;
+  margin-bottom: var(--weather-space);
+}
+.weather-search .input,
 .weather-search-input { flex: 1; min-width: 0; }
-.weather-city { font-size: var(--widget-heading); font-weight: 600; margin: 0 0 var(--weather-space, var(--space)); color: var(--fg); line-height: 1.2; }
-.weather-current { display: flex; align-items: baseline; justify-content: center; gap: var(--weather-space, var(--space)); flex-wrap: nowrap; margin-bottom: var(--weather-space, var(--space)); padding-bottom: var(--weather-space, var(--space)); border-bottom: 1px solid var(--border); }
-.weather-app .weather-icon { font-size: var(--widget-font); color: var(--muted); flex-shrink: 0; width: auto; height: auto; }
-.weather-app .weather-temp { font-size: var(--widget-heading); font-weight: 600; font-variant-numeric: tabular-nums; flex-shrink: 0; }
-.weather-app .weather-desc { color: var(--muted); font-size: var(--widget-meta); flex-shrink: 0; }
-.weather-forecast { margin: 0 0 var(--weather-space, var(--space)); list-style: none; padding: 0; }
-.weather-forecast-row { display: flex; align-items: center; justify-content: center; gap: var(--weather-space, var(--space)); padding: var(--weather-space, var(--space)) 0; border-bottom: 1px solid var(--border); min-height: var(--tap-min); font-size: var(--widget-font); }
+.weather-city {
+  font-size: var(--widget-heading);
+  font-weight: 600;
+  margin: 0 0 var(--weather-space);
+  color: var(--fg);
+  line-height: 1.2;
+  text-align: center;
+}
+.weather-current {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  margin-bottom: var(--weather-space);
+  padding: var(--weather-space) 0;
+  border-bottom: 1px solid var(--border);
+}
+.weather-app .weather-temp {
+  font-size: 2.25rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--fg);
+}
+.weather-current-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+}
+.weather-app .weather-icon {
+  font-size: var(--widget-meta);
+  color: var(--muted);
+  font-weight: 600;
+}
+.weather-app .weather-desc {
+  color: var(--muted);
+  font-size: var(--widget-meta);
+}
+.weather-forecast {
+  margin: 0 0 var(--weather-space);
+  list-style: none;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.weather-forecast-row {
+  display: grid;
+  grid-template-columns: 4.5rem 3rem 1fr;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.85rem;
+  border-bottom: 1px solid var(--border);
+  font-size: var(--widget-font);
+}
 .weather-forecast-row:last-child { border-bottom: none; }
-.weather-day { min-width: 2.5em; font-weight: 500; font-size: var(--widget-font); }
-.weather-app .weather-day-icon { font-size: var(--widget-meta); color: var(--muted); min-width: 2.5em; width: auto; height: auto; }
-.weather-day-range { color: var(--muted); font-variant-numeric: tabular-nums; font-size: var(--widget-meta); }
-.weather-actions { margin-top: var(--weather-space, var(--space)); display: flex; justify-content: center; flex-wrap: wrap; }
-.weather-app .widget-hint { margin: 0 0 var(--weather-space, var(--space)); }
+.weather-day {
+  font-weight: 600;
+  font-size: var(--widget-font);
+  color: var(--fg);
+}
+.weather-app .weather-day-icon {
+  font-size: var(--widget-meta);
+  color: var(--muted);
+  font-weight: 600;
+  text-align: center;
+}
+.weather-day-range {
+  font-variant-numeric: tabular-nums;
+  font-size: var(--widget-font);
+  color: var(--fg);
+  text-align: right;
+}
+.weather-actions {
+  margin-top: var(--weather-space);
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
 
 /* Timer – hint/label = widget-meta, actions row = var(--space) like others */
 .timer-app { }
