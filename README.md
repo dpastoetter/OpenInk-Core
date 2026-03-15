@@ -1,5 +1,7 @@
 # LibreInk
 
+**LibreInk – The Easy Way of E-Ink Hacking**
+
 A minimal, plugin-based launcher for low-spec and e-ink devices. It provides a home screen, status bar, and a set of built-in apps that run inside a shared shell—tuned for Kindle, grayscale displays, and slow hardware.
 
 ## Features
