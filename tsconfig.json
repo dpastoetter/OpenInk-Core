@@ -1,5 +1,4 @@
 {
-  "_": "LibreInk - The Easy Way of E-Ink Hacking",
   "compilerOptions": {
     "target": "ES2020",
     "useDefineForClassFields": true,
