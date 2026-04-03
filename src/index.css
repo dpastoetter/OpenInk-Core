@@ -1797,3 +1797,16 @@ html .app-grid > li {
   margin: 0.2rem;
   min-height: 0;
 }
+
+/* E-ink: no position:fixed (checkerboarding). Fullscreen becomes in-flow block. */
+html.legacy-browser .pictureframe-fullscreen {
+  position: relative;
+  top: auto;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  width: 100%;
+  min-height: 100vh;
+  height: auto;
+  z-index: 0;
+}
